@@ -1,0 +1,12 @@
+# intellij files
+.idea/
+*.iml
+*.ipr
+*.iws
+build-idea/
+/out/
+/classes/
+
+# moara stuff
+/config/
+/dic/
