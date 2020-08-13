@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+ 
+ 
+ 	<property name="LOG_HOME" value="log" />
+    <!-- Appenders -->
+
+     
+	<appender name="FILE-AUDIT"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${LOG_HOME}/moara.log</file>
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<Pattern>
+				%d{yyyy-MM-dd HH:mm:ss} - %msg%n
+			</Pattern>
+		</encoder>
+
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<!-- rollover daily 
+			<fileNamePattern>${DEV_HOME}/log/debug.%d{yyyy-MM-dd}.%i.log
+                        </fileNamePattern>
+
+
+			-->
+            <fileNamePattern>log/debug.%d{yyyy-MM-dd}.%i.log
+                        </fileNamePattern>
+			<timeBasedFileNamingAndTriggeringPolicy
+				class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+				<maxFileSize>10MB</maxFileSize>
+			</timeBasedFileNamingAndTriggeringPolicy>
+		</rollingPolicy>
+
+	</appender>
+
+     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<layout class="ch.qos.logback.classic.PatternLayout">
+			<Pattern>
+				%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger - %msg%n
+
+			</Pattern>
+		</layout>
+	</appender>
+
+
+
+     <!-- 클래스 지정  -->
+    <logger name="org.reflections.Reflections" additivity="false">  
+        <level value="error"/>
+       	<!--  <appender-ref ref="FILE-AUDIT"/>  -->
+         <appender-ref ref="STDOUT" />
+    </logger>
+
+
+	<logger name="org.apache" additivity="false">
+		<level value="info"/>
+		<!--  <appender-ref ref="FILE-AUDIT"/>  -->
+		<appender-ref ref="STDOUT" />
+	</logger>
+
+	<logger name="org.springframework" additivity="false">
+		<level value="info"/>
+		<!--  <appender-ref ref="FILE-AUDIT"/>  -->
+		<appender-ref ref="STDOUT" />
+	</logger>
+
+	<logger name="javax.management" additivity="false">
+		<level value="info"/>
+		<!--  <appender-ref ref="FILE-AUDIT"/>  -->
+		<appender-ref ref="STDOUT" />
+	</logger>
+
+	<logger name="org.hibernate" additivity="false">
+		<level value="info"/>
+		<!--  <appender-ref ref="FILE-AUDIT"/>  -->
+		<appender-ref ref="STDOUT" />
+	</logger>
+
+	<logger name="com.zaxxer.hikari" additivity="false">
+		<level value="info"/>
+		<!--  <appender-ref ref="FILE-AUDIT"/>  -->
+		<appender-ref ref="STDOUT" />
+	</logger>
+	<logger name="sun.rmi" additivity="false">
+		<level value="info"/>
+		<!--  <appender-ref ref="FILE-AUDIT"/>  -->
+		<appender-ref ref="STDOUT" />
+	</logger>
+	<logger name="java.io" additivity="false">
+		<level value="info"/>
+		<!--  <appender-ref ref="FILE-AUDIT"/>  -->
+		<appender-ref ref="STDOUT" />
+	</logger>
+
+	<logger name="org.quartz" additivity="false">
+		<level value="info"/>
+		<!--  <appender-ref ref="FILE-AUDIT"/>  -->
+		<appender-ref ref="STDOUT" />
+	</logger>
+
+	<logger name="sun.net.www.protocol" additivity="false">
+		<level value="info"/>
+		<!--  <appender-ref ref="FILE-AUDIT"/>  -->
+		<appender-ref ref="STDOUT" />
+	</logger>
+
+
+	<logger name="java.net" additivity="false">
+		<level value="info"/>
+		<!--  <appender-ref ref="FILE-AUDIT"/>  -->
+		<appender-ref ref="STDOUT" />
+	</logger>
+
+
+
+	<!-- Root Logger -->
+    <root>
+       <!-- <priority value="error"/>-->
+         <level value="trace"/>
+        <appender-ref ref="STDOUT" />
+         <!--   -->
+    </root>
+     
+</configuration>
