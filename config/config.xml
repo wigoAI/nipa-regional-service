@@ -25,7 +25,7 @@
 	<!-- 로컬-->
 	<entry key="application.database.url">jdbc:oracle:thin:@127.0.0.1:1521:orcl</entry>
 	<entry key="application.database.user.name">moara</entry>
-	<entry key="application.database.user.password">Ahdkfk1119</entry>
+	<entry key="application.database.user.password">password</entry>
 	<entry key="ara.dictionary.file.home">dic/</entry>
 
 	<!-- 개발 01
