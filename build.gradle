@@ -46,7 +46,8 @@ dependencies {
 
     implementation group: 'org.quartz-scheduler', name: 'quartz', version: '2.3.2'
     implementation group: 'org.mariadb.jdbc', name: 'mariadb-java-client', version: '2.6.0'
-    
+
+    implementation 'com.seomse.cypto:seomse-cypto:0.1.0'
 
     implementation fileTree (dir: 'dependencies', include: ['/**/*.jar'])
 }

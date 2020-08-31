@@ -11,12 +11,12 @@
 # 문서 공유
 https://wigoai.atlassian.net/wiki/spaces/WP/pages/168034317/nipa+regional+service
 
-# 라이센스
-nipa 프로젝트는 apache 2.0 라이센스로 진행 합니다.
+# license
+nipa 프로젝트는 apache 2.0 license 로 진행 합니다.
 
 하지만 프로젝트가 사용하는 의존성의 라이센스는 apache2.0이 아니라서 각 라이센스를 따라야 합니다.
 
-# apache 라이센스가 아닌 의존성 부분
+# apache license 아닌 의존성 부분
 - moara-core
 - moara-keyword
 - moara-rest
