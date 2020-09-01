@@ -17,6 +17,7 @@
 package com.wigoai.nipa.regional.service;
 
 /**
+ * nipa rs 에서 사용하는 설정 정보
  * @author macle
  */
 public enum ServiceConfig {
@@ -27,6 +28,18 @@ public enum ServiceConfig {
     , COLLECT_SLEEP_SECOND("nipa.rs.collect.sleep.second",300L)
     , CONTENTS_LAST_NUM("nipa.rs.contents.last.num", null)
     , CONTENTS_MAX_LENGTH("nipa.rs.contents.max.length",7000)
+    , ELASTICSEARCH_CONTENTS_LAST_NUM("nipa.rs.elasticsearch.contents.last.num", 0L)
+
+    , ELASTICSEARCH_HOST_ADDRESS("nipa.rs.elasticsearch.host.address", "localhost")
+    , ELASTICSEARCH_PORT("nipa.rs.elasticsearch.port", 9200)
+
+    //분야 분류
+    , FIELD_CLASSIFY("nipa.rs.field.classify", null)
+    
+    //감성 분류
+    , EMOTION_CLASSIFY("nipa.rs.emotion.classify", null)
+
+
     ;
 
     private final String key;

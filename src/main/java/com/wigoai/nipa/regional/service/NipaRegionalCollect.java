@@ -179,15 +179,7 @@ public class NipaRegionalCollect {
                     nipaContents.postTime = time;
                 }
 
-                String id = Long.toString(nipaContents.contentsNum);
-
-                Document document = new Document();
-                document.setId(id);
-                document.setTitle(nipaContents.title);
-                document.setContents(nipaContents.contents);
-                document.setLangCode(LangCode.KO);
-                document.setRegDataDateTime( nipaContents.postTime);
-                TextMining.mining(document);
+                Document document = makeDocument(nipaContents);
 
                 IndexData indexData = IndexDataMake.getIndexDataDefault(document, Config.getInteger(KeywordConfig.MIN_SYLLABLE_LENGTH.key(),(int)KeywordConfig.MIN_SYLLABLE_LENGTH.defaultValue()));
                 WordCount[] wordCounts = indexData.getWordCounts();
@@ -221,6 +213,8 @@ public class NipaRegionalCollect {
                 for(String indexKey : keys){
                     keyArray.put(indexKey);
                 }
+
+                String id = Long.toString(nipaContents.contentsNum);
 
                 IndexDataInfo info = new IndexDataInfo();
                 info.indexData = indexData;
@@ -282,6 +276,18 @@ public class NipaRegionalCollect {
         return dataSource;
     }
 
+
+    public static Document makeDocument(NipaRsContents nipaContents){
+        Document document = new Document();
+        document.setId(Long.toString(nipaContents.contentsNum));
+        document.setTitle(nipaContents.title);
+        document.setContents(nipaContents.contents);
+        document.setLangCode(LangCode.KO);
+        document.setRegDataDateTime( nipaContents.postTime);
+        TextMining.mining(document);
+
+        return document;
+    }
 
     private static class IndexDataInfo{
 
