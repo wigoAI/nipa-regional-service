@@ -16,19 +16,15 @@
 
 package com.wigoai.nipa.regional.service;
 
-import com.seomse.cypto.LoginCrypto;
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.moara.ara.datamining.statistics.count.WordCount;
-import org.moara.ara.datamining.textmining.TextMining;
 import org.moara.ara.datamining.textmining.document.Document;
 import org.moara.common.code.CharSet;
-import org.moara.common.code.LangCode;
 import org.moara.common.config.Config;
 import org.moara.common.data.database.jdbc.JdbcObjects;
 import org.moara.common.data.file.FileUtil;
+import org.moara.common.service.Service;
 import org.moara.common.util.ExceptionUtil;
 import org.moara.engine.MoaraEngine;
 import org.moara.engine.console.EngineConsole;
@@ -44,65 +40,27 @@ import org.moara.keyword.search.ContentsIndexData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.sql.DataSource;
 import java.io.File;
 import java.sql.Connection;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
- * Nipa Regional Service 데이터 수집
- * real time 용 파일 데이터 생성
+ * 키워드 분석용 수집 서비스
  * @author macle
  */
-public class NipaRegionalCollect {
+public class KeywordAnalysisCollectService extends Service {
 
-    private static final Logger logger = LoggerFactory.getLogger(NipaRegionalCollect.class);
+    private static final Logger logger = LoggerFactory.getLogger(ElasticSearchCollectService.class);
+    
 
-    private static class Singleton {
-        private static final NipaRegionalCollect instance = new NipaRegionalCollect();
-    }
-
-    /**
-     * 인스턴스 얻기
-     * @return NipaRegionalCollect
-     */
-    public static NipaRegionalCollect getInstance(){
-        return Singleton.instance;
-    }
-    private final DataSource dataSource;
     private final EngineConfig engineConfig;
 
     /**
      * 생성자
      */
-    private NipaRegionalCollect(){
-
-
-        String dbUrl = Config.getConfig(ServiceConfig.COLLECT_DB_URL.key());
-
-        String encId = Config.getConfig(ServiceConfig.COLLECT_DB_USER.key());
-        String encPassword = Config.getConfig(ServiceConfig.COLLECT_DB_PASSWORD.key());
-
-        if(dbUrl == null){
-            throw new RuntimeException(initError(ServiceConfig.COLLECT_DB_URL.key()));
-        }
-        if(encId == null){
-            throw new RuntimeException(initError(ServiceConfig.COLLECT_DB_USER.key()));
-        }
-        if(encPassword == null){
-            throw new RuntimeException(initError(ServiceConfig.COLLECT_DB_PASSWORD.key()));
-        }
-
-        String [] loginInfos = LoginCrypto.decryption(encId, encPassword);
-        HikariConfig config = new HikariConfig();
-        config.setJdbcUrl(dbUrl);
-        config.setUsername(loginInfos[0]);
-        config.setPassword(loginInfos[1]);
-        config.setAutoCommit(true);
-        config.setMaximumPoolSize(3);
-        dataSource =  new HikariDataSource(config);
-
+    public KeywordAnalysisCollectService(){
+        super();
         MoaraEngine moaraEngine = MoaraEngine.getInstance();
 
         if(moaraEngine == null){
@@ -128,16 +86,16 @@ public class NipaRegionalCollect {
         }
     }
 
-    /**
-     * init error
-     * @param key String config key
-     * @return String error message
-     */
-    String initError(String key){
-        String errorMessage = "crawling database set error " + key + " check";
-        logger.error(errorMessage);
-        return errorMessage;
+    @Override
+    public void work() {
+
+        for(;;){
+            if(!collectToMakeIndex()){
+                break;
+            }
+        }
     }
+
 
 
     private long lastNum ;
@@ -148,8 +106,8 @@ public class NipaRegionalCollect {
      */
     boolean collectToMakeIndex(){
 
-        //50개씩 가져오기
-        try(Connection conn = dataSource.getConnection()) {
+        //200개씩 가져오기
+        try(Connection conn = NipaRegionalAnalysis.getInstance().getDataSource().getConnection()) {
             List<NipaRsContents> nipaContentsList = JdbcObjects.getObjList(conn, NipaRsContents.class, "CONTENTS_NB > " + lastNum + " ORDER BY CONTENTS_NB ASC LIMIT 0, 200");
 
 
@@ -179,7 +137,7 @@ public class NipaRegionalCollect {
                     nipaContents.postTime = time;
                 }
 
-                Document document = makeDocument(nipaContents);
+                Document document = NipaRegionalAnalysis.makeDocument(nipaContents);
 
                 IndexData indexData = IndexDataMake.getIndexDataDefault(document, Config.getInteger(KeywordConfig.MIN_SYLLABLE_LENGTH.key(),(int)KeywordConfig.MIN_SYLLABLE_LENGTH.defaultValue()));
                 WordCount[] wordCounts = indexData.getWordCounts();
@@ -205,7 +163,7 @@ public class NipaRegionalCollect {
                 contentsIndexData.setData(indexData);
                 //메로리에 정보추가
                 contentsGroup.addIndex(contentsIndexData);
-                
+
                 //파일 데이터 저장용 생성
                 Map<String, IndexDataInfo> idMap = ymdIdMap.computeIfAbsent(ymd, k -> new HashMap<>());
 
@@ -268,31 +226,9 @@ public class NipaRegionalCollect {
         }
     }
 
-    /**
-     * ElasticSearchCollectService 에서 사용
-     * @return DataSource
-     */
-    DataSource getDataSource() {
-        return dataSource;
-    }
-
-
-    public static Document makeDocument(NipaRsContents nipaContents){
-        Document document = new Document();
-        document.setId(Long.toString(nipaContents.contentsNum));
-        document.setTitle(nipaContents.title);
-        document.setContents(nipaContents.contents);
-        document.setLangCode(LangCode.KO);
-        document.setRegDataDateTime( nipaContents.postTime);
-        TextMining.mining(document);
-
-        return document;
-    }
-
     private static class IndexDataInfo{
 
         IndexData indexData;
         JSONArray keyArray;
     }
-
 }

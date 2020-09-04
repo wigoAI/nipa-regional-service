@@ -14,33 +14,21 @@
  * limitations under the License.
  */
 
-package com.wigoai.nipa.regional.service;
+package com.wigoai.nipa.regional.service.dev;
 
+import com.wigoai.nipa.regional.service.NipaRsContents;
 import org.moara.common.data.database.Table;
-import org.moara.common.data.database.annotation.Column;
-import org.moara.common.data.database.annotation.DateTime;
-import org.moara.common.data.database.annotation.PrimaryKey;
+import org.moara.common.data.database.jdbc.common.TableSql;
 
 /**
- * engine 설정 정보
  * @author macle
  */
-@Table(name="TB_MOARA_ENGINE_CONFIG", size = 200)
-public class EngineConfig {
+public class Main {
 
-    @PrimaryKey(seq = 1)
-    @Column(name = "CD_ENGINE")
-    String engineCode;
+    public static void main(String[] args) {
+        Table table =  NipaRsContents.class.getAnnotation(Table.class);
+        String tableName = TableSql.getTableName(table, NipaRsContents.class.getName());
 
-    @PrimaryKey(seq = 2)
-    @Column(name = "CD_CONFIG")
-    String key;
-    @Column(name = "VAL_CONFIG")
-    String value;
-    @DateTime
-    @Column(name = "DT_UPT_LAST")
-    long updateTime;
-
-
-
+        System.out.println(tableName);
+    }
 }

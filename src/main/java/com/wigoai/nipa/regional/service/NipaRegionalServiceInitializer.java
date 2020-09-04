@@ -38,19 +38,20 @@ public class NipaRegionalServiceInitializer implements MoaraInitializer {
 
     @Override
     public void init() {
+
         if(Config.getBoolean(ServiceConfig.SERVICE_FLAG.key(),(Boolean)ServiceConfig.SERVICE_FLAG.defaultValue())){
             //싱글톤 생성
             //noinspection ResultOfMethodCallIgnored
-            NipaRegionalCollect.getInstance();
+            NipaRegionalAnalysis.getInstance();
             ServiceKeywordAnalysis serviceKeywordAnalysis = ServiceKeywordAnalysis.getInstance();
 
             Callback initCallback = new Callback() {
 
                 void callback(){
-                    NipaRegionalCollectService nipaRegionalCollectService = new NipaRegionalCollectService();
-                    nipaRegionalCollectService.setSleepTime(Config.getLong(ServiceConfig.COLLECT_SLEEP_SECOND.key(), ((long)ServiceConfig.COLLECT_SLEEP_SECOND.defaultValue() )* 1000L));
-                    nipaRegionalCollectService.setState(Service.State.START);
-                    nipaRegionalCollectService.start();
+                    KeywordAnalysisCollectService keywordAnalysisCollectService = new KeywordAnalysisCollectService();
+                    keywordAnalysisCollectService.setSleepTime(Config.getLong(ServiceConfig.COLLECT_SLEEP_SECOND.key(), ((long)ServiceConfig.COLLECT_SLEEP_SECOND.defaultValue() )* 1000L));
+                    keywordAnalysisCollectService.setState(Service.State.START);
+                    keywordAnalysisCollectService.start();
                     logger.info(this.getClass().getName() + " start complete");
                 }
             };

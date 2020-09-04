@@ -61,7 +61,7 @@ public class ElasticSearchCollectService extends Service {
 
         long lastNum = Config.getLong(ServiceConfig.ELASTICSEARCH_CONTENTS_LAST_NUM.key(), (long) ServiceConfig.ELASTICSEARCH_CONTENTS_LAST_NUM.defaultValue());
 
-        DataSource dataSource =NipaRegionalCollect.getInstance().getDataSource();
+        DataSource dataSource = NipaRegionalAnalysis.getInstance().getDataSource();
 
         try(
                 Connection conn = dataSource.getConnection();
@@ -86,8 +86,6 @@ public class ElasticSearchCollectService extends Service {
 
                 for(NipaRsContents nipaRsContents : nipaContentsList){
 
-
-
                     Map<String, Object> jsonMap = new HashMap<>();
                     jsonMap.put("title", nipaRsContents.title);
                     jsonMap.put("contents", nipaRsContents.contents);
@@ -101,7 +99,7 @@ public class ElasticSearchCollectService extends Service {
 //                    jsonMap.put("media","001");
 //
 
-                    Document document = NipaRegionalCollect.makeDocument(nipaRsContents);
+                    Document document = NipaRegionalAnalysis.makeDocument(nipaRsContents);
                     //분류결과 얻기
                     
                     

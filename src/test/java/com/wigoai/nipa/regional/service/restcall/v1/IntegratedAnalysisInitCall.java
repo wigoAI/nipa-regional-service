@@ -14,23 +14,22 @@
  * limitations under the License.
  */
 
-package com.wigoai.nipa.regional.service;
+package com.wigoai.nipa.regional.service.restcall.v1;
 
-import org.moara.common.service.Service;
+import com.wigoai.rest.RestCall;
 
 /**
  * @author macle
  */
-public class NipaRegionalCollectService extends Service {
+public class IntegratedAnalysisInitCall {
 
 
-    @Override
-    public void work() {
+    public static void main(String[] args) {
 
-        for(;;){
-            if(!NipaRegionalCollect.getInstance().collectToMakeIndex()){
-                break;
-            }
-        }
+
+
+
+        RestCall.postJson("","");
+
     }
 }

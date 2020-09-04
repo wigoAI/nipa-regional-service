@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-package com.wigoai.nipa.regional.service.controller.version0001;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.RestController;
+package com.wigoai.nipa.regional.service.dev;
+
+import org.moara.common.config.ConfigSet;
+import org.moara.engine.MoaraEngine;
+
 
 /**
+ * engine starter 
+ * 서버 반영전 테스트 클래스
  *
- * api version 0001
  * @author macle
  */
-@RestController
-public class AnalysisController {
-
-    private static final Logger logger = LoggerFactory.getLogger(AnalysisController.class);
-
-
-
+public class EngineStater {
+    public static void main(String[] args) {
+        ConfigSet.setPath("config/config.xml");
+        MoaraEngine.newInstance("macle");
+    }
 }

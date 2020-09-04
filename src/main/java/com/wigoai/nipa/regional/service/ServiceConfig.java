@@ -39,6 +39,10 @@ public enum ServiceConfig {
     //감성 분류
     , EMOTION_CLASSIFY("nipa.rs.emotion.classify", null)
 
+    //분석 최대시간
+    , ANALYSIS_MAX_TIME("nipa.rs.analysis.max.time",600000L)
+
+    , CHANNEL_DEFAULT("nipa.rs.channel.default", "community")
 
     ;
 

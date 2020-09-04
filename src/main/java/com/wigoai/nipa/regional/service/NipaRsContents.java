@@ -16,26 +16,82 @@
 
 package com.wigoai.nipa.regional.service;
 
+import org.moara.common.data.database.Table;
 import org.moara.common.data.database.annotation.Column;
+import org.moara.common.data.database.annotation.DateTime;
 import org.moara.common.data.database.annotation.PrimaryKey;
 
 /**
  * contetns 정보
  * @author macle
  */
+@Table(name="T_CRAWLING_CONTENTS")
 public class NipaRsContents {
 
 
     @PrimaryKey(seq = 1)
-    @Column(name = "CONTENTS_NB")
+    @Column(name = "CONTENTS_NO")
     long contentsNum;
 
+    @Column(name = "CHANNEL_ID")
     String channelId;
 
+    @Column(name = "TITLE")
     String title;
+
+    @Column(name = "CONTENTS")
     String contents;
 
+    @DateTime
+    @Column(name = "POST_DT")
     Long postTime;
 
+
+    @Column(name = "ORIGINAL_URL")
+    String originalUrl;
+
+    /**
+     * 컨텐츠 번호 설정
+     * 외부 insert 용
+     * @param contentsNum long
+     */
+    public void setContentsNum(long contentsNum) {
+        this.contentsNum = contentsNum;
+    }
+
+    /**
+     * 채널 아이디 설정
+     * 외부 insert 용
+     * @param channelId String
+     */
+    public void setChannelId(String channelId) {
+        this.channelId = channelId;
+    }
+
+    /**
+     * 제목 설정
+     * 외부 insert 용
+     * @param title String
+     */
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    /**
+     * 본문 설정
+     * 외부 insert 용
+     * @param contents String
+     */
+    public void setContents(String contents) {
+        this.contents = contents;
+    }
+
+    public void setPostTime(Long postTime) {
+        this.postTime = postTime;
+    }
+
+    public void setOriginalUrl(String originalUrl) {
+        this.originalUrl = originalUrl;
+    }
 
 }

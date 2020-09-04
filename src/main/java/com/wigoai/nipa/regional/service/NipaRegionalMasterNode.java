@@ -34,10 +34,12 @@ public class NipaRegionalMasterNode implements MasterNodeInitializer {
     @Override
     public void init() {
         if(Config.getBoolean(ServiceConfig.SERVICE_FLAG.key(),(Boolean)ServiceConfig.SERVICE_FLAG.defaultValue())){
-            ElasticSearchCollectService elasticSearchCollectService = new ElasticSearchCollectService();
-            elasticSearchCollectService.setSleepTime(Config.getLong(ServiceConfig.COLLECT_SLEEP_SECOND.key(), ((long)ServiceConfig.COLLECT_SLEEP_SECOND.defaultValue() )* 1000L));
-            elasticSearchCollectService.setState(Service.State.START);
-            elasticSearchCollectService.start();
+            //개발 미완료에 따른 주석처리
+            
+//            ElasticSearchCollectService elasticSearchCollectService = new ElasticSearchCollectService();
+//            elasticSearchCollectService.setSleepTime(Config.getLong(ServiceConfig.COLLECT_SLEEP_SECOND.key(), ((long)ServiceConfig.COLLECT_SLEEP_SECOND.defaultValue() )* 1000L));
+//            elasticSearchCollectService.setState(Service.State.START);
+//            elasticSearchCollectService.start();
 
 
             logger.info(this.getClass().getName() + " start complete");
