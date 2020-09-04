@@ -96,8 +96,6 @@ public class KeywordAnalysisCollectService extends Service {
         }
     }
 
-
-
     private long lastNum ;
 
     /**
@@ -106,14 +104,19 @@ public class KeywordAnalysisCollectService extends Service {
      */
     boolean collectToMakeIndex(){
 
-        //200개씩 가져오기
+        //500개씩 가져오기
         try(Connection conn = NipaRegionalAnalysis.getInstance().getDataSource().getConnection()) {
-            List<NipaRsContents> nipaContentsList = JdbcObjects.getObjList(conn, NipaRsContents.class, "CONTENTS_NB > " + lastNum + " ORDER BY CONTENTS_NB ASC LIMIT 0, 200");
+            List<NipaRsContents> nipaContentsList = JdbcObjects.getObjList(conn, NipaRsContents.class, "CONTENTS_NO > " + lastNum + " ORDER BY CONTENTS_NO ASC LIMIT 0, 500");
 
 
             if (nipaContentsList.size() == 0) {
+                logger.debug("data size 0 sleep");
                 return false;
             }
+
+            logger.debug("data size: " + nipaContentsList.size());
+
+
 
             lastNum = nipaContentsList.get(nipaContentsList.size() - 1).contentsNum;
 
@@ -126,6 +129,8 @@ public class KeywordAnalysisCollectService extends Service {
             long time = System.currentTimeMillis();
 
             int maxLength  = Config.getInteger(ServiceConfig.CONTENTS_MAX_LENGTH.key(),(int)ServiceConfig.CONTENTS_MAX_LENGTH.defaultValue());
+
+            NipaRegionalAnalysis nipaRegionalAnalysis = NipaRegionalAnalysis.getInstance();
 
             for(NipaRsContents nipaContents : nipaContentsList){
 
@@ -140,6 +145,8 @@ public class KeywordAnalysisCollectService extends Service {
                 Document document = NipaRegionalAnalysis.makeDocument(nipaContents);
 
                 IndexData indexData = IndexDataMake.getIndexDataDefault(document, Config.getInteger(KeywordConfig.MIN_SYLLABLE_LENGTH.key(),(int)KeywordConfig.MIN_SYLLABLE_LENGTH.defaultValue()));
+                indexData.putCustomData("title", nipaContents.title);
+
                 WordCount[] wordCounts = indexData.getWordCounts();
                 if(wordCounts == null || wordCounts.length == 0){
                     continue;
@@ -150,7 +157,7 @@ public class KeywordAnalysisCollectService extends Service {
                 String [] keys = new String[2];
 
                 keys[0] = ymd;
-                keys[1] = nipaContents.channelId;
+                keys[1] = nipaRegionalAnalysis.getChannelGroup(nipaContents.channelId).id;
 
                 ContentsGroup contentsGroup = keywordAnalysis.getGroup(keys);
 

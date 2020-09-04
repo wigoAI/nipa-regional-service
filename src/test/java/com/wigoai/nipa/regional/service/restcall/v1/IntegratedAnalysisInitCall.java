@@ -16,7 +16,14 @@
 
 package com.wigoai.nipa.regional.service.restcall.v1;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.wigoai.rest.RestCall;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
 /**
  * @author macle
@@ -24,12 +31,43 @@ import com.wigoai.rest.RestCall;
 public class IntegratedAnalysisInitCall {
 
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ParseException {
+
+        //1월 1일부터
+        long startTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20200101 00:00:00").getTime();
+
+        //10월 1일 전까지 (9월30일까지)
+        long endTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20201001 00:00:00").getTime();
+
+        long standardTime = System.currentTimeMillis();
+
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        
+        JsonObject param = new JsonObject();
+        param.addProperty("start_time", startTime);
+        param.addProperty("end_time", endTime);
+        param.addProperty("standard_time", standardTime);
+
+        JsonArray keywords = new JsonArray();
+        keywords.add("백신");
+//        JSONArray inKeywords= new JSONArray();
+//        inKeywords.put("보건");
+//        keyword1.put("in_filters", inKeywords);
+//        JSONArray outKeywords = new JSONArray();
+//        outKeywords.put("키트");
+//        keyword1.put("out_filters", outKeywords);
+        param.add("keywords", keywords);
 
 
+        String request = gson.toJson(param);
+        
+        String responseMessage = RestCall.postJson("http://127.0.0.1:33377/nipars/v1/integrated/classify",request);
 
 
-        RestCall.postJson("","");
+        System.out.println("request\n " + request +"\n");
+        gson.fromJson(responseMessage, JsonObject.class);
+        System.out.println("responseMessage\n "+ responseMessage) ;
 
+//        System.out.println("responseMessage\n "+ gson.toJson(gson.fromJson(responseMessage, JsonObject.class))) ;
     }
 }

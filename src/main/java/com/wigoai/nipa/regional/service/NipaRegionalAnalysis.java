@@ -23,6 +23,7 @@ import org.moara.ara.datamining.textmining.TextMining;
 import org.moara.ara.datamining.textmining.document.Document;
 import org.moara.common.code.LangCode;
 import org.moara.common.config.Config;
+import org.moara.sync.SynchronizerManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,9 +50,10 @@ public class NipaRegionalAnalysis {
     public static NipaRegionalAnalysis getInstance(){
         return Singleton.instance;
     }
+
     private final DataSource dataSource;
 
-
+    private final ChannelGroupManager channelGroupManager = new ChannelGroupManager();
     /**
      * 생성자
      */
@@ -81,6 +83,8 @@ public class NipaRegionalAnalysis {
         config.setAutoCommit(true);
         config.setMaximumPoolSize(3);
         dataSource =  new HikariDataSource(config);
+        channelGroupManager.sync();
+        SynchronizerManager.getInstance().add(channelGroupManager);
     }
 
     /**
@@ -94,8 +98,22 @@ public class NipaRegionalAnalysis {
         return errorMessage;
     }
 
+    /**
+     *
+     * @param channelId String
+     * @return ChannelGroup
+     */
+    public ChannelGroup getChannelGroup(String channelId){
+        return channelGroupManager.getChannelGroup(channelId);
+    }
 
-
+    /**
+     *
+     * @return ChannelGroup[]
+     */
+    public ChannelGroup[] getGroups() {
+        return channelGroupManager.getGroups();
+    }
 
     /**
      * DataSource 얻기

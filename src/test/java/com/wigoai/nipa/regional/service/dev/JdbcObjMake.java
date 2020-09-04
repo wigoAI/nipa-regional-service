@@ -16,19 +16,19 @@
 
 package com.wigoai.nipa.regional.service.dev;
 
-import com.wigoai.nipa.regional.service.NipaRsContents;
-import org.moara.common.data.database.Table;
-import org.moara.common.data.database.jdbc.common.TableSql;
+import org.moara.common.data.database.jdbc.JdbcObjects;
 
 /**
+ * db 연동 개체 생성용 유틸
  * @author macle
  */
-public class Main {
+public class JdbcObjMake {
+
 
     public static void main(String[] args) {
-        Table table =  NipaRsContents.class.getAnnotation(Table.class);
-        String tableName = TableSql.getTableName(table, NipaRsContents.class.getName());
 
-        System.out.println(tableName);
+        String tableName = "T_CRAWLING_CHANNEL_GP_MAP";
+        System.out.println(JdbcObjects.makeObjectValue(tableName));
+
     }
 }

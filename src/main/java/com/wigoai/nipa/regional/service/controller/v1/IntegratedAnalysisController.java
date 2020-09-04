@@ -18,14 +18,19 @@ package com.wigoai.nipa.regional.service.controller.v1;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
+import com.wigoai.nipa.regional.service.ChannelGroup;
+import com.wigoai.nipa.regional.service.NipaRegionalAnalysis;
 import com.wigoai.nipa.regional.service.ServiceConfig;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.moara.common.callback.ObjectCallback;
 import org.moara.common.config.Config;
 import org.moara.common.time.TimeUtil;
 import org.moara.common.util.ExceptionUtil;
+import org.moara.common.util.YmdUtil;
 import org.moara.keyword.KeywordAnalysis;
+import org.moara.keyword.ServiceKeywordAnalysis;
+import org.moara.message.disposable.DisposableMessageManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
@@ -34,6 +39,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -51,10 +58,12 @@ public class IntegratedAnalysisController {
      * @param jsonValue String json object
      * @return String json object
      */
-    @RequestMapping(value = "/nipars/v1/integrated/init" , method = RequestMethod.POST, produces= MediaType.APPLICATION_JSON_VALUE)
-    public String init(@RequestBody final String jsonValue) {
+    @RequestMapping(value = "/nipars/v1/integrated/classify" , method = RequestMethod.POST, produces= MediaType.APPLICATION_JSON_VALUE)
+    public String classify(@RequestBody final String jsonValue) {
 
         try {
+
+
 
             long analysisStartTime = System.currentTimeMillis();
 
@@ -64,19 +73,22 @@ public class IntegratedAnalysisController {
             long endTime = request.getLong("end_time");
             long standardTime = request.getLong("standard_time");
 
+            long analysisMaxTime = Config.getLong(ServiceConfig.ANALYSIS_MAX_TIME.key(), (long)ServiceConfig.ANALYSIS_MAX_TIME.defaultValue());
+
+
+
             final Thread currentThread = Thread.currentThread();
+
+
 
 
             AtomicBoolean isAnalysis = new AtomicBoolean(false);
 
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            final JsonObject response = new JsonObject() ;
 
-            ObjectCallback endCallback = obj ->
-            {
+            ObjectCallback endCallback = obj -> {
 
                 try {
-
                     isAnalysis.set(true);
                     currentThread.interrupt();
                 }catch(Exception e){
@@ -86,25 +98,75 @@ public class IntegratedAnalysisController {
 
 
 
-            KeywordAnalysis.Module [] modules = new KeywordAnalysis.Module[2];
+            final KeywordAnalysis.Module [] modules = new KeywordAnalysis.Module[1];
             modules[0] = KeywordAnalysis.Module.TF_CONTENTS;
-            modules[1] = KeywordAnalysis.Module.TF_CONTENTS;
+//            modules[1] = KeywordAnalysis.Module.TF_CLASSIFY;
+
+
+            ServiceKeywordAnalysis serviceKeywordAnalysis = ServiceKeywordAnalysis.getInstance();
+            KeywordAnalysis keywordAnalysis = serviceKeywordAnalysis.getKeywordAnalysis();
+
+
+            String startYmd =  new SimpleDateFormat("yyyyMMdd").format(new Date(startTime));
+            String endYmd =  new SimpleDateFormat("yyyyMMdd").format(new Date(endTime));
+
+            List<String> ymdList = YmdUtil.getYmdList(startYmd,endYmd);
+
+            ChannelGroup[] groups = NipaRegionalAnalysis.getInstance().getGroups();
+
+            int size = ymdList.size()*groups.length;
+
+            String [][] keysArray = new String[size][2];
+
+            int index = 0;
+            for(String ymd : ymdList){
+                for (ChannelGroup group : groups) {
+                    String[] key = new String[2];
+                    key[0] = ymd;
+                    key[1] = group.getId();
+                    keysArray[index++] = key;
+                }
+            }
+
+            Map<String, Object> parameterMap = null;
+            if(request.has("stopwords")){
+                JSONArray stopwordArray = request.getJSONArray("stopwords");
+                if(stopwordArray.length() > 0) {
+
+                    Set<String> stopwordSet = new HashSet<>();
+
+                    for (int i = 0; i < stopwordArray.length(); i++) {
+                        stopwordSet.add(stopwordArray.getString(i));
+                    }
+                    //옵션이 지금은 하나 이므로 여기에서 생성 나중에는 null일때만 생성하게 변경해야함
+                    parameterMap = new HashMap<>();
+                    parameterMap.put("stopwordSyllableSet", stopwordSet);
+                }
+
+            }
+
+
+            String messageId = keywordAnalysis.keywordAnalysis(startTime, endTime, standardTime, request.getJSONArray("keywords").toString(), keysArray, modules, null, parameterMap, endCallback);
+
+
             try {
+                long analysisTime = System.currentTimeMillis() - analysisStartTime;
                 //최대 대기 시간
-                Thread.sleep(Config.getLong(ServiceConfig.ANALYSIS_MAX_TIME.key(), (long)ServiceConfig.ANALYSIS_MAX_TIME.defaultValue()));
+                Thread.sleep(analysisMaxTime - analysisTime);
             }catch (InterruptedException ignore){}
 
-
-
 //            gson.fromJson()
-            if(isAnalysis.get()){
-                logger.debug("init data second: " + jsonValue +":  "+ TimeUtil.getSecond(System.currentTimeMillis() - analysisStartTime));
-                return gson.toJson(response);
-            }else{
+            if(!isAnalysis.get()){
                 logger.error("time out: " + jsonValue);
                 return "";
             }
 
+            DisposableMessageManager disposableMessageManager = DisposableMessageManager.getInstance();
+            String message =  disposableMessageManager.getMessages(messageId);
+
+
+            logger.debug("init data second: " + jsonValue +":  "+ TimeUtil.getSecond(System.currentTimeMillis() - analysisStartTime));
+            return gson.toJson(message);
 
         }catch(Exception e){
             logger.error(ExceptionUtil.getStackTrace(e));
@@ -114,11 +176,7 @@ public class IntegratedAnalysisController {
     }
 
 
-    public static void main(String[] args) {
-        JSONObject obj = new JSONObject();
-        System.out.println(obj.toString());
 
 
-    }
 
 }

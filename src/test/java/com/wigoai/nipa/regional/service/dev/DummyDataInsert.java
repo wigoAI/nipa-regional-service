@@ -21,9 +21,9 @@ import com.wigoai.nipa.regional.service.NipaRsContents;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.moara.common.data.database.jdbc.JDBCUtil;
 import org.moara.common.data.database.jdbc.JdbcObjects;
 import org.moara.common.data.office.excel.ExcelUtil;
+import org.moara.common.time.TimeUtil;
 import org.moara.common.util.ExceptionUtil;
 import org.moara.common.util.YmdUtil;
 import org.slf4j.Logger;
@@ -42,16 +42,16 @@ import java.util.Random;
  * 테스트 더미 데이터 생성
  * @author macle
  */
-public class DummyData {
+public class DummyDataInsert {
 
 
-    private static final Logger logger = LoggerFactory.getLogger(DummyData.class);
+    private static final Logger logger = LoggerFactory.getLogger(DummyDataInsert.class);
 
     private final ExcelUtil excelUtil = new ExcelUtil();
 
     private XSSFRow row;
 
-    void make(String excelDirPath){
+    void make(@SuppressWarnings("SameParameterValue") String excelDirPath){
 
         List<File> excelList = excelUtil.getExcelFileList(excelDirPath);
 
@@ -67,7 +67,7 @@ public class DummyData {
 
         final String [] channelIds = {"1","2","3","4","5","6","7","8"};
 
-        final int day = 86400000;
+        final int day = (int)TimeUtil.DAY_TIME;
 
         long rowNumber = 1;
 
@@ -144,7 +144,7 @@ public class DummyData {
 
     public static void main(String[] args){
         //환경부 데이터를 이용해서 만듬 관련데이터는 라이센스가 있는 데이터이므로 레파지토리에 저장하면 안됨
-        new DummyData().make("D:\\moara\\뉴스셈플데이터(환경부)");
+        new DummyDataInsert().make("D:\\moara\\뉴스셈플데이터(환경부)");
     }
 
 }

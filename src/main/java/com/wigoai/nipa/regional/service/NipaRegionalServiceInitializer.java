@@ -18,13 +18,13 @@ package com.wigoai.nipa.regional.service;
 
 import org.moara.MoaraInitializer;
 import org.moara.common.annotation.Priority;
+import org.moara.common.callback.Callback;
 import org.moara.common.config.Config;
 import org.moara.common.service.Service;
 import org.moara.keyword.ServiceKeywordAnalysis;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.security.auth.callback.Callback;
 
 /**
  * Moara Engine 이 구동될 떄 같이 실행 됨
@@ -47,7 +47,7 @@ public class NipaRegionalServiceInitializer implements MoaraInitializer {
 
             Callback initCallback = new Callback() {
 
-                void callback(){
+                public void callback(){
                     KeywordAnalysisCollectService keywordAnalysisCollectService = new KeywordAnalysisCollectService();
                     keywordAnalysisCollectService.setSleepTime(Config.getLong(ServiceConfig.COLLECT_SLEEP_SECOND.key(), ((long)ServiceConfig.COLLECT_SLEEP_SECOND.defaultValue() )* 1000L));
                     keywordAnalysisCollectService.setState(Service.State.START);
@@ -55,6 +55,8 @@ public class NipaRegionalServiceInitializer implements MoaraInitializer {
                     logger.info(this.getClass().getName() + " start complete");
                 }
             };
+
+            serviceKeywordAnalysis.addInitCallback(initCallback);
         }
     }
 
