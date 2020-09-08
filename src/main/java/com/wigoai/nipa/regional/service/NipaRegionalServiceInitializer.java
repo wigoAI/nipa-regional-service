@@ -49,7 +49,7 @@ public class NipaRegionalServiceInitializer implements MoaraInitializer {
 
                 public void callback(){
                     KeywordAnalysisCollectService keywordAnalysisCollectService = new KeywordAnalysisCollectService();
-                    keywordAnalysisCollectService.setSleepTime(Config.getLong(ServiceConfig.COLLECT_SLEEP_SECOND.key(), ((long)ServiceConfig.COLLECT_SLEEP_SECOND.defaultValue() )* 1000L));
+                    keywordAnalysisCollectService.setSleepTime(Config.getLong(ServiceConfig.COLLECT_SLEEP_SECOND.key(), ((long)ServiceConfig.COLLECT_SLEEP_SECOND.defaultValue()))* 1000L);
                     keywordAnalysisCollectService.setState(Service.State.START);
                     keywordAnalysisCollectService.start();
                     logger.info(this.getClass().getName() + " start complete");

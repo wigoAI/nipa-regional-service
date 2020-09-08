@@ -74,7 +74,7 @@ public class ElasticSearchCollectService extends Service {
 
             for(;;){
 
-                List<NipaRsContents> nipaContentsList = JdbcObjects.getObjList(conn, NipaRsContents.class, "CONTENTS_NB > " + lastNum + " ORDER BY CONTENTS_NB ASC LIMIT 0, 200");
+                List<NipaRsContents> nipaContentsList = JdbcObjects.getObjList(conn, NipaRsContents.class, "CONTENTS_NB > " + lastNum + " ORDER BY CONTENTS_NB ASC LIMIT 0, 500");
 
                 if(nipaContentsList.size() == 0){
                     break;

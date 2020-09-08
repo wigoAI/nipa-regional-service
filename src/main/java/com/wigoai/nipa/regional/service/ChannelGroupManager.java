@@ -34,7 +34,7 @@ import java.util.Map;
  * 채널 그룹 관리
  * @author macle
  */
-@Priority(seq = Integer.MAX_VALUE)
+@Priority(seq = Integer.MAX_VALUE - 5)
 public class ChannelGroupManager implements Synchronizer {
 
     private static final Logger logger = LoggerFactory.getLogger(ChannelGroupManager.class);

@@ -54,6 +54,8 @@ public class NipaRegionalAnalysis {
     private final DataSource dataSource;
 
     private final ChannelGroupManager channelGroupManager = new ChannelGroupManager();
+    private final ClassifyCodes classifyCodes = new ClassifyCodes();
+
     /**
      * 생성자
      */
@@ -85,6 +87,8 @@ public class NipaRegionalAnalysis {
         dataSource =  new HikariDataSource(config);
         channelGroupManager.sync();
         SynchronizerManager.getInstance().add(channelGroupManager);
+        classifyCodes.sync();
+        SynchronizerManager.getInstance().add(classifyCodes);
     }
 
     /**
@@ -138,6 +142,22 @@ public class NipaRegionalAnalysis {
         TextMining.mining(document);
 
         return document;
+    }
+
+    /**
+     * 감성분석에서 사용 하는 코드 목록 (im memory)
+     * @return String []
+     */
+    public String [] getEmotionCodes(){
+        return classifyCodes.emotionCodes;
+    }
+
+    /**
+     * 분야별 분석에서 사용 하는 코드 목록 (im memory)
+     * @return String []
+     */
+    public String [] getFieldCodes(){
+        return classifyCodes.fieldCodes;
     }
 
 }

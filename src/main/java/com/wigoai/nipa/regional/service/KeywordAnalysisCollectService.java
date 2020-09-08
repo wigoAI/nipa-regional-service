@@ -51,7 +51,7 @@ import java.util.*;
  */
 public class KeywordAnalysisCollectService extends Service {
 
-    private static final Logger logger = LoggerFactory.getLogger(ElasticSearchCollectService.class);
+    private static final Logger logger = LoggerFactory.getLogger(KeywordAnalysisCollectService.class);
     
 
     private final EngineConfig engineConfig;
@@ -196,11 +196,18 @@ public class KeywordAnalysisCollectService extends Service {
                 if(indexDataColl.size() == 0){
                     continue;
                 }
+
                 Integer lastNumber = lastFileNumberMap.get(keyYmd);
                 if(lastNumber == null){
                     lastNumber = -1;
                 }
+
+
+
+
                 String filePath = IndexUtil.getWriteFilePath(keyYmd, lastNumber);
+
+
                 File file = new File(filePath);
                 String fileName = file.getName();
                 lastFileNumberMap.put(keyYmd, IndexUtil.getFileNumber(fileName));
