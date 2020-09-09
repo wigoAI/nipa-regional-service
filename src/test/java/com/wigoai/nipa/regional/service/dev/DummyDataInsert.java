@@ -61,7 +61,7 @@ public class DummyDataInsert {
         }
 
         //날짜는 아래 날짜로 랜덤 하게 들어감
-        final List<String> ymdList = YmdUtil.getYmdList("20200101", "20200930");
+        final List<String> ymdList = YmdUtil.getYmdList("20200701", "20200930");
 
         final Random random = new Random();
 

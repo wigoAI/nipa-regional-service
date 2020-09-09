@@ -25,20 +25,25 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
- * nipa 서비스에서 사용하는 분류관련 코드고나리
+ * nipa 서비스에서 사용하는 분류 관리
  * @author macle
  */
 @Priority(seq = Integer.MAX_VALUE )
-public class ClassifyCodes implements Synchronizer {
+public class ClassifyManager implements Synchronizer {
 
-    private static final Logger logger = LoggerFactory.getLogger(ClassifyCodes.class);
+    private static final Logger logger = LoggerFactory.getLogger(ClassifyManager.class);
 
     String [] emotionCodes = StringArray.EMPTY_STRING_ARRAY;
 
     String [] fieldCodes = StringArray.EMPTY_STRING_ARRAY;
+
+    Map<String, String> fieldNameMap = new HashMap<>();
+
 
 
     @Override
@@ -54,22 +59,30 @@ public class ClassifyCodes implements Synchronizer {
 
         if(!Arrays.equals(emotionCodes, codes)){
             emotionCodes = codes;
-            logger.debug("emotion code update: " + emotionCodes.length);
+            logger.debug("emotion classify update: " + emotionCodes.length);
 
         }
         emotionCodeList.clear();
 
-        List<String> fieldCodeList = JDBCUtil.getList("SELECT CD_CATEGORY FROM TB_MOARA_CATEGORY WHERE CD_CATEGORY LIKE '" + Config.getConfig(ServiceConfig.FIELD_CLASSIFY.key()) +"%' AND FG_PARENTS ='N' AND FG_DEL='N'");
-        if(fieldCodeList.size() == 0){
+        List<Map<String,String>> fieldList = JDBCUtil.getResultList("SELECT CD_CATEGORY, NM_CATEGORY FROM TB_MOARA_CATEGORY WHERE CD_CATEGORY LIKE '" + Config.getConfig(ServiceConfig.FIELD_CLASSIFY.key()) +"%' AND FG_PARENTS ='N' AND FG_DEL='N'");
+        if(fieldList.size() == 0){
             throw new RuntimeException("field code set error: " + Config.getConfig(ServiceConfig.FIELD_CLASSIFY.key()));
         }
 
-        codes = fieldCodeList.toArray(new String[0]);
+        codes = new String [fieldList.size()];
+
+        for (int i = 0; i <codes.length ; i++) {
+            Map<String,String> data = fieldList.get(i);
+            codes[i] = data.get("CD_CATEGORY");
+            fieldNameMap.put(data.get("CD_CATEGORY"), data.get("NM_CATEGORY"));
+        }
 
         if(!Arrays.equals(fieldCodes, codes)){
             fieldCodes = codes;
+            logger.debug("field classify update: " + fieldCodes.length);
         }
-        fieldCodeList.clear();
+
+        fieldList.clear();
     }
 
 }

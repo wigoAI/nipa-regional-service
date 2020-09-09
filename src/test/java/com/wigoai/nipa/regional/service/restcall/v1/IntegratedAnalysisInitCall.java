@@ -33,11 +33,13 @@ public class IntegratedAnalysisInitCall {
 
     public static void main(String[] args) throws ParseException {
 
-        //1월 1일부터
-        long startTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20200101 00:00:00").getTime();
+        long analysisStartTime = System.currentTimeMillis();
 
-        //10월 1일 전까지 (9월30일까지)
-        long endTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20201001 00:00:00").getTime();
+        //7월 20일부터
+        long startTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20200720 00:00:00").getTime();
+
+        //7월 25일 전까지 (7월24일까지)
+        long endTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20200725 00:00:00").getTime();
 
         long standardTime = System.currentTimeMillis();
 
@@ -49,7 +51,7 @@ public class IntegratedAnalysisInitCall {
         param.addProperty("standard_time", standardTime);
 
         JsonArray keywords = new JsonArray();
-        keywords.add("백신");
+        keywords.add("먼지");
 //        JSONArray inKeywords= new JSONArray();
 //        inKeywords.put("보건");
 //        keyword1.put("in_filters", inKeywords);
@@ -58,16 +60,14 @@ public class IntegratedAnalysisInitCall {
 //        keyword1.put("out_filters", outKeywords);
         param.add("keywords", keywords);
 
-
         String request = gson.toJson(param);
-        
-        String responseMessage = RestCall.postJson("http://127.0.0.1:33377/nipars/v1/integrated/classify",request);
+        String responseMessage = RestCall.postJson("http://127.0.0.1:33377/nipars/v1/integrated/analysis",request);
+        System.out.println("mills second: " + (System.currentTimeMillis() - analysisStartTime));
 
 
         System.out.println("request\n " + request +"\n");
-        gson.fromJson(responseMessage, JsonObject.class);
         System.out.println("responseMessage\n "+ responseMessage) ;
-
+//        gson.fromJson(responseMessage, JsonObject.class);
 //        System.out.println("responseMessage\n "+ gson.toJson(gson.fromJson(responseMessage, JsonObject.class))) ;
     }
 }

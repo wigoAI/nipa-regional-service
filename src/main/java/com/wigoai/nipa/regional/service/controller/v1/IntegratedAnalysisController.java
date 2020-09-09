@@ -146,7 +146,26 @@ public class IntegratedAnalysisController {
 
             String keywordJson = request.getJSONArray("keywords").toString();
 
-            String messageId = keywordAnalysis.keywordAnalysis(startTime, endTime, standardTime, keywordJson, keysArray, modules, moduleProperties, null, endCallback);
+            Map<String, Object> parameterMap = null;
+            if(request.has("stopwords")){
+                Object obj = request.get("stopwords");
+                if(obj != null){
+                    JSONArray stopwordArray = (JSONArray) obj;
+                    if(stopwordArray.length() > 0) {
+
+                        Set<String> stopwordSet = new HashSet<>();
+
+                        for (int i = 0; i < stopwordArray.length(); i++) {
+                            stopwordSet.add(stopwordArray.getString(i));
+                        }
+                        //옵션이 지금은 하나 이므로 여기에서 생성 나중에는 null일때만 생성하게 변경해야함
+                        parameterMap = new HashMap<>();
+                        parameterMap.put("stopwordSyllableSet", stopwordSet);
+                    }
+                }
+            }
+
+            String messageId = keywordAnalysis.keywordAnalysis(startTime, endTime, standardTime, keywordJson, keysArray, modules, moduleProperties, parameterMap, endCallback);
 
             try {
                 long analysisTime = System.currentTimeMillis() - analysisStartTime;
@@ -185,7 +204,7 @@ public class IntegratedAnalysisController {
             for(String code : fieldCodes){
                 fieldBuilder.append(",").append(code);
             }
-            keyword(resultObj, endCallback, groups, 0, startTime, endTime, standardTime, keywordJson, keywordAnalysis, ymdList, fieldBuilder.substring(1));
+            keyword(resultObj, endCallback, groups, 0, startTime, endTime, standardTime, keywordJson, parameterMap, keywordAnalysis, ymdList, fieldBuilder.substring(1));
 
 
             try {
@@ -213,9 +232,8 @@ public class IntegratedAnalysisController {
 
     }
 
-
     private void keyword(final JSONObject resultObj, final ObjectCallback callback, final ChannelGroup[] groups, final int groupIndex
-            , final long startTime, final long endTime, final long standardTime, final String keywordJson, final KeywordAnalysis keywordAnalysis, final List<String> ymdList
+            , final long startTime, final long endTime, final long standardTime, final String keywordJson,  Map<String, Object> parameterMap, final KeywordAnalysis keywordAnalysis, final List<String> ymdList
             , final String inCodesValue){
 
         ObjectCallback endCallback  = obj -> {
@@ -247,7 +265,7 @@ public class IntegratedAnalysisController {
                     return;
                 }
 
-                keyword(resultObj, callback, groups, groupIndex +1, startTime, endTime, standardTime, keywordJson, keywordAnalysis, ymdList, inCodesValue);
+                keyword(resultObj, callback, groups, groupIndex +1, startTime, endTime, standardTime, keywordJson, parameterMap, keywordAnalysis, ymdList, inCodesValue);
             }catch(Exception e){
                 logger.error(ExceptionUtil.getStackTrace(e));
             }
@@ -274,10 +292,11 @@ public class IntegratedAnalysisController {
 
         properties = new Properties();
         properties.put("selectors","[{\"id\":\"keywords\",\"type\":\"WORD_CLASS\",\"value\":\"NOUN\"}]");
+        properties.put("count",30);
 
         moduleProperties.put(KeywordAnalysis.Module.TF_WORD, properties);
 
-        keywordAnalysis.keywordAnalysis(startTime, endTime, standardTime, keywordJson, keysArray, modules, moduleProperties, null, endCallback);
+        keywordAnalysis.keywordAnalysis(startTime, endTime, standardTime, keywordJson, keysArray, modules, moduleProperties, parameterMap, endCallback);
 
     }
 

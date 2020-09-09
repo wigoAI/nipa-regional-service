@@ -54,7 +54,7 @@ public class NipaRegionalAnalysis {
     private final DataSource dataSource;
 
     private final ChannelGroupManager channelGroupManager = new ChannelGroupManager();
-    private final ClassifyCodes classifyCodes = new ClassifyCodes();
+    private final ClassifyManager classifyCodes = new ClassifyManager();
 
     /**
      * 생성자
