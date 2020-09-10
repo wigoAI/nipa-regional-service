@@ -54,7 +54,7 @@ public class NipaRegionalAnalysis {
     private final DataSource dataSource;
 
     private final ChannelGroupManager channelGroupManager = new ChannelGroupManager();
-    private final ClassifyManager classifyCodes = new ClassifyManager();
+    private final ClassifyManager classifyCodeManager = new ClassifyManager();
 
     /**
      * 생성자
@@ -87,8 +87,8 @@ public class NipaRegionalAnalysis {
         dataSource =  new HikariDataSource(config);
         channelGroupManager.sync();
         SynchronizerManager.getInstance().add(channelGroupManager);
-        classifyCodes.sync();
-        SynchronizerManager.getInstance().add(classifyCodes);
+        classifyCodeManager.sync();
+        SynchronizerManager.getInstance().add(classifyCodeManager);
     }
 
     /**
@@ -149,7 +149,7 @@ public class NipaRegionalAnalysis {
      * @return String []
      */
     public String [] getEmotionCodes(){
-        return classifyCodes.emotionCodes;
+        return classifyCodeManager.emotionCodes;
     }
 
     /**
@@ -157,7 +157,15 @@ public class NipaRegionalAnalysis {
      * @return String []
      */
     public String [] getFieldCodes(){
-        return classifyCodes.fieldCodes;
+        return classifyCodeManager.fieldCodes;
     }
+
+
+    /**
+     * 이름으로 코드 얻기
+     * @param name String
+     * @return String
+     */
+    public String getFieldCode(String name){return classifyCodeManager.getFieldCode(name);}
 
 }

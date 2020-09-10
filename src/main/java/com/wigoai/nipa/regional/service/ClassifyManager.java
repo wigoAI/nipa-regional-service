@@ -42,8 +42,9 @@ public class ClassifyManager implements Synchronizer {
 
     String [] fieldCodes = StringArray.EMPTY_STRING_ARRAY;
 
-    Map<String, String> fieldNameMap = new HashMap<>();
+//    Map<String, String> fieldNameMap = new HashMap<>();
 
+    Map<String, String> fieldNameCodeMap = new HashMap<>();
 
 
     @Override
@@ -74,7 +75,8 @@ public class ClassifyManager implements Synchronizer {
         for (int i = 0; i <codes.length ; i++) {
             Map<String,String> data = fieldList.get(i);
             codes[i] = data.get("CD_CATEGORY");
-            fieldNameMap.put(data.get("CD_CATEGORY"), data.get("NM_CATEGORY"));
+//            fieldNameMap.put(data.get("CD_CATEGORY"), data.get("NM_CATEGORY"));
+            fieldNameCodeMap.put(data.get("NM_CATEGORY"), data.get("CD_CATEGORY"));
         }
 
         if(!Arrays.equals(fieldCodes, codes)){
@@ -84,5 +86,11 @@ public class ClassifyManager implements Synchronizer {
 
         fieldList.clear();
     }
+
+
+    public String getFieldCode(String name){
+        return fieldNameCodeMap.get(name);
+    }
+
 
 }

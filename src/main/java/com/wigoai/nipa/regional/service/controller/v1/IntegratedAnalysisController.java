@@ -91,10 +91,10 @@ public class IntegratedAnalysisController {
 
 
 
-            final KeywordAnalysis.Module [] modules = new KeywordAnalysis.Module[2];
+            final KeywordAnalysis.Module [] modules = new KeywordAnalysis.Module[3];
             modules[0] = KeywordAnalysis.Module.TF_CONTENTS;
             modules[1] = KeywordAnalysis.Module.TF_CLASSIFY;
-
+            modules[2] = KeywordAnalysis.Module.TF_CLASSIFY_TARGET;
 
             ServiceKeywordAnalysis serviceKeywordAnalysis = ServiceKeywordAnalysis.getInstance();
             KeywordAnalysis keywordAnalysis = serviceKeywordAnalysis.getKeywordAnalysis();
@@ -102,6 +102,8 @@ public class IntegratedAnalysisController {
 
             String startYmd =  new SimpleDateFormat("yyyyMMdd").format(new Date(startTime));
             String endYmd =  new SimpleDateFormat("yyyyMMdd").format(new Date(endTime));
+
+            //날짜정보
 
             List<String> ymdList = YmdUtil.getYmdList(startYmd,endYmd);
 
@@ -143,6 +145,34 @@ public class IntegratedAnalysisController {
             properties.put("in_codes", emotionBuilder.substring(1));
             properties.put("is_trend", false);
             moduleProperties.put(KeywordAnalysis.Module.TF_CLASSIFY, properties);
+
+
+            StringBuilder sourceBuilder =new StringBuilder();
+            if(request.has("classify_names")){
+                JSONArray array = request.getJSONArray("classify_names");
+                for (int i = 0; i <array.length() ; i++) {
+                    String code = nipaRegionalAnalysis.getFieldCode(array.getString(i));
+                    if(code == null){
+                        logger.error("field classify code search fail: " + array.getString(i));
+                        continue;
+                    }
+                    sourceBuilder.append(",").append(code);
+                }
+
+            }else{
+                String [] fieldCodes = nipaRegionalAnalysis.getFieldCodes();
+                for(String code : fieldCodes){
+                    sourceBuilder.append(",").append(code);
+                }
+
+            }
+
+
+            properties = new Properties();
+            properties.put("source_codes", sourceBuilder.substring(1));
+            properties.put("target_codes", emotionBuilder.substring(1));
+            moduleProperties.put(KeywordAnalysis.Module.TF_CLASSIFY_TARGET, properties);
+
 
             String keywordJson = request.getJSONArray("keywords").toString();
 
@@ -191,8 +221,10 @@ public class IntegratedAnalysisController {
                 KeywordAnalysis.Module module = KeywordAnalysis.Module.valueOf(messageObj.get("type").toString());
                 if (module == KeywordAnalysis.Module.TF_CONTENTS) {
                     resultObj.put("channel_count", messageObj.getJSONObject("message"));
+                }else if(module == KeywordAnalysis.Module.TF_CLASSIFY_TARGET){
+                    resultObj.put("field_emotion_classifies", messageObj.getJSONArray("message"));
                 } else {
-                    resultObj.put("emotion", messageObj.getJSONObject("message"));
+                    resultObj.put("emotion_classifies", messageObj.getJSONObject("message").getJSONArray("classifies"));
                 }
             }
 
@@ -246,16 +278,14 @@ public class IntegratedAnalysisController {
                     return ;
                 }
 
-
                 DisposableMessage disposableMessage = (DisposableMessage)obj;
                 String [] messages = disposableMessage.getMessages();
-
 
                 for(String message : messages){
                     JSONObject messageObj = new JSONObject(message);
                     KeywordAnalysis.Module module = KeywordAnalysis.Module.valueOf(messageObj.get("type").toString());
                     if (module == KeywordAnalysis.Module.TF_CLASSIFY) {
-                        resultObj.put(groups[groupIndex].getId() + "_classifies", messageObj.getJSONObject("message"));
+                        resultObj.put(groups[groupIndex].getId() + "_classifies", messageObj.getJSONObject("message").getJSONArray("classifies"));
                     } else {
                         resultObj.put(groups[groupIndex].getId() +"_keywords", messageObj.getJSONObject("message"));
                     }
