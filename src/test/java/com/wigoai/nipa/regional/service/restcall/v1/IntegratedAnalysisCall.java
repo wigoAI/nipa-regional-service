@@ -28,7 +28,7 @@ import java.text.SimpleDateFormat;
 /**
  * @author macle
  */
-public class IntegratedAnalysisInitCall {
+public class IntegratedAnalysisCall {
 
 
     public static void main(String[] args) throws ParseException {
@@ -51,7 +51,7 @@ public class IntegratedAnalysisInitCall {
         param.addProperty("standard_time", standardTime);
 
         JsonArray keywords = new JsonArray();
-        keywords.add("먼지");
+        keywords.add("환경");
 //        JSONArray inKeywords= new JSONArray();
 //        inKeywords.put("보건");
 //        keyword1.put("in_filters", inKeywords);
@@ -62,12 +62,16 @@ public class IntegratedAnalysisInitCall {
 
         String request = gson.toJson(param);
         String responseMessage = RestCall.postJson("http://127.0.0.1:33377/nipars/v1/integrated/analysis",request);
+//        String responseMessage = RestCall.postJson("http://sc.wigo.ai:10014/nipars/v1/integrated/analysis",request);
+
+
         System.out.println("mills second: " + (System.currentTimeMillis() - analysisStartTime));
 
 
         System.out.println("request\n " + request +"\n");
         System.out.println("responseMessage\n "+ responseMessage) ;
-//        gson.fromJson(responseMessage, JsonObject.class);
 //        System.out.println("responseMessage\n "+ gson.toJson(gson.fromJson(responseMessage, JsonObject.class))) ;
+
+
     }
 }

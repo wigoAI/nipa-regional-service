@@ -101,10 +101,9 @@ public class IntegratedAnalysisController {
 
 
             String startYmd =  new SimpleDateFormat("yyyyMMdd").format(new Date(startTime));
-            String endYmd =  new SimpleDateFormat("yyyyMMdd").format(new Date(endTime));
+            String endYmd =  new SimpleDateFormat("yyyyMMdd").format(new Date(endTime-1));
 
             //날짜정보
-
             List<String> ymdList = YmdUtil.getYmdList(startYmd,endYmd);
 
             NipaRegionalAnalysis nipaRegionalAnalysis = NipaRegionalAnalysis.getInstance();
@@ -250,9 +249,16 @@ public class IntegratedAnalysisController {
                 return "{}";
             }
 
+//            String result = resultObj.toString();
+//            logger.debug("init data second: " + jsonValue +":  "+ TimeUtil.getSecond(System.currentTimeMillis() - analysisStartTime));
+//            return result;
+
+
+            //파싱 및 변환에 대한 속도차이는 없는것으로 보임
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            String result =  gson.toJson(gson.fromJson(resultObj.toString(), JsonObject.class));
             logger.debug("init data second: " + jsonValue +":  "+ TimeUtil.getSecond(System.currentTimeMillis() - analysisStartTime));
-            return gson.toJson(gson.fromJson(resultObj.toString(), JsonObject.class));
+            return result;
 
         }catch(Exception e){
             e.printStackTrace();
