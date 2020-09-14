@@ -45,6 +45,10 @@ public enum ServiceConfig {
 
     , CHANNEL_DEFAULT("nipa.rs.channel.default", "community")
 
+//
+    , POSITIVE_CODE("nipa.rs.positive.code" , "U087001")
+
+    , NEGATIVE_CODE("nipa.rs.negative.code" , "U087002")
     ;
 
     private final String key;

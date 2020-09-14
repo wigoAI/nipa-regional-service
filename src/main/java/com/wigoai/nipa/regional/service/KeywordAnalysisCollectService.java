@@ -157,7 +157,15 @@ public class KeywordAnalysisCollectService extends Service {
                 String [] keys = new String[2];
 
                 keys[0] = ymd;
-                keys[1] = nipaRegionalAnalysis.getChannelGroup(nipaContents.channelId).id;
+
+                ChannelGroup channelGroup = nipaRegionalAnalysis.getChannelGroup(nipaContents.channelId);
+                if(channelGroup == null){
+                    keys[1] = Config.getConfig(ServiceConfig.CHANNEL_DEFAULT.key(), (String)ServiceConfig.CHANNEL_DEFAULT.defaultValue());
+                }else{
+                    keys[1] = channelGroup.id;
+                }
+
+
 
                 ContentsGroup contentsGroup = keywordAnalysis.getGroup(keys);
 

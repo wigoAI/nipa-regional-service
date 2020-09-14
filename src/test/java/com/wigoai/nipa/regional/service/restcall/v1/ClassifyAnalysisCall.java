@@ -50,12 +50,6 @@ public class ClassifyAnalysisCall {
 
         JsonArray keywords = new JsonArray();
         keywords.add("춘천");
-//        JSONArray inKeywords= new JSONArray();
-//        inKeywords.put("보건");
-//        keyword1.put("in_filters", inKeywords);
-//        JSONArray outKeywords = new JSONArray();
-//        outKeywords.put("키트");
-//        keyword1.put("out_filters", outKeywords);
         param.add("keywords", keywords);
 
 
