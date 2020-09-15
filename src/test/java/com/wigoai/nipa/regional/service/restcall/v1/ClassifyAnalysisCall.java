@@ -25,11 +25,14 @@ import com.wigoai.rest.RestCall;
 import java.text.SimpleDateFormat;
 
 /**
+ * 분야별분석
  * @author macle
  */
 public class ClassifyAnalysisCall {
 
+
     public static void main(String[] args) throws Exception {
+
         long analysisStartTime = System.currentTimeMillis();
 
         //7월 20일부터
@@ -41,21 +44,57 @@ public class ClassifyAnalysisCall {
         long standardTime = System.currentTimeMillis();
 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
-
+        
         JsonObject param = new JsonObject();
         param.addProperty("start_time", startTime);
         param.addProperty("end_time", endTime);
         param.addProperty("standard_time", standardTime);
 
+        String [] classifyNameArray = {
+                "보건위생"
+                , "재난안전"
+                , "건설교통"
 
+        };
+
+        JsonArray inKeywords= new JsonArray();
+
+        for(String classifyName : classifyNameArray){
+            inKeywords.add("#"+classifyName);
+        }
+
+        //키워드설정
         JsonArray keywords = new JsonArray();
-        keywords.add("춘천");
+
+        JsonObject keyword1 = new JsonObject();
+        keyword1.addProperty("keyword", "춘천");
+        keyword1.add("in_filters",inKeywords);
+        JsonObject keyword2 = new JsonObject();
+        keyword2.addProperty("keyword", "서울");
+        keyword2.add("in_filters",inKeywords);
+        JsonObject keyword3 = new JsonObject();
+        keyword3.addProperty("keyword", "강원도");
+        keyword3.add("in_filters",inKeywords);
+
+
+        keywords.add(keyword1);
+        keywords.add(keyword2);
+        keywords.add(keyword3);
+
+
         param.add("keywords", keywords);
+
+        JsonArray classifyNames = new JsonArray();
+        for(String classifyName : classifyNameArray){
+            classifyNames.add(classifyName);
+        }
+
+        param.add("classify_names", classifyNames);
+
 
 
         String request = gson.toJson(param);
         String responseMessage = RestCall.postJson("http://127.0.0.1:33377/nipars/v1/integrated/analysis",request);
-//        String responseMessage = RestCall.postJson("http://sc.wigo.ai:10014/nipars/v1/integrated/analysis",request);
 
 
         System.out.println("mills second: " + (System.currentTimeMillis() - analysisStartTime));
@@ -63,5 +102,7 @@ public class ClassifyAnalysisCall {
 
         System.out.println("request\n " + request +"\n");
         System.out.println("responseMessage\n "+ responseMessage) ;
+
+
     }
 }

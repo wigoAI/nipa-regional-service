@@ -25,11 +25,10 @@ import com.wigoai.rest.RestCall;
 import java.text.SimpleDateFormat;
 
 /**
- * 통합분석
+ * 주제별 분석
  * @author macle
  */
-public class IntegratedAnalysisCall {
-
+public class SubjectAnalysisCall {
     public static void main(String[] args) throws Exception {
         long analysisStartTime = System.currentTimeMillis();
 
@@ -48,15 +47,13 @@ public class IntegratedAnalysisCall {
         param.addProperty("end_time", endTime);
         param.addProperty("standard_time", standardTime);
 
-
         JsonArray keywords = new JsonArray();
         keywords.add("춘천");
         param.add("keywords", keywords);
 
 
         String request = gson.toJson(param);
-        String responseMessage = RestCall.postJson("http://127.0.0.1:33377/nipars/v1/integrated/analysis",request);
-//        String responseMessage = RestCall.postJson("http://sc.wigo.ai:10014/nipars/v1/integrated/analysis",request);
+        String responseMessage = RestCall.postJson("http://127.0.0.1:33377/nipars/v1/subject/analysis",request);
 
 
         System.out.println("mills second: " + (System.currentTimeMillis() - analysisStartTime));
@@ -64,5 +61,6 @@ public class IntegratedAnalysisCall {
 
         System.out.println("request\n " + request +"\n");
         System.out.println("responseMessage\n "+ responseMessage) ;
+
     }
 }
