@@ -33,6 +33,7 @@ import org.moara.common.util.ExceptionUtil;
 import org.moara.common.util.YmdUtil;
 import org.moara.keyword.KeywordAnalysis;
 import org.moara.keyword.ServiceKeywordAnalysis;
+import org.moara.message.disposable.DisposableMessage;
 import org.moara.message.disposable.DisposableMessageManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -138,7 +139,7 @@ public class SubjectAnalysisController {
             selectors.put(negativeSelector);
 
             properties.put("selectors", selectors.toString());
-            properties.put("count", 100);
+            properties.put("count", 50);
             properties.put("is_trend", false);
             moduleProperties.put(KeywordAnalysis.Module.TF_WORD, properties);
 
@@ -184,11 +185,29 @@ public class SubjectAnalysisController {
                 if (module == KeywordAnalysis.Module.TF_CONTENTS) {
                     resultObj.put("channel_count", messageObj.getJSONObject("message"));
                 }else if(module == KeywordAnalysis.Module.TF_CLASSIFY){
-                    resultObj.put("emotion_classifies", messageObj.getJSONObject("message").getJSONArray("classifies"));
+                    resultObj.put("emotion_classifies_trend", messageObj.getJSONObject("message"));
                 } else {
-                    resultObj.put("keywords", messageObj.getJSONArray("message"));
+                    JSONObject emotionObj = messageObj.getJSONObject("message");
+                    resultObj.put("negative_keywords", emotionObj.getJSONArray("negative_keywords"));
+
+                    resultObj.put("positive_keywords", emotionObj.getJSONArray("positive_keywords"));
                 }
             }
+
+
+            isAnalysis.set(false);
+            keyword(resultObj, endCallback, groups, 0, startTime, endTime, standardTime, keywordJson, parameterMap, keywordAnalysis, ymdList);
+            try {
+                long analysisTime = System.currentTimeMillis() - analysisStartTime;
+                //최대 대기 시간
+                Thread.sleep(analysisMaxTime - analysisTime);
+            }catch (InterruptedException ignore){}
+
+            if(!isAnalysis.get()){
+                logger.error("time out: " + jsonValue);
+                return "{}";
+            }
+
 
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             String result =  gson.toJson(gson.fromJson(resultObj.toString(), JsonObject.class));
@@ -200,6 +219,68 @@ public class SubjectAnalysisController {
             logger.error(ExceptionUtil.getStackTrace(e));
             return "{}";
         }
+    }
+
+
+    private void keyword(final JSONObject resultObj, final ObjectCallback callback, final ChannelGroup[] groups, final int groupIndex
+            , final long startTime, final long endTime, final long standardTime, final String keywordJson,  Map<String, Object> parameterMap, final KeywordAnalysis keywordAnalysis, final List<String> ymdList
+    ){
+
+        ObjectCallback endCallback  = obj -> {
+
+            try {
+
+                if(obj == null){
+                    logger.error("keyword analysis fail");
+                    callback.callback(null);
+                    return ;
+                }
+
+                DisposableMessage disposableMessage = (DisposableMessage)obj;
+                String [] messages = disposableMessage.getMessages();
+
+                for(String message : messages){
+                    JSONObject messageObj = new JSONObject(message);
+                    KeywordAnalysis.Module module = KeywordAnalysis.Module.valueOf(messageObj.get("type").toString());
+                    if (module == KeywordAnalysis.Module.TF_WORD) {
+                        resultObj.put(groups[groupIndex].getId() + "_keywords", messageObj.getJSONObject("message").getJSONArray("keywords"));
+                    } else {
+                        //릴레이션 일때
+                        resultObj.put(groups[groupIndex].getId() +"_networks", messageObj.getJSONArray("message"));
+                    }
+                }
+                if(groupIndex >= groups.length-1){
+                    callback.callback(null);
+                    return;
+                }
+
+                keyword(resultObj, callback, groups, groupIndex +1, startTime, endTime, standardTime, keywordJson, parameterMap, keywordAnalysis, ymdList);
+            }catch(Exception e){
+
+                if(obj == null){
+                    logger.error("keyword analysis fail");
+                    callback.callback(null);
+                    return ;
+                }
+
+                logger.error(ExceptionUtil.getStackTrace(e));
+            }
+        };
+
+        String [][] keysArray = GroupKeyUtil.makeKeysArray(ymdList,  groups[groupIndex].getId());
+
+        KeywordAnalysis.Module [] modules = new KeywordAnalysis.Module[2];
+        modules[0] = KeywordAnalysis.Module.TF_WORD;
+        modules[1] = KeywordAnalysis.Module.SNA_LITE;
+
+        Map<KeywordAnalysis.Module, Properties> moduleProperties = new HashMap<>();
+        Properties properties = new Properties();
+        properties.put("selectors","[{\"id\":\"keywords\",\"type\":\"WORD_CLASS\",\"value\":\"NOUN\"}]");
+        properties.put("count",100);
+        properties.put("is_trend",false);
+        moduleProperties.put(KeywordAnalysis.Module.TF_WORD, properties);
+        keywordAnalysis.keywordAnalysis(startTime, endTime, standardTime, keywordJson, keysArray, modules, moduleProperties, parameterMap, endCallback);
 
     }
+
 }

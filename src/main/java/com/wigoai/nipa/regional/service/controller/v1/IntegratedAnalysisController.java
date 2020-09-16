@@ -273,6 +273,12 @@ public class IntegratedAnalysisController {
 
                 keyword(resultObj, callback, groups, groupIndex +1, startTime, endTime, standardTime, keywordJson, parameterMap, keywordAnalysis, ymdList, inCodesValue, isFieldClassify);
             }catch(Exception e){
+
+                if(obj == null){
+                    logger.error("keyword analysis fail");
+                    callback.callback(null);
+                    return ;
+                }
                 logger.error(ExceptionUtil.getStackTrace(e));
             }
         };

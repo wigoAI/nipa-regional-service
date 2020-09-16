@@ -62,7 +62,7 @@ public class SubjectAnalysisCall {
         JsonArray keywords = new JsonArray();
         JsonObject keyword1 = new JsonObject();
         keyword1.addProperty("keyword", "서울");
-        keyword1.add("in_filters",inFilters);
+//        keyword1.add("in_filters",inFilters);
         keywords.add(keyword1);
         param.add("keywords", keywords);
 
