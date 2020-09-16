@@ -48,9 +48,9 @@ public class IntegratedAnalysisCall {
         param.addProperty("end_time", endTime);
         param.addProperty("standard_time", standardTime);
 
-
         JsonArray keywords = new JsonArray();
-        keywords.add("춘천");
+
+        keywords.add("서울");
         param.add("keywords", keywords);
 
 

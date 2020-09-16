@@ -47,9 +47,25 @@ public class SubjectAnalysisCall {
         param.addProperty("end_time", endTime);
         param.addProperty("standard_time", standardTime);
 
+        JsonArray inFilters= new JsonArray();
+        JsonArray inFilter1 = new JsonArray();
+        inFilter1.add("#보건위생");
+        inFilter1.add("환경부");
+        inFilters.add(inFilter1);
+        JsonArray inFilter2 = new JsonArray();
+        inFilter2.add("#교육");
+        inFilter2.add("환경부");
+        inFilters.add(inFilter2);
+
+
+
         JsonArray keywords = new JsonArray();
-        keywords.add("춘천");
+        JsonObject keyword1 = new JsonObject();
+        keyword1.addProperty("keyword", "서울");
+        keyword1.add("in_filters",inFilters);
+        keywords.add(keyword1);
         param.add("keywords", keywords);
+
 
 
         String request = gson.toJson(param);
