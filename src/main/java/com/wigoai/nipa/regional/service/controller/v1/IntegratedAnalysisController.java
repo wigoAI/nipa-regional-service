@@ -92,6 +92,12 @@ public class IntegratedAnalysisController {
                 }
             };
 
+            int keywordCount;
+            if(request.has("keyword_count")){
+                keywordCount = request.getInt("keyword_count");
+            }else{
+                keywordCount = 30;
+            }
 
 
             final KeywordAnalysis.Module [] modules = new KeywordAnalysis.Module[3];
@@ -211,7 +217,7 @@ public class IntegratedAnalysisController {
             for(String code : fieldCodes){
                 fieldBuilder.append(",").append(code);
             }
-            keyword(resultObj, endCallback, groups, 0, startTime, endTime, standardTime, keywordJson, parameterMap, keywordAnalysis, ymdList, fieldBuilder.substring(1), isFieldClassify);
+            keyword(resultObj, endCallback, groups, 0, startTime, endTime, standardTime, keywordJson, parameterMap, keywordAnalysis, ymdList, fieldBuilder.substring(1), keywordCount, isFieldClassify);
 
 
             try {
@@ -241,6 +247,7 @@ public class IntegratedAnalysisController {
     private void keyword(final JSONObject resultObj, final ObjectCallback callback, final ChannelGroup[] groups, final int groupIndex
             , final long startTime, final long endTime, final long standardTime, final String keywordJson,  Map<String, Object> parameterMap, final KeywordAnalysis keywordAnalysis, final List<String> ymdList
             , final String inCodesValue
+            , final int keywordCOunt
             , final boolean isFieldClassify
     ){
 
@@ -271,7 +278,7 @@ public class IntegratedAnalysisController {
                     return;
                 }
 
-                keyword(resultObj, callback, groups, groupIndex +1, startTime, endTime, standardTime, keywordJson, parameterMap, keywordAnalysis, ymdList, inCodesValue, isFieldClassify);
+                keyword(resultObj, callback, groups, groupIndex +1, startTime, endTime, standardTime, keywordJson, parameterMap, keywordAnalysis, ymdList, inCodesValue, keywordCOunt, isFieldClassify);
             }catch(Exception e){
 
                 if(obj == null){
@@ -308,7 +315,7 @@ public class IntegratedAnalysisController {
 
         Properties properties = new Properties();
         properties.put("selectors","[{\"id\":\"keywords\",\"type\":\"WORD_CLASS\",\"value\":\"NOUN\"}]");
-        properties.put("count",30);
+        properties.put("count", keywordCOunt);
 
         moduleProperties.put(KeywordAnalysis.Module.TF_WORD, properties);
 

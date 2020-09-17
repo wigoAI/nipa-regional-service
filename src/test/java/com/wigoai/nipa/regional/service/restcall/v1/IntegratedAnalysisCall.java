@@ -48,6 +48,10 @@ public class IntegratedAnalysisCall {
         param.addProperty("end_time", endTime);
         param.addProperty("standard_time", standardTime);
 
+        //단어 최대 건수설정 설정하지 않으면 30
+//        param.addProperty("keyword_count", 30);
+
+
         JsonArray keywords = new JsonArray();
 
         keywords.add("서울");
@@ -55,8 +59,8 @@ public class IntegratedAnalysisCall {
 
 
         String request = gson.toJson(param);
-        String responseMessage = RestCall.postJson("http://127.0.0.1:33377/nipars/v1/integrated/analysis",request);
-//        String responseMessage = RestCall.postJson("http://sc.wigo.ai:10014/nipars/v1/integrated/analysis",request);
+//        String responseMessage = RestCall.postJson("http://127.0.0.1:33377/nipars/v1/integrated/analysis",request);
+        String responseMessage = RestCall.postJson("http://sc.wigo.ai:10014/nipars/v1/integrated/analysis",request);
 
 
         System.out.println("mills second: " + (System.currentTimeMillis() - analysisStartTime));

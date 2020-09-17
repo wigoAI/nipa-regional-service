@@ -17,7 +17,6 @@
 package com.wigoai.nipa.regional.service;
 
 import org.moara.common.config.Config;
-import org.moara.common.service.Service;
 import org.moara.engine.node.MasterNodeInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

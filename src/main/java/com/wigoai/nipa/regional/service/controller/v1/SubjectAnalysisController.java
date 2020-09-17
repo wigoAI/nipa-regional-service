@@ -139,7 +139,14 @@ public class SubjectAnalysisController {
             selectors.put(negativeSelector);
 
             properties.put("selectors", selectors.toString());
-            properties.put("count", 50);
+
+            if(request.has("emotion_keyword_count")){
+                properties.put("count", request.getInt("emotion_keyword_count"));
+            }else{
+                properties.put("count", 50);
+            }
+
+
             properties.put("is_trend", false);
             moduleProperties.put(KeywordAnalysis.Module.TF_WORD, properties);
 
@@ -194,9 +201,16 @@ public class SubjectAnalysisController {
                 }
             }
 
+            int cloudKeywordCount;
+            if(request.has("cloud_keyword_count")){
+                cloudKeywordCount = request.getInt("cloud_keyword_count");
+            }else{
+                cloudKeywordCount = 100;
+            }
+
 
             isAnalysis.set(false);
-            keyword(resultObj, endCallback, groups, 0, startTime, endTime, standardTime, keywordJson, parameterMap, keywordAnalysis, ymdList);
+            keyword(resultObj, endCallback, groups, 0, startTime, endTime, standardTime, keywordJson, parameterMap, keywordAnalysis, ymdList, cloudKeywordCount);
             try {
                 long analysisTime = System.currentTimeMillis() - analysisStartTime;
                 //최대 대기 시간
@@ -224,6 +238,7 @@ public class SubjectAnalysisController {
 
     private void keyword(final JSONObject resultObj, final ObjectCallback callback, final ChannelGroup[] groups, final int groupIndex
             , final long startTime, final long endTime, final long standardTime, final String keywordJson,  Map<String, Object> parameterMap, final KeywordAnalysis keywordAnalysis, final List<String> ymdList
+            , final int cloudKeywordCount
     ){
 
         ObjectCallback endCallback  = obj -> {
@@ -254,7 +269,7 @@ public class SubjectAnalysisController {
                     return;
                 }
 
-                keyword(resultObj, callback, groups, groupIndex +1, startTime, endTime, standardTime, keywordJson, parameterMap, keywordAnalysis, ymdList);
+                keyword(resultObj, callback, groups, groupIndex +1, startTime, endTime, standardTime, keywordJson, parameterMap, keywordAnalysis, ymdList, cloudKeywordCount);
             }catch(Exception e){
 
                 if(obj == null){
@@ -276,7 +291,7 @@ public class SubjectAnalysisController {
         Map<KeywordAnalysis.Module, Properties> moduleProperties = new HashMap<>();
         Properties properties = new Properties();
         properties.put("selectors","[{\"id\":\"keywords\",\"type\":\"WORD_CLASS\",\"value\":\"NOUN\"}]");
-        properties.put("count",100);
+        properties.put("count", cloudKeywordCount);
         properties.put("is_trend",false);
         moduleProperties.put(KeywordAnalysis.Module.TF_WORD, properties);
         keywordAnalysis.keywordAnalysis(startTime, endTime, standardTime, keywordJson, keysArray, modules, moduleProperties, parameterMap, endCallback);

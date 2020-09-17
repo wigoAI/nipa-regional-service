@@ -36,7 +36,7 @@ public class SubjectAnalysisCall {
         long startTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20200720 00:00:00").getTime();
 
         //7월 25일 전까지 (7월24일까지)
-        long endTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20200930 00:00:00").getTime();
+        long endTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20200725 00:00:00").getTime();
 
         long standardTime = System.currentTimeMillis();
 
@@ -46,6 +46,12 @@ public class SubjectAnalysisCall {
         param.addProperty("start_time", startTime);
         param.addProperty("end_time", endTime);
         param.addProperty("standard_time", standardTime);
+
+        //설정예제
+        //긍부정 단어 최대 건수설정 설정하지 않으면 50
+//        param.addProperty("emotion_keyword_count", 50);
+        //클라우드 단어 최대 건수 설정 설정하지 안흐면 100
+//        param.addProperty("cloud_keyword_count", 100);
 
         JsonArray inFilters= new JsonArray();
         JsonArray inFilter1 = new JsonArray();
