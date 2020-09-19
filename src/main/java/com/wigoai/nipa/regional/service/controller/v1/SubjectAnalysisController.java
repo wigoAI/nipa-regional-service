@@ -208,9 +208,28 @@ public class SubjectAnalysisController {
                 cloudKeywordCount = 100;
             }
 
+            Properties snaProperties = null;
+            if(request.has("sna_use_count")){
+
+                snaProperties = new Properties();
+
+                snaProperties.put("use_count", request.getInt("sna_use_count"));
+            }
+            if(request.has("sna_source_count")){
+                if(snaProperties == null){
+                    snaProperties = new Properties();
+                }
+                snaProperties.put("source_count", request.getInt("sna_source_count"));
+            }
+            if(request.has("sna_target_count")){
+                if(snaProperties == null){
+                    snaProperties = new Properties();
+                }
+                snaProperties.put("target_count", request.getInt("sna_target_count"));
+            }
 
             isAnalysis.set(false);
-            keyword(resultObj, endCallback, groups, 0, startTime, endTime, standardTime, keywordJson, parameterMap, keywordAnalysis, ymdList, cloudKeywordCount);
+            keyword(resultObj, endCallback, groups, 0, startTime, endTime, standardTime, keywordJson, parameterMap, keywordAnalysis, ymdList, cloudKeywordCount, snaProperties);
             try {
                 long analysisTime = System.currentTimeMillis() - analysisStartTime;
                 //최대 대기 시간
@@ -238,7 +257,7 @@ public class SubjectAnalysisController {
 
     private void keyword(final JSONObject resultObj, final ObjectCallback callback, final ChannelGroup[] groups, final int groupIndex
             , final long startTime, final long endTime, final long standardTime, final String keywordJson,  Map<String, Object> parameterMap, final KeywordAnalysis keywordAnalysis, final List<String> ymdList
-            , final int cloudKeywordCount
+            , final int cloudKeywordCount ,  Properties snaProperties
     ){
 
         ObjectCallback endCallback  = obj -> {
@@ -269,7 +288,7 @@ public class SubjectAnalysisController {
                     return;
                 }
 
-                keyword(resultObj, callback, groups, groupIndex +1, startTime, endTime, standardTime, keywordJson, parameterMap, keywordAnalysis, ymdList, cloudKeywordCount);
+                keyword(resultObj, callback, groups, groupIndex +1, startTime, endTime, standardTime, keywordJson, parameterMap, keywordAnalysis, ymdList, cloudKeywordCount, snaProperties);
             }catch(Exception e){
 
                 if(obj == null){
@@ -288,12 +307,20 @@ public class SubjectAnalysisController {
         modules[0] = KeywordAnalysis.Module.TF_WORD;
         modules[1] = KeywordAnalysis.Module.SNA_LITE;
 
+
+
         Map<KeywordAnalysis.Module, Properties> moduleProperties = new HashMap<>();
         Properties properties = new Properties();
         properties.put("selectors","[{\"id\":\"keywords\",\"type\":\"WORD_CLASS\",\"value\":\"NOUN\"}]");
         properties.put("count", cloudKeywordCount);
         properties.put("is_trend",false);
         moduleProperties.put(KeywordAnalysis.Module.TF_WORD, properties);
+
+        if(snaProperties != null){
+            moduleProperties.put(KeywordAnalysis.Module.SNA_LITE, snaProperties);
+        }
+
+
         keywordAnalysis.keywordAnalysis(startTime, endTime, standardTime, keywordJson, keysArray, modules, moduleProperties, parameterMap, endCallback);
 
     }
