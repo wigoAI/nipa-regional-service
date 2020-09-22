@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("unused")
 public class NipaRegionalMasterNode implements MasterNodeInitializer {
 
-    private static final Logger logger = LoggerFactory.getLogger(ElasticSearchCollectService.class);
+    private static final Logger logger = LoggerFactory.getLogger(NipaRegionalMasterNode.class);
     @Override
     public void init() {
         if(Config.getBoolean(ServiceConfig.SERVICE_FLAG.key(),(Boolean)ServiceConfig.SERVICE_FLAG.defaultValue())){

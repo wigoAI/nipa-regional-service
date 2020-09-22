@@ -145,7 +145,7 @@ public class KeywordAnalysisCollectService extends Service {
                 Document document = NipaRegionalAnalysis.makeDocument(nipaContents);
 
                 IndexData indexData = IndexDataMake.getIndexDataDefault(document, Config.getInteger(KeywordConfig.MIN_SYLLABLE_LENGTH.key(),(int)KeywordConfig.MIN_SYLLABLE_LENGTH.defaultValue()));
-                indexData.putCustomData("title", nipaContents.title);
+//                indexData.putCustomData("title", nipaContents.title);
 
                 WordCount[] wordCounts = indexData.getWordCounts();
                 if(wordCounts == null || wordCounts.length == 0){

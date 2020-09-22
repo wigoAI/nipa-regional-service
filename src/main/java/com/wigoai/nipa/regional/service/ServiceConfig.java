@@ -28,10 +28,15 @@ public enum ServiceConfig {
     , COLLECT_SLEEP_SECOND("nipa.rs.collect.sleep.second",300L)
     , CONTENTS_LAST_NUM("nipa.rs.contents.last.num", null)
     , CONTENTS_MAX_LENGTH("nipa.rs.contents.max.length",7000)
-    , ELASTICSEARCH_CONTENTS_LAST_NUM("nipa.rs.elasticsearch.contents.last.num", 0L)
 
-    , ELASTICSEARCH_HOST_ADDRESS("nipa.rs.elasticsearch.host.address", "localhost")
-    , ELASTICSEARCH_PORT("nipa.rs.elasticsearch.port", 9200)
+    , ELASTICSEARCH_CONTENTS_LAST_NUM("nipa.rs.elasticsearch.contents.last.num", 0L)
+    , ELASTICSEARCH_CONNECT_INFOS ("nipa.rs.elasticsearch.connect.infos", null)
+
+//    , ELASTICSEARCH_HOST_ADDRESS("nipa.rs.elasticsearch.host.address", "localhost")
+//    , ELASTICSEARCH_PORT("nipa.rs.elasticsearch.port", 9200)
+
+    //
+
     //분야 분류
     , FIELD_CLASSIFY("nipa.rs.field.classify", null)
     

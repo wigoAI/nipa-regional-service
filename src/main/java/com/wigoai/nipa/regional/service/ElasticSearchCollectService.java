@@ -23,6 +23,8 @@ import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.moara.ara.datamining.textmining.document.Document;
 import org.moara.common.config.Config;
 import org.moara.common.data.database.jdbc.JdbcObjects;
@@ -63,19 +65,29 @@ public class ElasticSearchCollectService extends Service {
 
         DataSource dataSource = NipaRegionalAnalysis.getInstance().getDataSource();
 
+
+        JSONArray infos = new JSONArray(Config.getConfig(ServiceConfig.ELASTICSEARCH_CONNECT_INFOS.key()));
+        HttpHost [] hosts  = new HttpHost[infos.length()];
+
+
+        for (int i = 0; i < hosts.length ; i++) {
+            JSONObject info = infos.getJSONObject(i);
+            HttpHost host = new HttpHost(info.getString(""), info.getInt(""));
+            hosts[i] = host;
+        }
+
         try(
                 Connection conn = dataSource.getConnection();
                 RestHighLevelClient client = new RestHighLevelClient(
                     RestClient.builder(
-                            new HttpHost(Config.getConfig(ServiceConfig.ELASTICSEARCH_HOST_ADDRESS.key(), (String)ServiceConfig.ELASTICSEARCH_HOST_ADDRESS.defaultValue() )
-                                    ,Config.getInteger(ServiceConfig.ELASTICSEARCH_PORT.key(), (int)ServiceConfig.ELASTICSEARCH_PORT.defaultValue())
-                                    ,"http")))
+                            hosts
+                    )
+                )
         ){
 
             for(;;){
 
                 List<NipaRsContents> nipaContentsList = JdbcObjects.getObjList(conn, NipaRsContents.class, "CONTENTS_NB > " + lastNum + " ORDER BY CONTENTS_NB ASC LIMIT 0, 500");
-
                 if(nipaContentsList.size() == 0){
                     break;
                 }
@@ -93,6 +105,8 @@ public class ElasticSearchCollectService extends Service {
 
 
                     String ymd = new SimpleDateFormat("yyyyMMdd").format(new Date(nipaRsContents.postTime));
+                    jsonMap.put("post_ymd", ymd);
+                    jsonMap.put("post_epoch_millis", ymd);
 
 
 //                    jsonMap.put("reg_ymd", new SimpleDateFormat("yyyy-MM-dd").format(new Date(obj.getLong("time"))));
@@ -116,7 +130,7 @@ public class ElasticSearchCollectService extends Service {
                 commonConfig.key = ServiceConfig.ELASTICSEARCH_CONTENTS_LAST_NUM.key();
                 commonConfig.value = Long.toString(lastNum);
                 commonConfig.updateTime = System.currentTimeMillis();
-                JdbcObjects.update(commonConfig, false);
+                JdbcObjects.insertOrUpdate(commonConfig, false);
 
             }
 
