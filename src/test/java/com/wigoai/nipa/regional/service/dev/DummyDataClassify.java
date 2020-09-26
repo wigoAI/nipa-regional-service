@@ -56,8 +56,6 @@ public class DummyDataClassify {
 
         for(File file : fileList){
 
-            System.out.println();
-
             String contents = FileUtil.getFileContents(file, "UTF-8");
 
             String [] lineArray = contents.split("\n");
