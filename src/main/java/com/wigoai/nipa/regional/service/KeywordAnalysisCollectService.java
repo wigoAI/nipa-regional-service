@@ -16,21 +16,19 @@
 
 package com.wigoai.nipa.regional.service;
 
+import com.seomse.commons.utils.FileUtil;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.moara.ara.datamining.data.CodeName;
 import org.moara.ara.datamining.statistics.count.WordCount;
 import org.moara.ara.datamining.textmining.document.Document;
-import org.moara.ara.datamining.textmining.document.sentence.Sentence;
 import org.moara.common.code.CharSet;
 import org.moara.common.config.Config;
 import org.moara.common.data.database.jdbc.JdbcObjects;
-import com.seomse.commons.utils.FileUtil;
 import org.moara.common.data.database.jdbc.PrepareStatementData;
 import org.moara.common.service.Service;
 import org.moara.common.util.ExceptionUtil;
 import org.moara.engine.MoaraEngine;
-import org.moara.engine.console.EngineConsole;
 import org.moara.keyword.KeywordAnalysis;
 import org.moara.keyword.KeywordConfig;
 import org.moara.keyword.ServiceKeywordAnalysis;
@@ -78,7 +76,11 @@ public class KeywordAnalysisCollectService extends Service {
 
         engineConfig = new EngineConfig();
         engineConfig.engineCode = moaraEngine.getCode();
-        String lastNumValue = EngineConsole.getConfig(engineConfig.engineCode, ServiceConfig.CONTENTS_LAST_NUM.key());
+
+
+
+        String lastNumValue = MoaraEngine.getInstance().getConfig(ServiceConfig.CONTENTS_LAST_NUM.key());
+//                EngineConsole.getConfig(engineConfig.engineCode, ServiceConfig.CONTENTS_LAST_NUM.key());
 
         if (lastNumValue == null) {
             engineConfig.key = ServiceConfig.CONTENTS_LAST_NUM.key();
@@ -291,8 +293,7 @@ public class KeywordAnalysisCollectService extends Service {
                     detailFile = new DetailFile();
                     detailFile.filePath = IndexUtil.getDetailFilePath(keys[0]);
                     if(FileUtil.isFile(detailFile.filePath)){
-                        detailFile.lineIndex = FileUtil.getLineCount(detailFile.filePath);
-
+                        detailFile.lineIndex = (int) FileUtil.getLineCount(detailFile.filePath);
                     }else{
                         detailFile.lineIndex = 0;
                     }
@@ -302,6 +303,9 @@ public class KeywordAnalysisCollectService extends Service {
                     }
                     detailFileMap.put(keys[0], detailFile);
                 }
+
+                indexData.setDetailFilePath(detailFile.filePath);
+                indexData.setDetailLine(detailFile.lineIndex);
 
                 //파일에 쓸 데이터 추가
                 JSONObject fileValue = new JSONObject();
@@ -329,19 +333,13 @@ public class KeywordAnalysisCollectService extends Service {
                 }
                 fileValue.put("analysis_contents", nipaData.document.getAnalysisContents());
 
-                StringBuilder sb = new StringBuilder();
-                List<Sentence> sentences = nipaData.document.getSentenceList();
-                for(Sentence sentence : sentences){
-                    sb.append(";").append(sentence.getStartIndex()).append(",").append(sentence.getEndIndex()+1);
-                }
 
-                fileValue.put("sentences", sb.substring(1));
-
+                detailFile.sb.append("\n").append(fileValue.toString());
 
                 //라인 넘버 변경
                 detailFile.lineIndex++;
                 
-                if(detailFile.lineIndex > Config.getLong(KeywordConfig.DETAIL_FILE_LINE.key(), (long) KeywordConfig.DETAIL_FILE_LINE.defaultValue())){
+                if(detailFile.lineIndex >= Config.getLong(KeywordConfig.DETAIL_FILE_LINE.key(), (long) KeywordConfig.DETAIL_FILE_LINE.defaultValue())){
                     //파일에 내용을 저장하고 새로운 파일로 교체
                     //파일저장
                     if(detailFile.isFirst){
@@ -360,16 +358,18 @@ public class KeywordAnalysisCollectService extends Service {
 
             Collection<DetailFile> detailFiles = detailFileMap.values();
             for(DetailFile detailFile : detailFiles){
-                if(detailFile.isFirst){
-                    FileUtil.fileOutput(detailFile.sb.substring(1),  detailFile.filePath, false);
-                }else{
-                    FileUtil.fileOutput(detailFile.sb.toString(),  detailFile.filePath, true);
+                if(detailFile.sb.length() > 0 ) {
+
+                    if (detailFile.isFirst) {
+                        FileUtil.fileOutput(detailFile.sb.substring(1), detailFile.filePath, false);
+                    } else {
+                        FileUtil.fileOutput(detailFile.sb.toString(), detailFile.filePath, true);
+                    }
+                    detailFile.sb.setLength(0);
                 }
-                detailFile.sb.setLength(0);
             }
 
             detailFileMap.clear();
-
 
             for (NipaData nipaData : addDataList) {
                 //메모리 데이터 세팅
@@ -412,7 +412,7 @@ public class KeywordAnalysisCollectService extends Service {
     private static class DetailFile {
 
         String filePath;
-        long lineIndex;
+        int lineIndex;
         boolean isFirst = false;
         StringBuilder sb = new StringBuilder();
 
