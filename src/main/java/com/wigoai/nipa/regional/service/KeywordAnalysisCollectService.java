@@ -275,10 +275,6 @@ public class KeywordAnalysisCollectService extends Service {
             lastFileNumberMap.clear();
             ymdIdMap.clear();
 
-            engineConfig.key = ServiceConfig.CONTENTS_LAST_NUM.key();
-            engineConfig.value = Long.toString(lastNum);
-            engineConfig.updateTime = System.currentTimeMillis();
-            JdbcObjects.insertOrUpdate(engineConfig, false);
 
             Map<String, DetailFile> detailFileMap = new HashMap<>();
 
@@ -369,7 +365,13 @@ public class KeywordAnalysisCollectService extends Service {
                 }
             }
 
+            engineConfig.key = ServiceConfig.CONTENTS_LAST_NUM.key();
+            engineConfig.value = Long.toString(lastNum);
+            engineConfig.updateTime = System.currentTimeMillis();
+            JdbcObjects.insertOrUpdate(engineConfig, false);
+
             detailFileMap.clear();
+
 
             for (NipaData nipaData : addDataList) {
                 //메모리 데이터 세팅

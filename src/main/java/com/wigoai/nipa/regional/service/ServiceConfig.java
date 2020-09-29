@@ -54,6 +54,10 @@ public enum ServiceConfig {
     , POSITIVE_CODE("nipa.rs.positive.code" , "U087001")
 
     , NEGATIVE_CODE("nipa.rs.negative.code" , "U087002")
+
+
+    ,
+
     ;
 
     private final String key;
