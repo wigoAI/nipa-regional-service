@@ -68,23 +68,25 @@ public class KeywordSearchCall {
         JsonArray keywords = new JsonArray();
 
         JsonObject keyword1 = new JsonObject();
-        keyword1.addProperty("keyword", "춘천");
+        keyword1.addProperty("keyword", "춘천 환경");
         keyword1.add("in_filters",inKeywords);
         JsonObject keyword2 = new JsonObject();
-        keyword2.addProperty("keyword", "서울");
+        keyword2.addProperty("keyword", "서울 환경");
         keyword2.add("in_filters",inKeywords);
         keywords.add(keyword1);
         keywords.add(keyword2);
 
         param.add("keywords", keywords);
 
-        JsonArray channelGroups = new JsonArray();
-        channelGroups.add("media");
+        //하이라이트
+        param.addProperty("highlight_keyword", "환경 서울 춘천");
+        param.addProperty("highlight_max_length", 50);
+        param.addProperty("pre_tag", "<em>");
+        param.addProperty("post_tag", "</em>");
 
-        param.add("channel_groups", channelGroups);
         String request = gson.toJson(param);
-        String responseMessage = RestCall.postJson("http://127.0.0.1:33377/nipars/v1/search/contents",request);
-//        String responseMessage = RestCall.postJson("http://sc.wigo.ai:10014/nipars/v1/search/contents",request);
+//        String responseMessage = RestCall.postJson("http://127.0.0.1:33377/nipars/v1/search/contents",request);
+        String responseMessage = RestCall.postJson("http://sc.wigo.ai:10014/nipars/v1/search/contents",request);
 
 
         System.out.println("mills second: " + (System.currentTimeMillis() - analysisStartTime));

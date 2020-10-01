@@ -49,7 +49,7 @@ public class TimeLineCall {
         param.addProperty("end_time", endTime);
         param.addProperty("standard_time", standardTime);
         param.addProperty("start", 0);
-        param.addProperty("end", 20);
+        param.addProperty("end", 5);
         //단어 최대 건수설정 설정하지 않으면 30
 //        param.addProperty("keyword_count", 30);
 
