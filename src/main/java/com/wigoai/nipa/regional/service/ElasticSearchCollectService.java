@@ -43,6 +43,7 @@ import java.util.Map;
 
 
 /**
+ * 엘라스틱 서치 연동보류
  * 엘라스틱 서치 데이터 관리 서비스
  * @author macle
  */
@@ -115,8 +116,8 @@ public class ElasticSearchCollectService extends Service {
 
                     Document document = NipaRegionalAnalysis.makeDocument(nipaRsContents);
                     //분류결과 얻기
-                    
-                    
+
+
 
                     IndexRequest indexRequest = new IndexRequest("media")
                             .id(Long.toString(nipaRsContents.contentsNum)).source(jsonMap);

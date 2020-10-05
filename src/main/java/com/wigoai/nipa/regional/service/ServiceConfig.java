@@ -32,11 +32,7 @@ public enum ServiceConfig {
     , ELASTICSEARCH_CONTENTS_LAST_NUM("nipa.rs.elasticsearch.contents.last.num", 0L)
     , ELASTICSEARCH_CONNECT_INFOS ("nipa.rs.elasticsearch.connect.infos", null)
 
-//    , ELASTICSEARCH_HOST_ADDRESS("nipa.rs.elasticsearch.host.address", "localhost")
-//    , ELASTICSEARCH_PORT("nipa.rs.elasticsearch.port", 9200)
-
     //
-
     //분야 분류
     , FIELD_CLASSIFY("nipa.rs.field.classify", null)
     

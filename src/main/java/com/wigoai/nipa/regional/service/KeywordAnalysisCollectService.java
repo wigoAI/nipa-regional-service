@@ -240,40 +240,8 @@ public class KeywordAnalysisCollectService extends Service {
             }
 
             nipaContentsList.clear();
-            Map<String, Integer> lastFileNumberMap = new HashMap<>();
-            Set<String> ymdSet = ymdIdMap.keySet();
 
-            for (String keyYmd : ymdSet) {
-                Collection<IndexDataInfo> indexDataColl = ymdIdMap.get(keyYmd).values();
-                if (indexDataColl.size() == 0) {
-                    continue;
-                }
 
-                Integer lastNumber = lastFileNumberMap.get(keyYmd);
-                if (lastNumber == null) {
-                    lastNumber = -1;
-                }
-
-                String filePath = IndexUtil.getWriteFilePath(keyYmd, lastNumber);
-
-                File file = new File(filePath);
-                String fileName = file.getName();
-                lastFileNumberMap.put(keyYmd, IndexUtil.getFileNumber(fileName, 6));
-
-                StringBuilder sb = new StringBuilder();
-                for (IndexDataInfo data : indexDataColl) {
-                    data.indexData.setIndexFileName(fileName);
-                    JSONObject jsonObj = new JSONObject();
-                    data.indexData.setJSONObject(jsonObj);
-                    jsonObj.put(KeywordJsonIndex.INDEX_KEYS, data.keyArray);
-                    sb.append(jsonObj.toString()).append("\n");
-                }
-                FileUtil.fileOutput(sb.toString(), CharSet.UTF8, filePath, true);
-                indexDataColl.clear();
-            }
-
-            lastFileNumberMap.clear();
-            ymdIdMap.clear();
 
 
             Map<String, DetailFile> detailFileMap = new HashMap<>();
@@ -365,12 +333,46 @@ public class KeywordAnalysisCollectService extends Service {
                 }
             }
 
+
+            Map<String, Integer> lastFileNumberMap = new HashMap<>();
+            Set<String> ymdSet = ymdIdMap.keySet();
+
+            for (String keyYmd : ymdSet) {
+                Collection<IndexDataInfo> indexDataColl = ymdIdMap.get(keyYmd).values();
+                if (indexDataColl.size() == 0) {
+                    continue;
+                }
+
+                Integer lastNumber = lastFileNumberMap.get(keyYmd);
+                if (lastNumber == null) {
+                    lastNumber = -1;
+                }
+
+                String filePath = IndexUtil.getWriteFilePath(keyYmd, lastNumber);
+
+                File file = new File(filePath);
+                String fileName = file.getName();
+                lastFileNumberMap.put(keyYmd, IndexUtil.getFileNumber(fileName, 6));
+
+                StringBuilder sb = new StringBuilder();
+                for (IndexDataInfo data : indexDataColl) {
+                    data.indexData.setIndexFileName(fileName);
+                    JSONObject jsonObj = new JSONObject();
+                    data.indexData.setJSONObject(jsonObj);
+                    jsonObj.put(KeywordJsonIndex.INDEX_KEYS, data.keyArray);
+                    sb.append(jsonObj.toString()).append("\n");
+                }
+                FileUtil.fileOutput(sb.toString(), CharSet.UTF8, filePath, true);
+                indexDataColl.clear();
+            }
+
+
             engineConfig.key = ServiceConfig.CONTENTS_LAST_NUM.key();
             engineConfig.value = Long.toString(lastNum);
             engineConfig.updateTime = System.currentTimeMillis();
             JdbcObjects.insertOrUpdate(engineConfig, false);
 
-            detailFileMap.clear();
+
 
 
             for (NipaData nipaData : addDataList) {
@@ -389,6 +391,9 @@ public class KeywordAnalysisCollectService extends Service {
                 contentsGroup.addIndex(contentsIndexData);
             }
 
+            detailFileMap.clear();
+            lastFileNumberMap.clear();
+            ymdIdMap.clear();
             addDataList.clear();
 
             return true;

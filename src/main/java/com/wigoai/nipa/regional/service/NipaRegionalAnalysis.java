@@ -110,6 +110,14 @@ public class NipaRegionalAnalysis {
     public ChannelGroup getChannelGroup(String channelId){
         return channelGroupManager.getChannelGroup(channelId);
     }
+    /**
+     *
+     * @param groupId String
+     * @return ChannelGroup
+     */
+    public ChannelGroup getGroup(String groupId){
+        return channelGroupManager.getGroup(groupId);
+    }
 
     /**
      *

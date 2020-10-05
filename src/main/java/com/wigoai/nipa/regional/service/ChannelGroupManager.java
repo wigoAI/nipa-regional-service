@@ -152,13 +152,27 @@ public class ChannelGroupManager implements Synchronizer {
 
     }
 
+
+    /**
+     * ChannelGroup get
+     * @param groupId String
+     * @return ChannelGroup
+     */
+    public ChannelGroup getGroup(String groupId){
+        return groupMap.get(groupId);
+    }
+
     /**
      * ChannelGroup get
      * @param channelId String
      * @return ChannelGroup
      */
     public ChannelGroup getChannelGroup(String channelId){
-        return channelGroupMap.get(channelId);
+        ChannelGroup channelGroup =  channelGroupMap.get(channelId);
+        if(channelGroup == null){
+            return defaultGroup;
+        }
+        return channelGroup;
     }
 
     /**
@@ -169,10 +183,4 @@ public class ChannelGroupManager implements Synchronizer {
         return groups;
     }
 
-    /**
-     * @return ChannelGroup
-     */
-    public ChannelGroup getDefaultGroup() {
-        return defaultGroup;
-    }
 }

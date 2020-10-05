@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * 마스터 노드에서 실행 시켜야 할 내용 정의
- *
+ * 엘라스틱 서치 연동 보류
  * @author macle
  */
 @SuppressWarnings("unused")
@@ -34,7 +34,7 @@ public class NipaRegionalMasterNode implements MasterNodeInitializer {
     public void init() {
         if(Config.getBoolean(ServiceConfig.SERVICE_FLAG.key(),(Boolean)ServiceConfig.SERVICE_FLAG.defaultValue())){
             //개발 미완료에 따른 주석처리
-            
+
 //            ElasticSearchCollectService elasticSearchCollectService = new ElasticSearchCollectService();
 //            elasticSearchCollectService.setSleepTime(Config.getLong(ServiceConfig.COLLECT_SLEEP_SECOND.key(), ((long)ServiceConfig.COLLECT_SLEEP_SECOND.defaultValue() )* 1000L));
 //            elasticSearchCollectService.setState(Service.State.START);

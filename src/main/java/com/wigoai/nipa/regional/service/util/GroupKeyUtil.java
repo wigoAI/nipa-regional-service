@@ -34,23 +34,38 @@ public class GroupKeyUtil {
      * @return String [] []
      */
     public static String [][] makeKeysArray(List<String> ymdList,  ChannelGroup[] groups){
+        String [] groupIds = new String[groups.length];
 
-        int size = ymdList.size()*groups.length;
+        for (int i = 0; i < groups.length ; i++) {
+            groupIds[i] = groups[i].getId();
+        }
 
+        return makeKeysArray(ymdList, groupIds);
+    }
+
+    /**
+     * keys 생성
+     * @param ymdList List
+     * @param groupIds String []
+     * @return String [] []
+     */
+    public static String [][] makeKeysArray(List<String> ymdList,  String [] groupIds){
+        int size = ymdList.size()*groupIds.length;
         String [][] keysArray = new String[size][2];
 
         int index = 0;
         for(String ymd : ymdList){
-            for (ChannelGroup group : groups) {
+            for (String groupId : groupIds) {
                 String[] key = new String[2];
                 key[0] = ymd;
-                key[1] = group.getId();
+                key[1] = groupId;
                 keysArray[index++] = key;
             }
         }
 
         return keysArray;
     }
+
 
     /**
      * keys 생성
@@ -66,7 +81,6 @@ public class GroupKeyUtil {
             key[1] = groupId;
             keysArray[i] = key;
         }
-
 
         return keysArray;
     }

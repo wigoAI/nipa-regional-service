@@ -25,6 +25,7 @@ import com.wigoai.nipa.regional.service.ChannelGroup;
 import com.wigoai.nipa.regional.service.NipaRegionalAnalysis;
 import com.wigoai.nipa.regional.service.ServiceConfig;
 import com.wigoai.nipa.regional.service.util.GroupKeyUtil;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.moara.ara.datamining.data.CodeName;
 import org.moara.common.config.Config;
@@ -35,6 +36,7 @@ import org.moara.keyword.ServiceKeywordAnalysis;
 import org.moara.keyword.index.IndexData;
 import org.moara.keyword.index.IndexUtil;
 import org.moara.keyword.search.data.SearchData;
+import org.moara.keyword.search.data.SearchHighlight;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
@@ -77,15 +79,12 @@ public class DataSearchDataController {
                 return nullResult;
             }
 
-
             IndexData [] searchArray = searchData.getDataArray();
-
 
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             JsonObject response = new JsonObject();
             response.addProperty("total", searchArray.length);
             String classifyCode = Config.getConfig(ServiceConfig.FIELD_CLASSIFY.key());
-
 
             IndexData[] subArray = IndexUtil.subData(searchArray, request.getInt("start") , request.getInt("end"));
             JsonArray dataArray = new JsonArray();
@@ -103,8 +102,7 @@ public class DataSearchDataController {
                     classifies.add(classifyObj);
 
                 }
-
-
+                obj.remove("analysis_contents");
 
                 obj.add("classifies", classifies);
                 dataArray.add(obj);
@@ -143,9 +141,38 @@ public class DataSearchDataController {
             IndexData[] subArray = IndexUtil.subData(searchArray, request.getInt("start") , request.getInt("end"));
             JsonArray dataArray = new JsonArray();
 
+            String preTag;
+            if(request.has("pre_tag")){
+                preTag = request.getString("pre_tag");
+            }else{
+                preTag ="<em>";
+            }
+
+            String postTag;
+            if(request.has("post_tag")){
+                postTag = request.getString("post_tag");
+            }else{
+                postTag ="</em>";
+            }
+
+            int maxLength;
+            if(request.has("highlight_max_length")){
+                maxLength = request.getInt("highlight_max_length");
+            }else{
+                maxLength = 120;
+            }
+
+
+            String [] highlightKeywords = request.getString("highlight_keyword").trim().split(" ");
+
+
             for(IndexData data : subArray){
                 JsonObject obj =  makeObj(gson, data);
-
+                
+                //분석 정보를 가져와서 하이라이트 정보 생성하기
+                String analysisContents = obj.remove("analysis_contents").getAsString();
+                obj.addProperty("highlight", SearchHighlight.highlight(data, analysisContents, highlightKeywords , preTag, postTag, maxLength).replace('\n', ' ' ));
+                
                 dataArray.add(obj);
             }
 
@@ -159,14 +186,15 @@ public class DataSearchDataController {
     }
 
     private JsonObject makeObj(Gson gson, IndexData data){
-
         JsonObject obj =  gson.fromJson(FileUtil.getLine(data.getDetailFilePath(), data.getDetailLine()),JsonObject.class);
-        obj.addProperty("id", data.getId());
-//        obj.remove("analysis_contents");
 
+
+        String channelGroupId = data.getIndexKeys()[1];
+        obj.addProperty("channel_group_id", channelGroupId);
+        obj.addProperty("channel_group_nm", NipaRegionalAnalysis.getInstance().getGroup(channelGroupId).getName());
+        obj.addProperty("id", data.getId());
         return obj;
     }
-
 
     /**
      * 데이터 검색겱과 얻기
@@ -185,13 +213,24 @@ public class DataSearchDataController {
         String startYmd =  new SimpleDateFormat("yyyyMMdd").format(new Date(startTime));
         String endYmd =  new SimpleDateFormat("yyyyMMdd").format(new Date(endTime-1));
 
-        NipaRegionalAnalysis nipaRegionalAnalysis = NipaRegionalAnalysis.getInstance();
-        ChannelGroup[] groups = nipaRegionalAnalysis.getGroups();
-
+        String [] groupIds;
+        if(request.has("channel_groups")){
+            JSONArray ids = request.getJSONArray("channel_groups");
+            groupIds = new String[ids.length()];
+            for (int i = 0; i <groupIds.length ; i++) {
+                groupIds[i] = ids.getString(i);
+            }
+        }else{
+            NipaRegionalAnalysis nipaRegionalAnalysis = NipaRegionalAnalysis.getInstance();
+            ChannelGroup[] groups = nipaRegionalAnalysis.getGroups();
+            groupIds = new String[groups.length];
+            for (int i = 0; i <groupIds.length ; i++) {
+                groupIds[i] = groups[i].getId();
+            }
+        }
         List<String> ymdList = YmdUtil.getYmdList(startYmd,endYmd);
-        String [][] keysArray = GroupKeyUtil.makeKeysArray(ymdList, groups);
+        String [][] keysArray = GroupKeyUtil.makeKeysArray(ymdList, groupIds);
         return  keywordAnalysis.dataSearch(startTime, endTime, standardTime, request.getJSONArray("keywords").toString(),keysArray , analysisMaxTime);
 
     }
-
 }
