@@ -247,7 +247,7 @@ public class IntegratedAnalysisController {
     private void keyword(final JSONObject resultObj, final ObjectCallback callback, final ChannelGroup[] groups, final int groupIndex
             , final long startTime, final long endTime, final long standardTime, final String keywordJson,  Map<String, Object> parameterMap, final KeywordAnalysis keywordAnalysis, final List<String> ymdList
             , final String inCodesValue
-            , final int keywordCOunt
+            , final int keywordCount
             , final boolean isFieldClassify
     ){
 
@@ -278,7 +278,7 @@ public class IntegratedAnalysisController {
                     return;
                 }
 
-                keyword(resultObj, callback, groups, groupIndex +1, startTime, endTime, standardTime, keywordJson, parameterMap, keywordAnalysis, ymdList, inCodesValue, keywordCOunt, isFieldClassify);
+                keyword(resultObj, callback, groups, groupIndex +1, startTime, endTime, standardTime, keywordJson, parameterMap, keywordAnalysis, ymdList, inCodesValue, keywordCount, isFieldClassify);
             }catch(Exception e){
 
                 if(obj == null){
@@ -315,7 +315,7 @@ public class IntegratedAnalysisController {
 
         Properties properties = new Properties();
         properties.put("selectors","[{\"id\":\"keywords\",\"type\":\"WORD_CLASS\",\"value\":\"NOUN\"}]");
-        properties.put("count", keywordCOunt);
+        properties.put("count", keywordCount);
 
         moduleProperties.put(KeywordAnalysis.Module.TF_WORD, properties);
 

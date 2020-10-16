@@ -44,15 +44,9 @@ public enum ServiceConfig {
     //분석 최대시간
     , ANALYSIS_MAX_TIME("nipa.rs.analysis.max.time",600000L)
 
-    , CHANNEL_DEFAULT("nipa.rs.channel.default", "community")
-
-//
     , POSITIVE_CODE("nipa.rs.positive.code" , "U087001")
 
     , NEGATIVE_CODE("nipa.rs.negative.code" , "U087002")
-
-
-    ,
 
     ;
 
