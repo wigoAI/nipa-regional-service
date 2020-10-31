@@ -56,6 +56,7 @@ public class ClassifyAnalysisCall {
                 "보건위생"
                 , "재난안전"
                 , "건설교통"
+                , "기타"
 
         };
 
@@ -69,13 +70,13 @@ public class ClassifyAnalysisCall {
         JsonArray keywords = new JsonArray();
 
         JsonObject keyword1 = new JsonObject();
-        keyword1.addProperty("keyword", "춘천");
+        keyword1.addProperty("keyword", "강남");
         keyword1.add("in_filters",inKeywords);
         JsonObject keyword2 = new JsonObject();
         keyword2.addProperty("keyword", "서울");
         keyword2.add("in_filters",inKeywords);
         JsonObject keyword3 = new JsonObject();
-        keyword3.addProperty("keyword", "강원도");
+        keyword3.addProperty("keyword", "환경");
         keyword3.add("in_filters",inKeywords);
 
 
@@ -85,6 +86,12 @@ public class ClassifyAnalysisCall {
 
 
         param.add("keywords", keywords);
+
+
+//        JsonArray keywords = new JsonArray();
+//        keywords.add("서울");
+//        param.add("keywords", keywords);
+
 
         JsonArray classifyNames = new JsonArray();
         for(String classifyName : classifyNameArray){

@@ -142,7 +142,6 @@ public class IntegratedAnalysisController {
             moduleProperties.put(KeywordAnalysis.Module.TF_CLASSIFY, properties);
 
 
-            boolean isFieldClassify = true;
 
             StringBuilder sourceBuilder =new StringBuilder();
             if(request.has("classify_names") ){
@@ -155,8 +154,6 @@ public class IntegratedAnalysisController {
                     }
                     sourceBuilder.append(",").append(code);
                 }
-                isFieldClassify = false;
-
             }else{
                 String [] fieldCodes = nipaRegionalAnalysis.getFieldCodes();
                 for(String code : fieldCodes){
@@ -212,12 +209,7 @@ public class IntegratedAnalysisController {
             //2번째 결과 호출
             isAnalysis.set(false);
 
-            String [] fieldCodes = nipaRegionalAnalysis.getFieldCodes();
-            StringBuilder fieldBuilder = new StringBuilder();
-            for(String code : fieldCodes){
-                fieldBuilder.append(",").append(code);
-            }
-            keyword(resultObj, endCallback, groups, 0, startTime, endTime, standardTime, keywordJson, parameterMap, keywordAnalysis, ymdList, fieldBuilder.substring(1), keywordCount, isFieldClassify);
+            keyword(resultObj, endCallback, groups, 0, startTime, endTime, standardTime, keywordJson, parameterMap, keywordAnalysis, ymdList, sourceBuilder.substring(1), keywordCount);
 
 
             try {
@@ -248,7 +240,6 @@ public class IntegratedAnalysisController {
             , final long startTime, final long endTime, final long standardTime, final String keywordJson,  Map<String, Object> parameterMap, final KeywordAnalysis keywordAnalysis, final List<String> ymdList
             , final String inCodesValue
             , final int keywordCount
-            , final boolean isFieldClassify
     ){
 
         ObjectCallback endCallback  = obj -> {
@@ -278,7 +269,7 @@ public class IntegratedAnalysisController {
                     return;
                 }
 
-                keyword(resultObj, callback, groups, groupIndex +1, startTime, endTime, standardTime, keywordJson, parameterMap, keywordAnalysis, ymdList, inCodesValue, keywordCount, isFieldClassify);
+                keyword(resultObj, callback, groups, groupIndex +1, startTime, endTime, standardTime, keywordJson, parameterMap, keywordAnalysis, ymdList, inCodesValue, keywordCount);
             }catch(Exception e){
 
                 if(obj == null){
@@ -293,27 +284,18 @@ public class IntegratedAnalysisController {
         String [][] keysArray = GroupKeyUtil.makeKeysArray(ymdList,  groups[groupIndex].getId());
 
         KeywordAnalysis.Module [] modules;
-        if(isFieldClassify){
-            modules = new KeywordAnalysis.Module[2];
-            modules[0] = KeywordAnalysis.Module.TF_WORD;
-            modules[1] = KeywordAnalysis.Module.TF_CLASSIFY;
-
-        }else{
-            modules = new KeywordAnalysis.Module[1];
-            modules[0] = KeywordAnalysis.Module.TF_WORD;
-
-        }
+        modules = new KeywordAnalysis.Module[2];
+        modules[0] = KeywordAnalysis.Module.TF_WORD;
+        modules[1] = KeywordAnalysis.Module.TF_CLASSIFY;
 
 
         Map<KeywordAnalysis.Module, Properties> moduleProperties = new HashMap<>();
-        if(isFieldClassify) {
-            Properties properties = new Properties();
-            properties.put("in_codes", inCodesValue);
-            properties.put("is_trend", false);
-            moduleProperties.put(KeywordAnalysis.Module.TF_CLASSIFY, properties);
-        }
-
         Properties properties = new Properties();
+        properties.put("in_codes", inCodesValue);
+        properties.put("is_trend", false);
+        moduleProperties.put(KeywordAnalysis.Module.TF_CLASSIFY, properties);
+
+        properties = new Properties();
         properties.put("selectors","[{\"id\":\"keywords\",\"type\":\"WORD_CLASS\",\"value\":\"NOUN\"}]");
         properties.put("count", keywordCount);
 
