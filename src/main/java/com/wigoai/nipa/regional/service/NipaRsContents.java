@@ -22,7 +22,7 @@ import org.moara.common.data.database.annotation.DateTime;
 import org.moara.common.data.database.annotation.PrimaryKey;
 
 /**
- * contetns 정보
+ * contents 정보
  * @author macle
  */
 @Table(name="T_CRAWLING_CONTENTS")
@@ -33,7 +33,7 @@ public class NipaRsContents {
     @Column(name = "CONTENTS_NO")
     long contentsNum;
 
-    @Column(name = "CHANNEL_ID")
+    @Column(name = "API_CHANNEL_ID")
     String channelId;
 
     @Column(name = "TITLE")
@@ -46,9 +46,11 @@ public class NipaRsContents {
     @Column(name = "POST_DT")
     Long postTime;
 
-
     @Column(name = "ORIGINAL_URL")
     String originalUrl;
+
+    @Column(name = "SEQ_NO")
+    long seqNum;
 
     /**
      * 컨텐츠 번호 설정

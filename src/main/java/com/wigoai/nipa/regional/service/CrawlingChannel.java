@@ -25,10 +25,10 @@ import org.moara.common.data.database.annotation.PrimaryKey;
  * 크롤링 채널정보
  * @author macle
  */
-@Table(name="T_CRAWLING_CHANNEL")
+@Table(name="T_CRAWLING_CLIENT_CHANNEL")
 public class CrawlingChannel {
     @PrimaryKey(seq = 1)
-    @Column(name = "CHANNEL_ID")
+    @Column(name = "API_CHANNEL_ID")
     String id;
 
     @Column(name = "CHANNEL_NM")

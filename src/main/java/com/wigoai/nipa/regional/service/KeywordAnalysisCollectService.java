@@ -119,19 +119,19 @@ public class KeywordAnalysisCollectService extends Service {
     boolean collectToMakeIndex() {
 
         //개발용 임시소스 (분류모델 생성 전 더미데이터)
-        CodeName[] emotionArray = new CodeName[3];
-        emotionArray[0] = new CodeName("U716001","긍정");
-        emotionArray[1] = new CodeName("U716002","중립");
-        emotionArray[2] = new CodeName("U716003","부정");
-        CodeName [] classifies = new CodeName[7];
-        classifies[0] = new CodeName("U718001","보건위생");
-        classifies[1] = new CodeName("U718002","재난안전");
-        classifies[2] = new CodeName("U718003","청소환경");
-        classifies[3] = new CodeName("U718004","건설교통");
-        classifies[4] = new CodeName("U718005","교육");
-        classifies[5] = new CodeName("U718006","경제산업");
-        classifies[6] = new CodeName("U718007","기타");
-        Random random = new Random();
+//        CodeName[] emotionArray = new CodeName[3];
+//        emotionArray[0] = new CodeName("U716001","긍정");
+//        emotionArray[1] = new CodeName("U716002","중립");
+//        emotionArray[2] = new CodeName("U716003","부정");
+//        CodeName [] classifies = new CodeName[7];
+//        classifies[0] = new CodeName("U718001","보건위생");
+//        classifies[1] = new CodeName("U718002","재난안전");
+//        classifies[2] = new CodeName("U718003","청소환경");
+//        classifies[3] = new CodeName("U718004","건설교통");
+//        classifies[4] = new CodeName("U718005","교육");
+//        classifies[5] = new CodeName("U718006","경제산업");
+//        classifies[6] = new CodeName("U718007","기타");
+//        Random random = new Random();
 
         String emotionClassify = Config.getConfig(ServiceConfig.EMOTION_CLASSIFY.key());
 
@@ -158,7 +158,7 @@ public class KeywordAnalysisCollectService extends Service {
             }
 
 
-            List<NipaRsContents> nipaContentsList = JdbcObjects.getObjList(conn, NipaRsContents.class, "CONTENTS_NO > " + lastNum + " ORDER BY CONTENTS_NO ASC LIMIT 0, 500");
+            List<NipaRsContents> nipaContentsList = JdbcObjects.getObjList(conn, NipaRsContents.class, "SEQ_NO > " + lastNum + " ORDER BY SEQ_NO ASC LIMIT 0, 500");
 
             if (nipaContentsList.size() == 0) {
                 logger.debug("data size 0 sleep");
@@ -166,7 +166,7 @@ public class KeywordAnalysisCollectService extends Service {
             }
 
             logger.debug("data size: " + nipaContentsList.size());
-            lastNum = nipaContentsList.get(nipaContentsList.size() - 1).contentsNum;
+            lastNum = nipaContentsList.get(nipaContentsList.size() - 1).seqNum;
             //인 메모리 데이터 생성
             KeywordAnalysis keywordAnalysis = ServiceKeywordAnalysis.getInstance().getKeywordAnalysis();
 
@@ -199,10 +199,10 @@ public class KeywordAnalysisCollectService extends Service {
                 }
 
                 //개발용 임시소스 (분류모델 생성 전 더미데이터)
-                CodeName [] codeNames = new CodeName[2];
-                codeNames[0] = emotionArray[random.nextInt(emotionArray.length)];
-                codeNames[1] = classifies[random.nextInt(classifies.length)];
-                indexData.setClassifies(codeNames);
+//                CodeName [] codeNames = new CodeName[2];
+//                codeNames[0] = emotionArray[random.nextInt(emotionArray.length)];
+//                codeNames[1] = classifies[random.nextInt(classifies.length)];
+//                indexData.setClassifies(codeNames);
 
 
                 String ymd = new SimpleDateFormat("yyyyMMdd").format(new Date(nipaContents.postTime));
