@@ -32,10 +32,7 @@ import org.moara.engine.MoaraEngine;
 import org.moara.keyword.KeywordAnalysis;
 import org.moara.keyword.KeywordConfig;
 import org.moara.keyword.ServiceKeywordAnalysis;
-import org.moara.keyword.index.IndexData;
-import org.moara.keyword.index.IndexDataMake;
-import org.moara.keyword.index.IndexUtil;
-import org.moara.keyword.index.KeywordJsonIndex;
+import org.moara.keyword.index.*;
 import org.moara.keyword.search.ContentsGroup;
 import org.moara.keyword.search.ContentsIndexData;
 import org.moara.meta.MetaDataUtil;
@@ -51,7 +48,7 @@ import java.util.*;
  * 키워드 분석용 수집 서비스
  * @author macle
  */
-public class KeywordAnalysisCollectService extends Service {
+public class KeywordAnalysisCollectService extends Service implements ReIndexWait{
 
     private static final Logger logger = LoggerFactory.getLogger(KeywordAnalysisCollectService.class);
 
@@ -100,8 +97,9 @@ public class KeywordAnalysisCollectService extends Service {
     @Override
     public void work() {
 
-        for (; ; ) {
+        for (;;) {
             if (!collectToMakeIndex()) {
+                ServiceKeywordAnalysis.getInstance().getKeywordAnalysis().setIndex(null, null);
                 break;
             }
         }
@@ -110,6 +108,11 @@ public class KeywordAnalysisCollectService extends Service {
     private long lastNum;
 
     private long channelUpdateTime = 0L;
+
+
+    private final Object collectLock = new Object();
+
+    private boolean isCollect = false;
 
     /**
      * 데이터 수집 하여 index 정보 생성
@@ -132,6 +135,9 @@ public class KeywordAnalysisCollectService extends Service {
 //        classifies[5] = new CodeName("U718006","경제산업");
 //        classifies[6] = new CodeName("U718007","기타");
 //        Random random = new Random();
+
+
+
 
         String emotionClassify = Config.getConfig(ServiceConfig.EMOTION_CLASSIFY.key());
 
@@ -157,12 +163,27 @@ public class KeywordAnalysisCollectService extends Service {
                 channelList.clear();
             }
 
-
             List<NipaRsContents> nipaContentsList = JdbcObjects.getObjList(conn, NipaRsContents.class, "SEQ_NO > " + lastNum + " ORDER BY SEQ_NO ASC LIMIT 0, 500");
-
             if (nipaContentsList.size() == 0) {
                 logger.debug("data size 0 sleep");
                 return false;
+            }
+
+            ReIndex reIndex = ReIndex.getInstance();
+            try{
+                while (reIndex.isRun()) {
+                    logger.debug("reindex running sleep");
+                    //noinspection BusyWait
+                    Thread.sleep(5000);
+                }
+            }catch (Exception e){
+                logger.error(ExceptionUtil.getStackTrace(e));
+                return false;
+            }
+
+            //리인덱스 실행중인지체크 로직
+            synchronized (collectLock) {
+                isCollect = true;
             }
 
             logger.debug("data size: " + nipaContentsList.size());
@@ -240,9 +261,6 @@ public class KeywordAnalysisCollectService extends Service {
             }
 
             nipaContentsList.clear();
-
-
-
 
             Map<String, DetailFile> detailFileMap = new HashMap<>();
 
@@ -373,8 +391,6 @@ public class KeywordAnalysisCollectService extends Service {
             JdbcObjects.insertOrUpdate(engineConfig, false);
 
 
-
-
             for (NipaData nipaData : addDataList) {
                 //메모리 데이터 세팅
                 IndexData indexData = nipaData.indexData;
@@ -396,11 +412,22 @@ public class KeywordAnalysisCollectService extends Service {
             ymdIdMap.clear();
             addDataList.clear();
 
+            synchronized (collectLock) {
+                isCollect = false;
+            }
             return true;
 
         } catch (Exception e) {
             logger.error(ExceptionUtil.getStackTrace(e));
+            isCollect = false;
             return false;
+        }
+    }
+
+    @Override
+    public boolean isWait() {
+        synchronized (collectLock) {
+           return isCollect;
         }
     }
 

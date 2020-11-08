@@ -32,10 +32,10 @@ public class KeywordSearchCall {
         long analysisStartTime = System.currentTimeMillis();
 
         //7월 20일부터
-        long startTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20200720 00:00:00").getTime();
+        long startTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20201101 00:00:00").getTime();
 
         //7월 25일 전까지 (7월24일까지)
-        long endTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20200725 00:00:00").getTime();
+        long endTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20201105 00:00:00").getTime();
 
         //기준시는 반드시 통계 결과에서 사용한 값을 이용해야함.
         long standardTime = System.currentTimeMillis();
@@ -67,14 +67,16 @@ public class KeywordSearchCall {
         //키워드설정
         JsonArray keywords = new JsonArray();
 
-        JsonObject keyword1 = new JsonObject();
-        keyword1.addProperty("keyword", "춘천 환경");
-        keyword1.add("in_filters",inKeywords);
-        JsonObject keyword2 = new JsonObject();
-        keyword2.addProperty("keyword", "서울 환경");
-        keyword2.add("in_filters",inKeywords);
-        keywords.add(keyword1);
-        keywords.add(keyword2);
+//        JsonObject keyword1 = new JsonObject();
+//        keyword1.addProperty("keyword", "춘천 환경");
+//        keyword1.add("in_filters",inKeywords);
+//        JsonObject keyword2 = new JsonObject();
+//        keyword2.addProperty("keyword", "서울 환경");
+//        keyword2.add("in_filters",inKeywords);
+//        keywords.add(keyword1);
+//        keywords.add(keyword2);
+
+        keywords.add("춘천");
 
         param.add("keywords", keywords);
 
