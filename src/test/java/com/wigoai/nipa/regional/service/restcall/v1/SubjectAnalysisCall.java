@@ -36,7 +36,7 @@ public class SubjectAnalysisCall {
         long startTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20200720 00:00:00").getTime();
 
         //7월 25일 전까지 (7월24일까지)
-        long endTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20200925 00:00:00").getTime();
+        long endTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20200930 00:00:00").getTime();
 
         long standardTime = System.currentTimeMillis();
 
@@ -71,7 +71,7 @@ public class SubjectAnalysisCall {
 
         JsonArray keywords = new JsonArray();
         JsonObject keyword1 = new JsonObject();
-        keyword1.addProperty("keyword", "춘천시");
+        keyword1.addProperty("keyword", "춘천");
         keyword1.add("in_filters",inFilters);
         keywords.add(keyword1);
         param.add("keywords", keywords);

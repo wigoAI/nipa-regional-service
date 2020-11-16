@@ -17,12 +17,11 @@
 package com.wigoai.nipa.regional.service;
 
 import com.seomse.commons.utils.FileUtil;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.moara.ara.datamining.data.CodeName;
 import org.moara.ara.datamining.statistics.count.WordCount;
+import org.moara.ara.datamining.textmining.api.document.DocumentStandardKey;
 import org.moara.ara.datamining.textmining.document.Document;
-import org.moara.common.code.CharSet;
 import org.moara.common.config.Config;
 import org.moara.common.data.database.jdbc.JdbcObjects;
 import org.moara.common.data.database.jdbc.PrepareStatementData;
@@ -57,6 +56,8 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
 
     private final Map<String, String> channelNameMap = new HashMap<>();
 
+    ReIndexDetail reIndexDetail;
+
     /**
      * 생성자
      */
@@ -70,6 +71,27 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
             throw new RuntimeException(errorMessage);
 
         }
+
+        String emotionClassify = Config.getConfig(ServiceConfig.EMOTION_CLASSIFY.key());
+        reIndexDetail = (detailObj, document, indexData) -> {
+
+
+            CodeName[] emotionClassifies = indexData.getClassifies();
+            CodeName emotionCodeName = null;
+            for(CodeName codeName : emotionClassifies){
+                if(codeName.getCode().startsWith(emotionClassify)){
+                    emotionCodeName = codeName;
+                    break;
+                }
+            }
+
+            if(emotionCodeName == null) {
+                detailObj.put("emotion_name", "중립");
+            }else{
+                detailObj.put("emotion_name", emotionCodeName.getName());
+            }
+            return null;
+        };
 
         engineConfig = new EngineConfig();
         engineConfig.engineCode = moaraEngine.getCode();
@@ -191,7 +213,6 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
             //인 메모리 데이터 생성
             KeywordAnalysis keywordAnalysis = ServiceKeywordAnalysis.getInstance().getKeywordAnalysis();
 
-            Map<String, Map<String, IndexDataInfo>> ymdIdMap = new HashMap<>();
 
             long time = System.currentTimeMillis();
 
@@ -238,66 +259,60 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
                 }
                 indexData.setIndexKeys(keys);
 
-                //파일 데이터 저장용 생성
-                Map<String, IndexDataInfo> idMap = ymdIdMap.computeIfAbsent(ymd, k -> new HashMap<>());
-
-                JSONArray keyArray = new JSONArray();
-                for (String indexKey : keys) {
-                    keyArray.put(indexKey);
-                }
-
-                String id = Long.toString(nipaContents.contentsNum);
-
-                IndexDataInfo info = new IndexDataInfo();
-                info.indexData = indexData;
-                info.keyArray = keyArray;
-                idMap.put(id, info);
 
                 NipaData nipaData = new NipaData();
                 nipaData.indexData = indexData;
                 nipaData.nipaContents = nipaContents;
                 nipaData.document = document;
+
                 addDataList.add(nipaData);
             }
 
             nipaContentsList.clear();
 
-            Map<String, DetailFile> detailFileMap = new HashMap<>();
+            Map<String, IndexFile> indexFileMap = new HashMap<>();
 
             for (NipaData nipaData : addDataList) {
                 //상세파일저장
                 IndexData indexData = nipaData.indexData;
 
                 String[] keys = indexData.getIndexKeys();
-                DetailFile detailFile = detailFileMap.get(keys[0]);
+                IndexFile indexFile = indexFileMap.get(keys[0]);
 
-                if(detailFile == null){
-                    detailFile = new DetailFile();
-                    detailFile.filePath = IndexUtil.getDetailFilePath(keys[0]);
-                    if(FileUtil.isFile(detailFile.filePath)){
-                        detailFile.lineIndex = (int) FileUtil.getLineCount(detailFile.filePath);
+                if(indexFile == null){
+                    indexFile = new IndexFile();
+                    indexFile.filePath = IndexUtil.getWriteFilePath(keys[0], -1);
+                    if(FileUtil.isFile(indexFile.filePath)){
+                        indexFile.lineIndex = (int) FileUtil.getLineCount(indexFile.filePath);
                     }else{
-                        detailFile.lineIndex = 0;
+                        indexFile.lineIndex = 0;
                     }
 
-                    if(detailFile.lineIndex == 0){
-                        detailFile.isFirst = true;
+                    if(indexFile.lineIndex == 0){
+                        indexFile.isFirst = true;
                     }
-                    detailFileMap.put(keys[0], detailFile);
+                    indexFileMap.put(keys[0], indexFile);
                 }
 
-                indexData.setDetailFilePath(detailFile.filePath);
-                indexData.setDetailLine(detailFile.lineIndex);
+                indexData.setIndexFileName(indexFile.filePath);
+                indexData.setIndexFileLine(indexFile.lineIndex);
 
-                //파일에 쓸 데이터 추가
-                JSONObject fileValue = new JSONObject();
-                fileValue.put("title", nipaData.nipaContents.title);
-                fileValue.put("contents", nipaData.nipaContents.contents);
-                fileValue.put("channel_id", nipaData.nipaContents.channelId);
-                fileValue.put("channel_name", channelNameMap.get(nipaData.nipaContents.channelId));
-                fileValue.put("post_time", nipaData.nipaContents.postTime);
-                fileValue.put("post_ymd_hm", new SimpleDateFormat("yyyyMMdd hh:mm").format(new Date(nipaData.nipaContents.postTime)));
-                fileValue.put("original_url", nipaData.nipaContents.originalUrl);
+                JSONObject jsonObj = new JSONObject();
+                indexData.setJSONObject(jsonObj);
+
+                JSONObject detailObj = jsonObj.getJSONObject(IndexData.Keys.DETAIL.key());
+                detailObj.put(IndexData.Keys.ANALYSIS_CONTENTS.key(), nipaData.document.getAnalysisContents());
+
+                detailObj.put(DocumentStandardKey.TITLE.key(), nipaData.nipaContents.title);
+                detailObj.put(DocumentStandardKey.CONTENTS.key(), nipaData.nipaContents.contents);
+                detailObj.put(DocumentStandardKey.LANG_CODE.key(), nipaData.document.getLangCode());
+                detailObj.put(DocumentStandardKey.DOC_TYPE.key(), nipaData.document.getDocType());
+
+                detailObj.put("channel_id", nipaData.nipaContents.channelId);
+                detailObj.put("channel_name", channelNameMap.get(nipaData.nipaContents.channelId));
+                detailObj.put("post_time", nipaData.nipaContents.postTime);
+                detailObj.put("post_ymd_hm", new SimpleDateFormat("yyyyMMdd hh:mm").format(new Date(nipaData.nipaContents.postTime)));
+                detailObj.put("original_url", nipaData.nipaContents.originalUrl);
 
                 CodeName[] emotionClassifies = indexData.getClassifies();
                 CodeName emotionCodeName = null;
@@ -309,79 +324,48 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
                 }
 
                 if(emotionCodeName == null) {
-                    fileValue.put("emotion_name", "중립");
+                    detailObj.put("emotion_name", "중립");
                 }else{
-                    fileValue.put("emotion_name", emotionCodeName.getName());
+                    detailObj.put("emotion_name", emotionCodeName.getName());
                 }
-                fileValue.put("analysis_contents", nipaData.document.getAnalysisContents());
 
 
-                detailFile.sb.append("\n").append(fileValue.toString());
+                jsonObj.put(IndexData.Keys.DETAIL.key(), detailObj);
+
+                indexFile.sb.append('\n').append(jsonObj.toString());
 
                 //라인 넘버 변경
-                detailFile.lineIndex++;
+                indexFile.lineIndex++;
                 
-                if(detailFile.lineIndex >= Config.getLong(KeywordConfig.DETAIL_FILE_LINE.key(), (long) KeywordConfig.DETAIL_FILE_LINE.defaultValue())){
+                if(indexFile.lineIndex >= Config.getInteger(KeywordConfig.INDEX_FILE_SPLIT_COUNT.key(), (int) KeywordConfig.INDEX_FILE_SPLIT_COUNT.defaultValue())){
                     //파일에 내용을 저장하고 새로운 파일로 교체
                     //파일저장
-                    if(detailFile.isFirst){
-                        FileUtil.fileOutput(detailFile.sb.substring(1),  detailFile.filePath, false);
+                    if(indexFile.isFirst){
+
+                        FileUtil.fileOutput(indexFile.sb.substring(1),  indexFile.filePath, false);
                     }else{
-                        FileUtil.fileOutput(detailFile.sb.toString(),  detailFile.filePath, true);
+                        FileUtil.fileOutput(indexFile.sb.toString(),  indexFile.filePath, true);
                     }
 
                     //새로운 파일로 변경
-                    detailFile.filePath = IndexUtil.getDetailFilePath(keys[0], IndexUtil.getFileNumber(new File(detailFile.filePath).getName(),7) + 1);
-                    detailFile.isFirst = true;
-                    detailFile.lineIndex = 0;
-                    detailFile.sb.setLength(0);
+                    indexFile.filePath = IndexUtil.getWriteFilePath(keys[0], IndexUtil.getFileNumber(new File(indexFile.filePath).getName(),6) + 1);
+                    indexFile.isFirst = true;
+                    indexFile.lineIndex = 0;
+                    indexFile.sb.setLength(0);
                 }
             }
 
-            Collection<DetailFile> detailFiles = detailFileMap.values();
-            for(DetailFile detailFile : detailFiles){
-                if(detailFile.sb.length() > 0 ) {
+            Collection<IndexFile> detailFiles = indexFileMap.values();
+            for(IndexFile indexFile : detailFiles){
+                if(indexFile.sb.length() > 0 ) {
 
-                    if (detailFile.isFirst) {
-                        FileUtil.fileOutput(detailFile.sb.substring(1), detailFile.filePath, false);
+                    if (indexFile.isFirst) {
+                        FileUtil.fileOutput(indexFile.sb.substring(1), indexFile.filePath, false);
                     } else {
-                        FileUtil.fileOutput(detailFile.sb.toString(), detailFile.filePath, true);
+                        FileUtil.fileOutput(indexFile.sb.toString(), indexFile.filePath, true);
                     }
-                    detailFile.sb.setLength(0);
+                    indexFile.sb.setLength(0);
                 }
-            }
-
-
-            Map<String, Integer> lastFileNumberMap = new HashMap<>();
-            Set<String> ymdSet = ymdIdMap.keySet();
-
-            for (String keyYmd : ymdSet) {
-                Collection<IndexDataInfo> indexDataColl = ymdIdMap.get(keyYmd).values();
-                if (indexDataColl.size() == 0) {
-                    continue;
-                }
-
-                Integer lastNumber = lastFileNumberMap.get(keyYmd);
-                if (lastNumber == null) {
-                    lastNumber = -1;
-                }
-
-                String filePath = IndexUtil.getWriteFilePath(keyYmd, lastNumber);
-
-                File file = new File(filePath);
-                String fileName = file.getName();
-                lastFileNumberMap.put(keyYmd, IndexUtil.getFileNumber(fileName, 6));
-
-                StringBuilder sb = new StringBuilder();
-                for (IndexDataInfo data : indexDataColl) {
-                    data.indexData.setIndexFileName(fileName);
-                    JSONObject jsonObj = new JSONObject();
-                    data.indexData.setJSONObject(jsonObj);
-                    jsonObj.put(KeywordJsonIndex.INDEX_KEYS, data.keyArray);
-                    sb.append(jsonObj.toString()).append("\n");
-                }
-                FileUtil.fileOutput(sb.toString(), CharSet.UTF8, filePath, true);
-                indexDataColl.clear();
             }
 
 
@@ -407,9 +391,7 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
                 contentsGroup.addIndex(contentsIndexData);
             }
 
-            detailFileMap.clear();
-            lastFileNumberMap.clear();
-            ymdIdMap.clear();
+            indexFileMap.clear();
             addDataList.clear();
 
             synchronized (collectLock) {
@@ -431,19 +413,15 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
         }
     }
 
-    private static class IndexDataInfo {
-
-        IndexData indexData;
-        JSONArray keyArray;
-    }
 
     private static class NipaData{
         NipaRsContents nipaContents;
         IndexData indexData;
         Document document;
+
     }
 
-    private static class DetailFile {
+    private static class IndexFile {
 
         String filePath;
         int lineIndex;

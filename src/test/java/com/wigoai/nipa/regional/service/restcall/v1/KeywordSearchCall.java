@@ -32,7 +32,7 @@ public class KeywordSearchCall {
         long analysisStartTime = System.currentTimeMillis();
 
         //7월 20일부터
-        long startTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20201101 00:00:00").getTime();
+        long startTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20200730 00:00:00").getTime();
 
         //7월 25일 전까지 (7월24일까지)
         long endTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20201105 00:00:00").getTime();

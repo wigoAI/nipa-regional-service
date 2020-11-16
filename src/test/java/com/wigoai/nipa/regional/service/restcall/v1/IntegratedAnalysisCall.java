@@ -34,10 +34,10 @@ public class IntegratedAnalysisCall {
         long analysisStartTime = System.currentTimeMillis();
 
         //7월 20일부터
-        long startTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("202000101 00:00:00").getTime();
+        long startTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20200720 00:00:00").getTime();
 
         //7월 25일 전까지 (7월24일까지)
-        long endTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("202000130 00:00:00").getTime();
+        long endTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20200730 00:00:00").getTime();
 
         long standardTime = System.currentTimeMillis();
 
@@ -59,8 +59,8 @@ public class IntegratedAnalysisCall {
 
 
         String request = gson.toJson(param);
-//        String responseMessage = RestCall.postJson("http://127.0.0.1:33377/nipars/v1/integrated/analysis",request);
-        String responseMessage = RestCall.postJson("http://sc.wigo.ai:10015/nipars/v1/integrated/analysis",request);
+        String responseMessage = RestCall.postJson("http://127.0.0.1:33377/nipars/v1/integrated/analysis",request);
+//        String responseMessage = RestCall.postJson("http://sc.wigo.ai:10015/nipars/v1/integrated/analysis",request);
 
 
         System.out.println("mills second: " + (System.currentTimeMillis() - analysisStartTime));

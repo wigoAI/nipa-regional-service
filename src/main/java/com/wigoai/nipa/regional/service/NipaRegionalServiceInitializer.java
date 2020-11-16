@@ -22,6 +22,7 @@ import org.moara.common.callback.Callback;
 import org.moara.common.config.Config;
 import org.moara.common.service.Service;
 import org.moara.keyword.ServiceKeywordAnalysis;
+import org.moara.keyword.index.ReIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,11 +49,19 @@ public class NipaRegionalServiceInitializer implements MoaraInitializer {
             Callback initCallback = new Callback() {
 
                 public void callback(){
+
+
                     KeywordAnalysisCollectService keywordAnalysisCollectService = new KeywordAnalysisCollectService();
                     keywordAnalysisCollectService.setSleepTime(Config.getLong(ServiceConfig.COLLECT_SLEEP_SECOND.key(), ((long)ServiceConfig.COLLECT_SLEEP_SECOND.defaultValue()))* 1000L);
                     keywordAnalysisCollectService.setState(Service.State.START);
                     keywordAnalysisCollectService.start();
+
+                    ReIndex reIndex = ReIndex.getInstance();
+                    reIndex.setReIndexDetail(keywordAnalysisCollectService.reIndexDetail);
+
                     logger.info(this.getClass().getName() + " start complete");
+
+
                 }
             };
 

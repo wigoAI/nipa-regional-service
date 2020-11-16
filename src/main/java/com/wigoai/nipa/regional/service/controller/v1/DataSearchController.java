@@ -29,6 +29,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.moara.ara.datamining.data.CodeName;
 import org.moara.ara.datamining.statistics.count.WordCount;
+import org.moara.ara.datamining.textmining.api.document.DocumentStandardKey;
 import org.moara.common.config.Config;
 import org.moara.common.util.ExceptionUtil;
 import org.moara.common.util.YmdUtil;
@@ -186,8 +187,13 @@ public class DataSearchController {
 
 
     private JsonObject makeObj(Gson gson, IndexData data){
-        JsonObject obj =  gson.fromJson(FileUtil.getLine(data.getDetailFilePath(), data.getDetailLine()),JsonObject.class);
 
+
+        JsonObject obj =  gson.fromJson(FileUtil.getLine(data.getIndexFileName(), data.getIndexFileLine()),JsonObject.class).getAsJsonObject(IndexData.Keys.DETAIL.key());
+        obj.remove(IndexData.Keys.WORD_POSITIONS.key());
+        obj.remove(IndexData.Keys.SENTENCE_POSITIONS.key());
+        obj.remove(DocumentStandardKey.LANG_CODE.key());
+        obj.remove(DocumentStandardKey.DOC_TYPE.key());
 
         String channelGroupId = data.getIndexKeys()[1];
         obj.addProperty("channel_group_id", channelGroupId);

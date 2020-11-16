@@ -14,16 +14,26 @@
  * limitations under the License.
  */
 
-package com.wigoai.nipa.regional.service.restcall.v1;
+package com.wigoai.nipa.regional.service.enginecall;
+
+import org.moara.common.network.socket.HostAddrPort;
+import org.moara.engine.console.EngineConsole;
+import org.moara.open.api.client.ApiRequests;
 
 /**
+ * 리인덱스
+ * 사전이나 분류모델이 변경되었을때 사용
  * @author macle
  */
-public class DataSearchCall {
-
+public class ReIndex {
     public static void main(String[] args) {
 
+        HostAddrPort addrPort
+                = EngineConsole.getHostAddrPort("macle");
+        String message
+                = ApiRequests.sendToReceiveMessage(addrPort.getHostAddress(), addrPort.getPort()
+                , "org.moara.keyword.api", "ReIndex", "");
 
-
+        System.out.println(message);
     }
 }

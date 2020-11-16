@@ -34,10 +34,10 @@ public class TimeLineCall {
         long analysisStartTime = System.currentTimeMillis();
 
         //7월 20일부터
-        long startTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20200101 00:00:00").getTime();
+        long startTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20200720 00:00:00").getTime();
 
         //7월 25일 전까지 (7월24일까지)
-        long endTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20200130 00:00:00").getTime();
+        long endTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20200930 00:00:00").getTime();
 
         //기준시는 반드시 통계 결과에서 사용한 값을 이용해야함.
         long standardTime = System.currentTimeMillis();
@@ -85,8 +85,8 @@ public class TimeLineCall {
 
         param.add("channel_groups", channelGroups);
         String request = gson.toJson(param);
-//        String responseMessage = RestCall.postJson("http://127.0.0.1:33377/nipars/v1/search/timeline",request);
-        String responseMessage = RestCall.postJson("http://sc.wigo.ai:10014/nipars/v1/search/timeline",request);
+        String responseMessage = RestCall.postJson("http://127.0.0.1:33377/nipars/v1/search/timeline",request);
+//        String responseMessage = RestCall.postJson("http://sc.wigo.ai:10014/nipars/v1/search/timeline",request);
 
 
         System.out.println("mills second: " + (System.currentTimeMillis() - analysisStartTime));
