@@ -311,7 +311,7 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
                 detailObj.put("channel_id", nipaData.nipaContents.channelId);
                 detailObj.put("channel_name", channelNameMap.get(nipaData.nipaContents.channelId));
                 detailObj.put("post_time", nipaData.nipaContents.postTime);
-                detailObj.put("post_ymd_hm", new SimpleDateFormat("yyyyMMdd hh:mm").format(new Date(nipaData.nipaContents.postTime)));
+                detailObj.put("post_ymd_hm", new SimpleDateFormat("yyyyMMdd HH:mm").format(new Date(nipaData.nipaContents.postTime)));
                 detailObj.put("original_url", nipaData.nipaContents.originalUrl);
 
                 CodeName[] emotionClassifies = indexData.getClassifies();
