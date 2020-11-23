@@ -86,7 +86,7 @@ public class DataSearchController {
             response.addProperty("total", searchArray.length);
             String classifyCode = Config.getConfig(ServiceConfig.FIELD_CLASSIFY.key());
 
-            IndexData[] subArray = IndexUtil.subData(searchArray, request.getInt("start") , request.getInt("end"));
+            IndexData[] subArray = IndexUtil.subData(searchArray, request.getInt("begin") , request.getInt("end"));
             JsonArray dataArray = new JsonArray();
             for(IndexData data : subArray){
                 JsonObject obj =  makeObj(gson, data);
@@ -138,7 +138,7 @@ public class DataSearchController {
             response.addProperty("total", searchArray.length);
 
 
-            IndexData[] subArray = IndexUtil.subData(searchArray, request.getInt("start") , request.getInt("end"));
+            IndexData[] subArray = IndexUtil.subData(searchArray, request.getInt("begin") , request.getInt("end"));
             JsonArray dataArray = new JsonArray();
 
             String preTag;

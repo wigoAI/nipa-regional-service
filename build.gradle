@@ -45,7 +45,7 @@ dependencies {
 
     implementation group: 'org.mariadb.jdbc', name: 'mariadb-java-client', version: '2.6.0'
 
-    implementation 'com.seomse.commons:seomse-commons:1.1.9'
+    implementation 'com.seomse.commons:seomse-commons:1.2.1'
     implementation 'com.seomse.cypto:seomse-cypto:0.1.0'
 
     implementation group: 'org.elasticsearch.client', name: 'elasticsearch-rest-high-level-client', version: '7.7.1'

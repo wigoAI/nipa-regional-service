@@ -17,7 +17,9 @@ package com.wigoai.nipa.regional.service.restcall;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.seomse.commons.utils.FileUtil;
 import com.wigoai.rest.RestCall;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -32,20 +34,32 @@ public class TestAnalysis {
     public static void main(String[] args) {
 
         String url = "http://127.0.0.1:33377";
-//        String url = "http://sc.wigo.ai:10014";
+//        String url = "http://sc.wigo.ai:10015";
 
 
         JSONObject param = new JSONObject();
-        param.put("start_ymd", "20200701");
-        param.put("end_ymd", "20200930");
+        param.put("start_ymd", "20190101");
+        param.put("end_ymd", "20201031");
 
         JSONArray media = new JSONArray();
-//        media.put("media");
+        media.put("media");
         media.put("community");
+
+
+        String search = "고속도로";
+
+
+        JSONObject keyword1 = new JSONObject();
+        keyword1.put("keyword",search);
+        JSONArray outKeywords = new JSONArray();
+        outKeywords.put("키트");
+        keyword1.put("out_filters", outKeywords);
 
         JSONArray keywords = new JSONArray();
 
-        keywords.put("환경");
+
+//        keywords.put(keyword1);
+        keywords.put(search);
 
         param.put("keywords", keywords);
         param.put("media", media);
@@ -66,8 +80,9 @@ public class TestAnalysis {
         //모듈을 따로설정하지 않고 기본설정을 따르는 경우 추가하지 않아도 됨
 
         JSONObject moduleDetail = new JSONObject();
-        moduleDetail.put("module", "SNA_LITE");
-        moduleDetail.put("group_percent", 0.80);
+        moduleDetail.put("module", "TF_WORD");
+        moduleDetail.put("count", 500);
+        moduleDetail.put("is_trend", false);
         modules.put(moduleDetail);
 
         param.put("modules", modules);
@@ -100,8 +115,25 @@ public class TestAnalysis {
             JSONArray messageArray = jsonObject.getJSONArray("messages");
             for (int j = 0; j <messageArray.length() ; j++) {
                 String message = messageArray.getString(j);
-                System.out.println("============================================== message ==============================================\n");
-                System.out.println(gson.toJson(gson.fromJson(message, JsonObject.class)));
+                JsonObject JsonObject = gson.fromJson(message, JsonObject.class);
+                JsonObject = JsonObject.getAsJsonObject("message");
+                JsonArray array = JsonObject.getAsJsonArray("noun");
+
+                StringBuilder sb = new StringBuilder();
+                sb.append("단어,건수");
+                for (int k = 0; k <array.size() ; k++) {
+                    JsonObject = array.get(k).getAsJsonObject();
+                    sb.append("\n").append(JsonObject.get("syllable").getAsString()).append(",").append(JsonObject.get("count").getAsInt());
+                }
+
+                FileUtil.fileOutput(sb.toString(), "EUC-KR", "data\\" + search + ".csv" , false);
+
+                System.out.println(sb.toString());
+
+//                System.out.println(gson.toJson(array));
+
+
+                break;
             }
 
             if(jsonObject.getBoolean("is_end")){
