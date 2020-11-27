@@ -45,9 +45,7 @@ public class TestAnalysis {
         media.put("media");
         media.put("community");
 
-
         String search = "고속도로";
-
 
         JSONObject keyword1 = new JSONObject();
         keyword1.put("keyword",search);
