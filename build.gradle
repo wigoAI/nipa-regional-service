@@ -17,7 +17,7 @@ dependencies {
     implementation 'ch.qos.logback:logback-classic:1.2.3'
     implementation 'ch.qos.logback:logback-access:1.2.3'
 
-    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: '2.4.0'
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: '2.4.1'
 
     //jdbc
     implementation group: 'com.oracle.ojdbc', name: 'ojdbc8', version: '19.3.0.0'
