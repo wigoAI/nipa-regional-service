@@ -45,6 +45,7 @@ import java.util.*;
 
 /**
  * 키워드 분석용 수집 서비스
+ *
  * @author macle
  */
 public class KeywordAnalysisCollectService extends Service implements ReIndexWait{
@@ -90,7 +91,6 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
             }else{
                 detailObj.put("emotion_name", emotionCodeName.getName());
             }
-            return null;
         };
 
         engineConfig = new EngineConfig();
