@@ -22,12 +22,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.seomse.commons.utils.time.Times;
 import com.wigoai.rest.RestCall;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.moara.common.config.Config;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
 
 /**
  * 통합분석
@@ -39,14 +35,14 @@ public class IntegratedAnalysisCall {
         long analysisStartTime = System.currentTimeMillis();
 
         //7월 20일부터
-        long startTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20201202 00:00:00").getTime();
+        long startTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20210107 00:00:00").getTime();
 
         //7월 25일 전까지 (7월24일까지)
 
         System.out.println(Times.DAY_1 -1);
 
         //전일자
-        long endTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20201202 00:00:00").getTime() + (Times.DAY_1 -1);
+        long endTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20210114 00:00:00").getTime() + (Times.DAY_1 -1);
 
 
 
@@ -68,28 +64,15 @@ public class IntegratedAnalysisCall {
 
         JsonArray keywords = new JsonArray();
 
-        keywords.add("속초");
+        keywords.add("강원");
         param.add("keywords", keywords);
 
 
         String request = gson.toJson(param);
-        String responseMessage = RestCall.postJson("http://127.0.0.1:33377/nipars/v1/integrated/analysis",request);
-//        String responseMessage = RestCall.postJson("http://sc.wigo.ai:10014/nipars/v1/integrated/analysis",request);
-
-        JSONObject check = new JSONObject(responseMessage);
-
-        JSONArray array = check.getJSONObject("channel_count").getJSONArray("time_tf_arrays");
-
-        for (int i = 0; i <array.length() ; i++) {
-
-            System.out.println("ymd: " +new SimpleDateFormat(Config.DATE_FORMAT_JAVA).format(new Date(array.getJSONObject(i).getLong("time"))));
-
-        }
-
+//        String responseMessage = RestCall.postJson("http://127.0.0.1:33377/nipars/v1/integrated/analysis",request);
+        String responseMessage = RestCall.postJson("http://sc.wigo.ai:10014/nipars/v1/integrated/analysis",request);
 
         System.out.println("mills second: " + (System.currentTimeMillis() - analysisStartTime));
-
-
         System.out.println("request\n " + request +"\n");
         System.out.println("responseMessage\n "+ responseMessage) ;
     }

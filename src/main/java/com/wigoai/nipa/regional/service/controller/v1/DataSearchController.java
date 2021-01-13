@@ -180,8 +180,17 @@ public class DataSearchController {
                 
                 //분석 정보를 가져와서 하이라이트 정보 생성하기
                 String analysisContents = obj.remove("analysis_contents").getAsString();
-                obj.addProperty("highlight", SearchHighlight.highlight(data, analysisContents, highlightKeywords , preTag, postTag, maxLength).replace('\n', ' ' ));
-                
+
+                try {
+                    obj.addProperty("highlight", SearchHighlight.highlight(data, analysisContents, highlightKeywords, preTag, postTag, maxLength).replace('\n', ' '));
+                }catch(Exception e){
+                    StringBuilder sb = new StringBuilder();
+                    for(String keyword : highlightKeywords){
+                        sb.append(",").append(keyword);
+                    }
+                    logger.error("highlight error id: " + data.getId() + " keywords: " + sb.toString());
+
+                }
                 dataArray.add(obj);
             }
 

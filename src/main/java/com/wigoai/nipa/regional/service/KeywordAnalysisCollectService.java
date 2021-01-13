@@ -75,6 +75,18 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
 
         String emotionClassify = Config.getConfig(ServiceConfig.EMOTION_CLASSIFY.key());
         reIndexDetail = (detailObj, document, indexData) -> {
+            
+            //index data에 데이터 추가
+//            NamedEntityRecognizer namedEntityRecognizer = PersonNamedEntityRecognizerManager.getInstance().getNamedEntityRecognizer("reporter");
+//            NamedEntity[] namedEntityArray = namedEntityRecognizer.recognize(document.getAnalysisContents());
+//
+//
+//
+//            if(namedEntityArray.length > 0){
+//                Set<String> tagSet = new HashSet<>();
+//            }
+
+
 
 
             CodeName[] emotionClassifies = indexData.getClassifies();
@@ -160,6 +172,17 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
 
 
 
+        ReIndex reIndex = ReIndex.getInstance();
+        try{
+            while (reIndex.isRun()) {
+                logger.debug("reindex running sleep");
+                //noinspection BusyWait
+                Thread.sleep(5000);
+            }
+        }catch (Exception e){
+            logger.error(ExceptionUtil.getStackTrace(e));
+            return false;
+        }
 
         String emotionClassify = Config.getConfig(ServiceConfig.EMOTION_CLASSIFY.key());
 
@@ -191,12 +214,11 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
                 return false;
             }
 
-            ReIndex reIndex = ReIndex.getInstance();
+            reIndex = ReIndex.getInstance();
             try{
-                while (reIndex.isRun()) {
-                    logger.debug("reindex running sleep");
-                    //noinspection BusyWait
-                    Thread.sleep(5000);
+                if (reIndex.isRun()) {
+                    logger.debug("reindex running wait");
+                    return false;
                 }
             }catch (Exception e){
                 logger.error(ExceptionUtil.getStackTrace(e));
