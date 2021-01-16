@@ -95,7 +95,7 @@ public class SubjectAnalysisController {
             final KeywordAnalysis.Module [] modules = new KeywordAnalysis.Module[3];
             modules[0] = KeywordAnalysis.Module.TF_CONTENTS;
             modules[1] = KeywordAnalysis.Module.TF_CLASSIFY;
-            modules[2] = KeywordAnalysis.Module.TF_WORD;
+            modules[2] = KeywordAnalysis.Module.TF_WORD_CONTENTS;
 
             NipaRegionalAnalysis nipaRegionalAnalysis = NipaRegionalAnalysis.getInstance();
 
@@ -146,9 +146,8 @@ public class SubjectAnalysisController {
                 properties.put("count", 50);
             }
 
-
             properties.put("is_trend", false);
-            moduleProperties.put(KeywordAnalysis.Module.TF_WORD, properties);
+            moduleProperties.put(KeywordAnalysis.Module.TF_WORD_CONTENTS, properties);
 
 
             String keywordJson = request.getJSONArray("keywords").toString();
@@ -276,7 +275,7 @@ public class SubjectAnalysisController {
                 for(String message : messages){
                     JSONObject messageObj = new JSONObject(message);
                     KeywordAnalysis.Module module = KeywordAnalysis.Module.valueOf(messageObj.get("type").toString());
-                    if (module == KeywordAnalysis.Module.TF_WORD) {
+                    if (module == KeywordAnalysis.Module.TF_WORD_CONTENTS) {
                         resultObj.put(groups[groupIndex].getId() + "_keywords", messageObj.getJSONObject("message").getJSONArray("keywords"));
                     } else {
                         //릴레이션 일때
@@ -304,7 +303,7 @@ public class SubjectAnalysisController {
         String [][] keysArray = GroupKeyUtil.makeKeysArray(ymdList,  groups[groupIndex].getId());
 
         KeywordAnalysis.Module [] modules = new KeywordAnalysis.Module[2];
-        modules[0] = KeywordAnalysis.Module.TF_WORD;
+        modules[0] = KeywordAnalysis.Module.TF_WORD_CONTENTS;
         modules[1] = KeywordAnalysis.Module.SNA_LITE;
 
 
@@ -314,7 +313,7 @@ public class SubjectAnalysisController {
         properties.put("selectors","[{\"id\":\"keywords\",\"type\":\"WORD_CLASS\",\"value\":\"NOUN\"}]");
         properties.put("count", cloudKeywordCount);
         properties.put("is_trend",false);
-        moduleProperties.put(KeywordAnalysis.Module.TF_WORD, properties);
+        moduleProperties.put(KeywordAnalysis.Module.TF_WORD_CONTENTS, properties);
 
         if(snaProperties != null){
             moduleProperties.put(KeywordAnalysis.Module.SNA_LITE, snaProperties);

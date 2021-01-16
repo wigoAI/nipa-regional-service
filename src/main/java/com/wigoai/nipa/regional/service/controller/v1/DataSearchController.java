@@ -73,6 +73,9 @@ public class DataSearchController {
     public String timeLine(@RequestBody final String jsonValue){
 
         try {
+
+
+
             JSONObject request = new JSONObject(jsonValue);
             SearchData searchData = search(request);
             if(searchData == null){
@@ -135,6 +138,9 @@ public class DataSearchController {
     @RequestMapping(value = "/nipars/v1/search/contents" , method = RequestMethod.POST, produces= MediaType.APPLICATION_JSON_VALUE)
     public String contents(@RequestBody final String jsonValue){
         try {
+
+            logger.debug(jsonValue);
+
             JSONObject request = new JSONObject(jsonValue);
             SearchData searchData = search(request);
             if(searchData == null){
