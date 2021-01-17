@@ -19,27 +19,25 @@ package com.wigoai.nipa.regional.service.restcall.v1;
 import com.wigoai.rest.RestCall;
 
 /**
- * 주제별분석
  * @author macle
  */
-public class SubjectAnalysisJsonCall {
+public class DataSearchCall {
     public static void main(String[] args) {
 
 
-
         String jsonText ="{\n" +
-                "  \"start_time\": 1609945200000,\n" +
-                "  \"end_time\": 1610499971513,\n" +
+                "  \"start_time\": 1610118000000,\n" +
+                "  \"end_time\": 1610685457638,\n" +
                 "  \"standard_time\":" +  System.currentTimeMillis() +",\n" +
-                "  \"emotion_keyword_count\": \"10\",\n" +
-                "  \"cloud_keyword_count\": \"15\",\n" +
-                "  \"sna_use_count\": \"15\",\n" +
-                "  \"sna_source_count\": \"15\",\n" +
-                "  \"sna_target_count\": \"5\",\n" +
-                "  \"classify_names\": [\n" +
-                "    \"보건위생\",\n" +
-                "    \"재난안전\",\n" +
-                "    \"청소환경\"\n" +
+                "  \"start\": 0,\n" +
+                "  \"end\": 5,\n" +
+                "  \"highlight_keyword\": \"강원 안내\",\n" +
+                "  \"highlight_max_length\": \"160\",\n" +
+                "  \"pre_tag\": \"\\u003cspan class\\u003d\\\"point\\\"\\u003e\",\n" +
+                "  \"post_tag\": \"\\u003c/span\\u003e\",\n" +
+                "  \"channel_groups\": [\n" +
+                "    \"media\",\n" +
+                "    \"community\"\n" +
                 "  ],\n" +
                 "  \"keywords\": [\n" +
                 "    {\n" +
@@ -47,20 +45,14 @@ public class SubjectAnalysisJsonCall {
                 "      \"in_filters\": [\n" +
                 "        [\n" +
                 "          \"#보건위생\"\n" +
-                "        ]" +
-//                ",\n" +
-//                "        [\n" +
-//                "          \"#재난안전\"\n" +
-//                "        ],\n" +
-//                "        [\n" +
-//                "          \"#청소환경\"\n" +
-//                "        ]\n" +
+                ",\"안내\"" +
+                "        ]\n" +
                 "      ],\n" +
                 "      \"out_filters\": []\n" +
                 "    }\n" +
                 "  ]\n" +
                 "}";
-        String responseMessage = RestCall.postJson("http://sc.wigo.ai:10015/nipars/v1/subject/analysis", jsonText);
+        String responseMessage = RestCall.postJson("http://sc.wigo.ai:10015/nipars/v1/search/contents", jsonText);
 
         System.out.println("request\n " + jsonText +"\n");
         System.out.println("responseMessage\n "+ responseMessage) ;
