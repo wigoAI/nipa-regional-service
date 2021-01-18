@@ -119,8 +119,6 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
         };
 
 
-        ReIndex.getInstance().setReIndexDetail(reIndexDetail);
-
         engineConfig = new EngineConfig();
         engineConfig.engineCode = moaraEngine.getCode();
 
