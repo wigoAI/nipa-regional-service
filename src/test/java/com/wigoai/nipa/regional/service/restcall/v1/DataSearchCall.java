@@ -26,12 +26,12 @@ public class DataSearchCall {
 
 
         String jsonText ="{\n" +
-                "  \"start_time\": 1610118000000,\n" +
-                "  \"end_time\": 1610685457638,\n" +
+                "  \"start_time\": 1577804400000,\n" +
+                "  \"end_time\": 1610982000000,\n" +
                 "  \"standard_time\":" +  System.currentTimeMillis() +",\n" +
                 "  \"start\": 0,\n" +
                 "  \"end\": 5,\n" +
-                "  \"highlight_keyword\": \"강원 안내\",\n" +
+                "  \"highlight_keyword\": \"이데일리\",\n" +
                 "  \"highlight_max_length\": \"160\",\n" +
                 "  \"pre_tag\": \"\\u003cspan class\\u003d\\\"point\\\"\\u003e\",\n" +
                 "  \"post_tag\": \"\\u003c/span\\u003e\",\n" +
@@ -41,18 +41,24 @@ public class DataSearchCall {
                 "  ],\n" +
                 "  \"keywords\": [\n" +
                 "    {\n" +
-                "      \"keyword\": \"강원\",\n" +
+                "      \"keyword\": \"#이데일리\",\n" +
                 "      \"in_filters\": [\n" +
                 "        [\n" +
-                "          \"#보건위생\"\n" +
-                ",\"안내\"" +
+                "          \"#이데일리\"\n" +
+//                ",\"안내\"" +
                 "        ]\n" +
                 "      ],\n" +
                 "      \"out_filters\": []\n" +
                 "    }\n" +
                 "  ]\n" +
                 "}";
-        String responseMessage = RestCall.postJson("http://sc.wigo.ai:10015/nipars/v1/search/contents", jsonText);
+//        String responseMessage = RestCall.postJson("http://127.0.0.1:33377/nipars/v1/search/contents", jsonText);
+
+        String responseMessage = RestCall.postJson("http://sc.wigo.ai:10014/nipars/v1/search/contents", jsonText);
+
+//        System.out.println(YmdUtil.getTime("20200101"));
+//
+//        System.out.println(YmdUtil.getTime("20210119"));
 
         System.out.println("request\n " + jsonText +"\n");
         System.out.println("responseMessage\n "+ responseMessage) ;

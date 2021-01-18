@@ -33,10 +33,10 @@ public class SubjectAnalysisCall {
         long analysisStartTime = System.currentTimeMillis();
 
         //7월 20일부터
-        long startTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20200720 00:00:00").getTime();
+        long startTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20200101 00:00:00").getTime();
 
         //7월 25일 전까지 (7월24일까지)
-        long endTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20200930 00:00:00").getTime();
+        long endTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20210118 00:00:00").getTime();
 
         long standardTime = System.currentTimeMillis();
 
@@ -70,17 +70,18 @@ public class SubjectAnalysisCall {
 
 
         JsonArray keywords = new JsonArray();
-        JsonObject keyword1 = new JsonObject();
-        keyword1.addProperty("keyword", "춘천");
-        keyword1.add("in_filters",inFilters);
-        keywords.add(keyword1);
+        keywords.add("#조승현");
+//        JsonObject keyword1 = new JsonObject();
+//        keyword1.addProperty("keyword", "#조승현");
+//        keyword1.add("in_filters",inFilters);
+//        keywords.add(keyword1);
         param.add("keywords", keywords);
 
 
 
         String request = gson.toJson(param);
-//        String responseMessage = RestCall.postJson("http://127.0.0.1:33377/nipars/v1/subject/analysis",request);
-        String responseMessage = RestCall.postJson("http://sc.wigo.ai:10014/nipars/v1/subject/analysis",request);
+        String responseMessage = RestCall.postJson("http://127.0.0.1:33377/nipars/v1/subject/analysis",request);
+//        String responseMessage = RestCall.postJson("http://sc.wigo.ai:10014/nipars/v1/subject/analysis",request);
 
         System.out.println("mills second: " + (System.currentTimeMillis() - analysisStartTime));
 
