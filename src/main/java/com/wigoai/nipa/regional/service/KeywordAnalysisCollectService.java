@@ -88,15 +88,24 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
                 //            //index data에 데이터 추가
                 NamedEntity[] namedEntityArray = reportRecognizer.recognize(document.getContents());
 
+                Set<String> tagSet = null;
 
+                if(detailObj.has("channel_name")){
+                    tagSet = new HashSet<>();
+                    tagSet.add(detailObj.getString("channel_name"));
+                }
 
                 if(namedEntityArray.length > 0){
-                    Set<String> tagSet = new HashSet<>();
+                    if(tagSet == null){
+                        tagSet = new HashSet<>();
+                    }
 
                     for(NamedEntity namedEntity : namedEntityArray){
                         tagSet.add(namedEntity.getText());
                     }
+                }
 
+                if(tagSet != null && tagSet.size() > 0){
                     indexData.setTagSet(tagSet);
                 }
 
@@ -285,13 +294,25 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
                     //            //index data에 데이터 추가
                     NamedEntity[] namedEntityArray = reportRecognizer.recognize(document.getContents());
 
+                    String channelName = channelNameMap.get(nipaContents.channelId);
+                    Set<String> tagSet = null;
+
+                    if(channelName != null){
+                        tagSet = new HashSet<>();
+                        tagSet.add(channelName);
+                    }
+
                     if(namedEntityArray.length > 0){
-                        Set<String> tagSet = new HashSet<>();
+                        if(tagSet == null){
+                            tagSet = new HashSet<>();
+                        }
 
                         for(NamedEntity namedEntity : namedEntityArray){
                             tagSet.add(namedEntity.getText());
                         }
+      }
 
+                    if(tagSet != null && tagSet.size() > 0){
                         indexData.setTagSet(tagSet);
                     }
 
