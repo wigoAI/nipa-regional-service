@@ -35,6 +35,9 @@ import org.moara.keyword.index.*;
 import org.moara.keyword.search.ContentsGroup;
 import org.moara.keyword.search.ContentsIndexData;
 import org.moara.meta.MetaDataUtil;
+import org.moara.ner.NamedEntityRecognizer;
+import org.moara.ner.NamedEntityRecognizerManager;
+import org.moara.ner.entity.NamedEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,12 +55,13 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
 
     private static final Logger logger = LoggerFactory.getLogger(KeywordAnalysisCollectService.class);
 
-
     private final EngineConfig engineConfig;
 
     private final Map<String, String> channelNameMap = new HashMap<>();
 
     ReIndexDetail reIndexDetail;
+
+    private final NamedEntityRecognizer reportRecognizer;
 
     /**
      * 생성자
@@ -65,29 +69,38 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
     public KeywordAnalysisCollectService() {
         super();
         MoaraEngine moaraEngine = MoaraEngine.getInstance();
-
         if (moaraEngine == null) {
             String errorMessage = "engine null";
             logger.error(errorMessage);
             throw new RuntimeException(errorMessage);
 
         }
+        NamedEntityRecognizerManager namedEntityRecognizerManager = NamedEntityRecognizerManager.getInstance();
+        reportRecognizer = namedEntityRecognizerManager.getNamedEntityRecognizer("ps_reporter");
 
         String emotionClassify = Config.getConfig(ServiceConfig.EMOTION_CLASSIFY.key());
+
         reIndexDetail = (detailObj, document, indexData) -> {
-            
-            //index data에 데이터 추가
-//            NamedEntityRecognizer namedEntityRecognizer = PersonNamedEntityRecognizerManager.getInstance().getNamedEntityRecognizer("reporter");
-//            NamedEntity[] namedEntityArray = namedEntityRecognizer.recognize(document.getAnalysisContents());
-//
-//
-//
-//            if(namedEntityArray.length > 0){
-//                Set<String> tagSet = new HashSet<>();
-//            }
+
+            String [] keys = indexData.getIndexKeys();
+            if (keys[1].equals("media")) {
+                //해시 태그 정보 추가
+                //            //index data에 데이터 추가
+                NamedEntity[] namedEntityArray = reportRecognizer.recognize(document.getContents());
 
 
 
+                if(namedEntityArray.length > 0){
+                    Set<String> tagSet = new HashSet<>();
+
+                    for(NamedEntity namedEntity : namedEntityArray){
+                        tagSet.add(namedEntity.getText());
+                    }
+
+                    indexData.setTagSet(tagSet);
+                }
+
+            }
 
             CodeName[] emotionClassifies = indexData.getClassifies();
             CodeName emotionCodeName = null;
@@ -104,6 +117,9 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
                 detailObj.put("emotion_name", emotionCodeName.getName());
             }
         };
+
+
+        ReIndex.getInstance().setReIndexDetail(reIndexDetail);
 
         engineConfig = new EngineConfig();
         engineConfig.engineCode = moaraEngine.getCode();
@@ -156,21 +172,6 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
     boolean collectToMakeIndex() {
 
         //개발용 임시소스 (분류모델 생성 전 더미데이터)
-//        CodeName[] emotionArray = new CodeName[3];
-//        emotionArray[0] = new CodeName("U716001","긍정");
-//        emotionArray[1] = new CodeName("U716002","중립");
-//        emotionArray[2] = new CodeName("U716003","부정");
-//        CodeName [] classifies = new CodeName[7];
-//        classifies[0] = new CodeName("U718001","보건위생");
-//        classifies[1] = new CodeName("U718002","재난안전");
-//        classifies[2] = new CodeName("U718003","청소환경");
-//        classifies[3] = new CodeName("U718004","건설교통");
-//        classifies[4] = new CodeName("U718005","교육");
-//        classifies[5] = new CodeName("U718006","경제산업");
-//        classifies[6] = new CodeName("U718007","기타");
-//        Random random = new Random();
-
-
 
         ReIndex reIndex = ReIndex.getInstance();
         try{
@@ -281,6 +282,22 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
                 }
                 indexData.setIndexKeys(keys);
 
+                if (keys[1].equals("media")) {
+                    //해시 태그 정보 추가
+                    //            //index data에 데이터 추가
+                    NamedEntity[] namedEntityArray = reportRecognizer.recognize(document.getContents());
+
+                    if(namedEntityArray.length > 0){
+                        Set<String> tagSet = new HashSet<>();
+
+                        for(NamedEntity namedEntity : namedEntityArray){
+                            tagSet.add(namedEntity.getText());
+                        }
+
+                        indexData.setTagSet(tagSet);
+                    }
+
+                }
 
                 NipaData nipaData = new NipaData();
                 nipaData.indexData = indexData;
@@ -390,12 +407,10 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
                 }
             }
 
-
             engineConfig.key = ServiceConfig.CONTENTS_LAST_NUM.key();
             engineConfig.value = Long.toString(lastNum);
             engineConfig.updateTime = System.currentTimeMillis();
             JdbcObjects.insertOrUpdate(engineConfig, false);
-
 
             for (NipaData nipaData : addDataList) {
                 //메모리 데이터 세팅
@@ -435,22 +450,17 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
         }
     }
 
-
     private static class NipaData{
         NipaRsContents nipaContents;
         IndexData indexData;
         Document document;
-
     }
 
     private static class IndexFile {
-
         String filePath;
         int lineIndex;
         boolean isFirst = false;
         StringBuilder sb = new StringBuilder();
-
-
     }
 
 }
