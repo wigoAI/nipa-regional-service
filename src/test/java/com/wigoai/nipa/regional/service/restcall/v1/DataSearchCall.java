@@ -25,36 +25,40 @@ public class DataSearchCall {
     public static void main(String[] args) {
 
 
-        String jsonText ="{\n" +
-                "  \"start_time\": 1577804400000,\n" +
-                "  \"end_time\": 1610982000000,\n" +
+        String jsonText =" {\n" +
+                "  \"start_time\": 1608390000000,\n" +
+                "  \"end_time\": 1611021751397,\n" +
                 "  \"standard_time\":" +  System.currentTimeMillis() +",\n" +
                 "  \"start\": 0,\n" +
-                "  \"end\": 5,\n" +
-                "  \"highlight_keyword\": \"이데일리\",\n" +
+                "  \"end\": 6679,\n" +
+                "  \"highlight_keyword\": \"강원도 춘천시\",\n" +
                 "  \"highlight_max_length\": \"160\",\n" +
                 "  \"pre_tag\": \"\\u003cspan class\\u003d\\\"point\\\"\\u003e\",\n" +
                 "  \"post_tag\": \"\\u003c/span\\u003e\",\n" +
                 "  \"channel_groups\": [\n" +
-                "    \"media\",\n" +
                 "    \"community\"\n" +
                 "  ],\n" +
                 "  \"keywords\": [\n" +
                 "    {\n" +
-                "      \"keyword\": \"#이데일리\",\n" +
+                "      \"keyword\": \"강원도\",\n" +
                 "      \"in_filters\": [\n" +
                 "        [\n" +
-                "          \"#이데일리\"\n" +
-//                ",\"안내\"" +
+                "          \"#블로그검색\"\n" +
+                "        ],\n" +
+                "        [\n" +
+                "          \"#블로그검색\"\n" +
+                "        ],\n" +
+                "        [\n" +
+                "          \"#블로그검색\"\n" +
                 "        ]\n" +
                 "      ],\n" +
                 "      \"out_filters\": []\n" +
                 "    }\n" +
                 "  ]\n" +
                 "}";
-//        String responseMessage = RestCall.postJson("http://127.0.0.1:33377/nipars/v1/search/contents", jsonText);
+        String responseMessage = RestCall.postJson("http://127.0.0.1:33377/nipars/v1/search/contents", jsonText);
 
-        String responseMessage = RestCall.postJson("http://sc.wigo.ai:10014/nipars/v1/search/contents", jsonText);
+//        String responseMessage = RestCall.postJson("http://sc.wigo.ai:10015/nipars/v1/search/contents", jsonText);
 
 //        System.out.println(YmdUtil.getTime("20200101"));
 //
