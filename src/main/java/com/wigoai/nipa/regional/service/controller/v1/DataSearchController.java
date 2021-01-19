@@ -74,8 +74,6 @@ public class DataSearchController {
 
         try {
 
-
-
             JSONObject request = new JSONObject(jsonValue);
             SearchData searchData = search(request);
             if(searchData == null){
@@ -96,8 +94,6 @@ public class DataSearchController {
             }else{
                 begin  = request.getInt("begin");
             }
-
-
 
             IndexData[] subArray = IndexUtil.subData(searchArray, begin, request.getInt("end"));
             JsonArray dataArray = new JsonArray();
@@ -127,7 +123,6 @@ public class DataSearchController {
             logger.error(ExceptionUtil.getStackTrace(e));
             return nullResult;
         }
-
     }
 
     /**
@@ -177,9 +172,7 @@ public class DataSearchController {
                 maxLength = 120;
             }
 
-
             String [] highlightKeywords = request.getString("highlight_keyword").trim().split(" ");
-
 
             for(IndexData data : subArray){
                 JsonObject obj =  makeObj(gson, data);
@@ -194,7 +187,7 @@ public class DataSearchController {
                     for(String keyword : highlightKeywords){
                         sb.append(",").append(keyword);
                     }
-                    logger.error("highlight error id: " + data.getId() + " keywords: " + sb.toString());
+                    logger.error("highlight error id: " + data.getId() + " keywords: " + sb.toString() + " length: " + maxLength + ", pre: " + preTag + ", post: " + postTag);
 
                 }
                 dataArray.add(obj);
@@ -211,8 +204,6 @@ public class DataSearchController {
 
 
     private JsonObject makeObj(Gson gson, IndexData data){
-
-
         JsonObject obj =  gson.fromJson(FileUtil.getLine(data.getIndexFileName(), data.getIndexFileLine()),JsonObject.class).getAsJsonObject(IndexData.Keys.DETAIL.key());
         obj.remove(IndexData.Keys.WORD_POSITIONS.key());
         obj.remove(IndexData.Keys.SENTENCE_POSITIONS.key());
