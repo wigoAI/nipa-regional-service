@@ -247,8 +247,16 @@ public class IntegratedAnalysisController {
             try {
 
                 if(obj == null){
-                    logger.error("keyword analysis fail");
-                    callback.callback(null);
+                    //검색 결과가 없을때
+//                    resultObj.put(groups[groupIndex].getId() + "_classifies", "[]");
+//                    resultObj.put(groups[groupIndex].getId() + "_keywords", "[]");
+//                    logger.error("keyword analysis fail");
+
+                    if(groupIndex >= groups.length-1){
+                        callback.callback(null);
+                        return;
+                    }
+                    keyword(resultObj, callback, groups, groupIndex +1, startTime, endTime, standardTime, keywordJson, parameterMap, keywordAnalysis, ymdList, inCodesValue, keywordCount);
                     return ;
                 }
 
@@ -285,7 +293,7 @@ public class IntegratedAnalysisController {
 
         KeywordAnalysis.Module [] modules;
         modules = new KeywordAnalysis.Module[2];
-        modules[0] = KeywordAnalysis.Module.TF_WORD;
+        modules[0] = KeywordAnalysis.Module.TF_WORD_CONTENTS;
         modules[1] = KeywordAnalysis.Module.TF_CLASSIFY;
 
 
@@ -299,9 +307,10 @@ public class IntegratedAnalysisController {
         properties.put("selectors","[{\"id\":\"keywords\",\"type\":\"WORD_CLASS\",\"value\":\"NOUN\"}]");
         properties.put("count", keywordCount);
 
-        moduleProperties.put(KeywordAnalysis.Module.TF_WORD, properties);
+        moduleProperties.put(KeywordAnalysis.Module.TF_WORD_CONTENTS, properties);
 
         keywordAnalysis.keywordAnalysis(startTime, endTime, standardTime, keywordJson, keysArray, modules, moduleProperties, parameterMap, endCallback);
 
     }
+
 }

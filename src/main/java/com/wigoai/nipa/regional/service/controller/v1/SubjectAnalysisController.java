@@ -264,8 +264,12 @@ public class SubjectAnalysisController {
             try {
 
                 if(obj == null){
-                    logger.error("keyword analysis fail");
-                    callback.callback(null);
+                    //검색 결과가 없을때
+                    if(groupIndex >= groups.length-1){
+                        callback.callback(null);
+                        return;
+                    }
+                    keyword(resultObj, callback, groups, groupIndex +1, startTime, endTime, standardTime, keywordJson, parameterMap, keywordAnalysis, ymdList, cloudKeywordCount, snaProperties);
                     return ;
                 }
 
