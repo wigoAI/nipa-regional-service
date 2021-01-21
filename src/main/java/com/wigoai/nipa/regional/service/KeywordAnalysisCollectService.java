@@ -83,17 +83,18 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
         reIndexDetail = (detailObj, document, indexData) -> {
 
             String [] keys = indexData.getIndexKeys();
+
+            Set<String> tagSet = null;
+
+            if(detailObj.has("channel_name")){
+                tagSet = new HashSet<>();
+                tagSet.add(detailObj.getString("channel_name").replace(" ",""));
+            }
+
             if (keys[1].equals("media")) {
                 //해시 태그 정보 추가
                 //            //index data에 데이터 추가
                 NamedEntity[] namedEntityArray = reportRecognizer.recognize(document.getContents());
-
-                Set<String> tagSet = null;
-
-                if(detailObj.has("channel_name")){
-                    tagSet = new HashSet<>();
-                    tagSet.add(detailObj.getString("channel_name"));
-                }
 
                 if(namedEntityArray.length > 0){
                     if(tagSet == null){
@@ -104,13 +105,11 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
                         tagSet.add(namedEntity.getText());
                     }
                 }
-
-                if(tagSet != null && tagSet.size() > 0){
-                    indexData.setTagSet(tagSet);
-                }
-
             }
 
+            if(tagSet != null && tagSet.size() > 0){
+                indexData.setTagSet(tagSet);
+            }
             CodeName[] emotionClassifies = indexData.getClassifies();
             CodeName emotionCodeName = null;
             for(CodeName codeName : emotionClassifies){
@@ -127,14 +126,10 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
             }
         };
 
-
         engineConfig = new EngineConfig();
         engineConfig.engineCode = moaraEngine.getCode();
 
-
-
         String lastNumValue = MoaraEngine.getInstance().getConfig(ServiceConfig.CONTENTS_LAST_NUM.key());
-//                EngineConsole.getConfig(engineConfig.engineCode, ServiceConfig.CONTENTS_LAST_NUM.key());
 
         if (lastNumValue == null) {
             engineConfig.key = ServiceConfig.CONTENTS_LAST_NUM.key();
@@ -146,9 +141,6 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
         } else {
             lastNum = Long.parseLong(lastNumValue);
         }
-
-
-
     }
 
     @Override
@@ -270,13 +262,6 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
                     continue;
                 }
 
-                //개발용 임시소스 (분류모델 생성 전 더미데이터)
-//                CodeName [] codeNames = new CodeName[2];
-//                codeNames[0] = emotionArray[random.nextInt(emotionArray.length)];
-//                codeNames[1] = classifies[random.nextInt(classifies.length)];
-//                indexData.setClassifies(codeNames);
-
-
                 String ymd = new SimpleDateFormat("yyyyMMdd").format(new Date(nipaContents.postTime));
                 String[] keys = new String[2];
 
@@ -289,18 +274,20 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
                 }
                 indexData.setIndexKeys(keys);
 
+                Set<String> tagSet = null;
+
+
+                String channelName = channelNameMap.get(nipaContents.channelId);
+
+                if(channelName != null){
+                    tagSet = new HashSet<>();
+                    tagSet.add(channelName.replace(" ",""));
+                }
+
                 if (keys[1].equals("media")) {
                     //해시 태그 정보 추가
-                    //            //index data에 데이터 추가
+                    //index data에 데이터 추가
                     NamedEntity[] namedEntityArray = reportRecognizer.recognize(document.getContents());
-
-                    String channelName = channelNameMap.get(nipaContents.channelId);
-                    Set<String> tagSet = null;
-
-                    if(channelName != null){
-                        tagSet = new HashSet<>();
-                        tagSet.add(channelName);
-                    }
 
                     if(namedEntityArray.length > 0){
                         if(tagSet == null){
@@ -310,14 +297,12 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
                         for(NamedEntity namedEntity : namedEntityArray){
                             tagSet.add(namedEntity.getText());
                         }
-      }
-
-                    if(tagSet != null && tagSet.size() > 0){
-                        indexData.setTagSet(tagSet);
                     }
 
                 }
-
+                if(tagSet != null && tagSet.size() > 0){
+                    indexData.setTagSet(tagSet);
+                }
                 NipaData nipaData = new NipaData();
                 nipaData.indexData = indexData;
                 nipaData.nipaContents = nipaContents;
