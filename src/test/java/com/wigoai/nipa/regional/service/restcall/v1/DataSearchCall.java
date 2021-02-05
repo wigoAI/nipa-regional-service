@@ -32,8 +32,8 @@ public class DataSearchCall {
                 "  \"standard_time\":" +  System.currentTimeMillis() +",\n" +
                 "  \"start\": 0,\n" +
                 "  \"end\": 10,\n" +
-                "  \"like_keyword\": \"아침에\",\n" +
-                "  \"highlight_keyword\": \"아침에\",\n" +
+                "  \"like_keyword\": \"상고대로\",\n" +
+                "  \"highlight_keyword\": \"상고대로\",\n" +
                 "  \"highlight_max_length\": \"160\",\n" +
                 "  \"pre_tag\": \"\\u003cspan class\\u003d\\\"point\\\"\\u003e\",\n" +
                 "  \"post_tag\": \"\\u003c/span\\u003e\",\n" +
