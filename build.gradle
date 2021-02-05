@@ -42,7 +42,7 @@ dependencies {
 
     implementation group: 'org.mariadb.jdbc', name: 'mariadb-java-client', version: '2.6.0'
 
-    implementation 'com.seomse.commons:seomse-commons:1.2.4'
+    implementation 'com.seomse.commons:seomse-commons:1.2.5'
     implementation 'com.seomse.cypto:seomse-cypto:0.1.0'
 
 

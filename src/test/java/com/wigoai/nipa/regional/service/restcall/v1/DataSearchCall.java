@@ -17,6 +17,7 @@
 package com.wigoai.nipa.regional.service.restcall.v1;
 
 import com.wigoai.rest.RestCall;
+import org.json.JSONObject;
 
 /**
  * @author macle
@@ -25,15 +26,14 @@ public class DataSearchCall {
     public static void main(String[] args) {
 
 
-
-
-        String jsonText =" {\n" +
-                "  \"start_time\": 1608390000000,\n" +
-                "  \"end_time\": 1611021751397,\n" +
+        String jsonText = "{\n" +
+                "  \"start_time\": 1609426800000,\n" +
+                "  \"end_time\": 1612105199999,\n" +
                 "  \"standard_time\":" +  System.currentTimeMillis() +",\n" +
                 "  \"start\": 0,\n" +
-                "  \"end\": 6679,\n" +
-                "  \"highlight_keyword\": \"강원도 춘천시\",\n" +
+                "  \"end\": 10,\n" +
+                "  \"like_keyword\": \"아침에\",\n" +
+                "  \"highlight_keyword\": \"아침에\",\n" +
                 "  \"highlight_max_length\": \"160\",\n" +
                 "  \"pre_tag\": \"\\u003cspan class\\u003d\\\"point\\\"\\u003e\",\n" +
                 "  \"post_tag\": \"\\u003c/span\\u003e\",\n" +
@@ -42,25 +42,26 @@ public class DataSearchCall {
                 "  ],\n" +
                 "  \"keywords\": [\n" +
                 "    {\n" +
-                "      \"keyword\": \"강원도\",\n" +
+                "      \"keyword\": \"홍천\",\n" +
                 "      \"in_filters\": [\n" +
                 "        [\n" +
-                "          \"#블로그검색\"\n" +
+                "          \"#보건위생\"\n" +
                 "        ],\n" +
                 "        [\n" +
-                "          \"#블로그검색\"\n" +
+                "          \"#재난안전\"\n" +
                 "        ],\n" +
                 "        [\n" +
-                "          \"#블로그검색\"\n" +
+                "          \"#청소환경\"\n" +
                 "        ]\n" +
                 "      ],\n" +
                 "      \"out_filters\": []\n" +
                 "    }\n" +
                 "  ]\n" +
                 "}";
-        String responseMessage = RestCall.postJson("http://127.0.0.1:33377/nipars/v1/search/contents", jsonText);
 
-//        String responseMessage = RestCall.postJson("http://sc.wigo.ai:10015/nipars/v1/search/contents", jsonText);
+//        String responseMessage = RestCall.postJson("http://127.0.0.1:10014/nipars/v1/search/contents", jsonText);
+
+        String responseMessage = RestCall.postJson("http://sc.wigo.ai:10014/nipars/v1/search/contents", jsonText);
 
 //        System.out.println(YmdUtil.getTime("20200101"));
 //

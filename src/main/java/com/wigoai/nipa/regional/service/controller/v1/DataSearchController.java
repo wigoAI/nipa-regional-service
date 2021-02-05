@@ -37,6 +37,8 @@ import org.moara.keyword.KeywordAnalysis;
 import org.moara.keyword.ServiceKeywordAnalysis;
 import org.moara.keyword.index.IndexData;
 import org.moara.keyword.index.IndexUtil;
+import org.moara.keyword.search.data.LikeIndexData;
+import org.moara.keyword.search.data.LikeSearchData;
 import org.moara.keyword.search.data.SearchData;
 import org.moara.keyword.search.data.SearchHighlight;
 import org.slf4j.Logger;
@@ -142,14 +144,8 @@ public class DataSearchController {
                 return nullResult;
             }
 
-            IndexData [] searchArray = searchData.getDataArray();
-
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             JsonObject response = new JsonObject();
-            response.addProperty("total", searchArray.length);
-
-            IndexData[] subArray = IndexUtil.subData(searchArray, request.getInt("start") , request.getInt("end"));
-            JsonArray dataArray = new JsonArray();
 
             String preTag;
             if(request.has("pre_tag")){
@@ -174,26 +170,90 @@ public class DataSearchController {
 
             String [] highlightKeywords = request.getString("highlight_keyword").trim().split(" ");
 
-            for(IndexData data : subArray){
-                JsonObject obj =  makeObj(gson, data);
-                
-                //분석 정보를 가져와서 하이라이트 정보 생성하기
-                String analysisContents = obj.remove("analysis_contents").getAsString();
+            IndexData [] searchArray = searchData.getDataArray();
 
-                try {
-                    obj.addProperty("highlight", SearchHighlight.highlight(data, analysisContents, highlightKeywords, preTag, postTag, maxLength).replace('\n', ' '));
-                }catch(Exception e){
-                    StringBuilder sb = new StringBuilder();
-                    for(String keyword : highlightKeywords){
-                        sb.append(",").append(keyword);
-                    }
-                    logger.error("highlight error id: " + data.getId() + " keywords: " + sb.toString() + " length: " + maxLength + ", pre: " + preTag + ", post: " + postTag);
+            String likeKeyword  = null;
 
+            if(request.has("like_keyword")){
+                likeKeyword = request.getString("like_keyword").trim();
+            }
+
+
+            JsonArray dataArray = new JsonArray();
+
+            int start = request.getInt("start");
+            int end =  request.getInt("end");
+
+            if(likeKeyword != null && likeKeyword.length() > 0){
+                long analysisMaxTime = Config.getLong(ServiceConfig.ANALYSIS_MAX_TIME.key(), (long)ServiceConfig.ANALYSIS_MAX_TIME.defaultValue());
+
+                ServiceKeywordAnalysis serviceKeywordAnalysis = ServiceKeywordAnalysis.getInstance();
+                KeywordAnalysis keywordAnalysis = serviceKeywordAnalysis.getKeywordAnalysis();
+
+                LikeSearchData likeSearchData = keywordAnalysis.likeSearch(searchData, likeKeyword, analysisMaxTime);
+
+                if(likeSearchData == null ){
+                    return nullResult;
                 }
-                dataArray.add(obj);
+
+
+                LikeIndexData[] likeDataArray = likeSearchData.getLikeDataArray();
+                response.addProperty("total", likeDataArray.length);
+
+                LikeIndexData [] subArray = likeSearchData.subData(start, end);
+
+
+                for(LikeIndexData likeIndexData : subArray){
+
+                    IndexData data = likeIndexData.getIndexData();
+
+                    JsonObject obj =  makeObj(gson, data);
+                    String analysisContents = obj.remove("analysis_contents").getAsString();
+
+                    try {
+                        obj.addProperty("highlight", SearchHighlight.highlight(data, analysisContents, highlightKeywords, preTag, postTag, maxLength, likeIndexData.getTextIndexArray(likeKeyword)).replace('\n', ' '));
+                    }catch(Exception e){
+                        StringBuilder sb = new StringBuilder();
+                        for(String keyword : highlightKeywords){
+                            sb.append(",").append(keyword);
+                        }
+                        logger.error("highlight error id: " + data.getId() + " keywords: " + sb.toString() + " length: " + maxLength + ", pre: " + preTag + ", post: " + postTag);
+
+                    }
+                    dataArray.add(obj);
+                }
+
+            }else{
+
+                response.addProperty("total", searchArray.length);
+
+                IndexData[] subArray = IndexUtil.subData(searchArray, start, end);
+
+                for(IndexData data : subArray){
+                    JsonObject obj =  makeObj(gson, data);
+
+                    //분석 정보를 가져와서 하이라이트 정보 생성하기
+                    String analysisContents = obj.remove("analysis_contents").getAsString();
+
+                    try {
+                        obj.addProperty("highlight", SearchHighlight.highlight(data, analysisContents, highlightKeywords, preTag, postTag, maxLength).replace('\n', ' '));
+                    }catch(Exception e){
+                        StringBuilder sb = new StringBuilder();
+                        for(String keyword : highlightKeywords){
+                            sb.append(",").append(keyword);
+                        }
+                        logger.error("highlight error id: " + data.getId() + " keywords: " + sb.toString() + " length: " + maxLength + ", pre: " + preTag + ", post: " + postTag);
+
+                    }
+                    dataArray.add(obj);
+                }
+
             }
 
             response.add("data_array", dataArray);
+
+
+
             return gson.toJson(response);
 
         }catch(Exception e){
@@ -251,7 +311,7 @@ public class DataSearchController {
         }
         List<String> ymdList = YmdUtil.getYmdList(startYmd,endYmd);
         String [][] keysArray = GroupKeyUtil.makeKeysArray(ymdList, groupIds);
-        return  keywordAnalysis.dataSearch(startTime, endTime, standardTime, request.getJSONArray("keywords").toString(),keysArray , analysisMaxTime);
+        return  keywordAnalysis.dataSearch(startTime, endTime, standardTime, request.getJSONArray("keywords").toString(), keysArray , analysisMaxTime);
 
     }
 
