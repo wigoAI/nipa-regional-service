@@ -78,7 +78,7 @@ public class DataSearchController {
 
             JSONObject request = new JSONObject(jsonValue);
             SearchData searchData = search(request);
-            if(searchData == null){
+            if(searchData == null|| searchData.getDataArray().length == 0){
                 return nullResult;
             }
 
@@ -140,7 +140,7 @@ public class DataSearchController {
 
             JSONObject request = new JSONObject(jsonValue);
             SearchData searchData = search(request);
-            if(searchData == null){
+            if(searchData == null || searchData.getDataArray().length == 0){
                 return nullResult;
             }
 
@@ -311,6 +311,7 @@ public class DataSearchController {
         }
         List<String> ymdList = YmdUtil.getYmdList(startYmd,endYmd);
         String [][] keysArray = GroupKeyUtil.makeKeysArray(ymdList, groupIds);
+
         return  keywordAnalysis.dataSearch(startTime, endTime, standardTime, request.getJSONArray("keywords").toString(), keysArray , analysisMaxTime);
 
     }
