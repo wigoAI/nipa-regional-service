@@ -76,7 +76,7 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
 
         }
         NamedEntityRecognizerManager namedEntityRecognizerManager = NamedEntityRecognizerManager.getInstance();
-        reportRecognizer = namedEntityRecognizerManager.getNamedEntityRecognizer("ps_reporter");
+        reportRecognizer = namedEntityRecognizerManager.getNamedEntityRecognizer("PS_REPORTER");
 
         String emotionClassify = Config.getConfig(ServiceConfig.EMOTION_CLASSIFY.key());
 

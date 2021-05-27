@@ -17,7 +17,6 @@
 package com.wigoai.nipa.regional.service.restcall.v1;
 
 import com.wigoai.rest.RestCall;
-import org.json.JSONObject;
 
 /**
  * @author macle
@@ -25,33 +24,51 @@ import org.json.JSONObject;
 public class DataSearchCall {
     public static void main(String[] args) {
 
-
-        String jsonText = "{\n" +
-                "  \"start_time\": 1609426800000,\n" +
-                "  \"end_time\": 1612105199999,\n" +
+        String jsonText ="{\n" +
+                "  \"start_time\": 1612796400000,\n" +
+                "  \"end_time\": 1613354433689,\n" +
                 "  \"standard_time\":" +  System.currentTimeMillis() +",\n" +
                 "  \"start\": 0,\n" +
                 "  \"end\": 10,\n" +
-                "  \"like_keyword\": \"상고대로\",\n" +
-                "  \"highlight_keyword\": \"상고대로\",\n" +
+                "  \"like_keyword\": \"ㅁㅁ\",\n" +
+                "  \"highlight_keyword\": \"ㅁㅁ\",\n" +
                 "  \"highlight_max_length\": \"160\",\n" +
                 "  \"pre_tag\": \"\\u003cspan class\\u003d\\\"point\\\"\\u003e\",\n" +
                 "  \"post_tag\": \"\\u003c/span\\u003e\",\n" +
                 "  \"channel_groups\": [\n" +
-                "    \"community\"\n" +
+                "    \"media\"\n" +
                 "  ],\n" +
                 "  \"keywords\": [\n" +
                 "    {\n" +
-                "      \"keyword\": \"홍천\",\n" +
+                "      \"keyword\": \"강원도\",\n" +
                 "      \"in_filters\": [\n" +
                 "        [\n" +
-                "          \"#보건위생\"\n" +
+                "          \"#보건위생\",\n" +
+                "          \"#ㅁㅁ\"\n" +
                 "        ],\n" +
                 "        [\n" +
-                "          \"#재난안전\"\n" +
+                "          \"#재난안전\",\n" +
+                "          \"#ㅁㅁ\"\n" +
                 "        ],\n" +
                 "        [\n" +
-                "          \"#청소환경\"\n" +
+                "          \"#청소환경\",\n" +
+                "          \"#ㅁㅁ\"\n" +
+                "        ],\n" +
+                "        [\n" +
+                "          \"#건설교통\",\n" +
+                "          \"#ㅁㅁ\"\n" +
+                "        ],\n" +
+                "        [\n" +
+                "          \"#교육\",\n" +
+                "          \"#ㅁㅁ\"\n" +
+                "        ],\n" +
+                "        [\n" +
+                "          \"#경제산업\",\n" +
+                "          \"#ㅁㅁ\"\n" +
+                "        ],\n" +
+                "        [\n" +
+                "          \"#기타\",\n" +
+                "          \"#ㅁㅁ\"\n" +
                 "        ]\n" +
                 "      ],\n" +
                 "      \"out_filters\": []\n" +
@@ -59,9 +76,11 @@ public class DataSearchCall {
                 "  ]\n" +
                 "}";
 
-//        String responseMessage = RestCall.postJson("http://127.0.0.1:10014/nipars/v1/search/contents", jsonText);
 
-        String responseMessage = RestCall.postJson("http://sc.wigo.ai:10014/nipars/v1/search/contents", jsonText);
+
+        String responseMessage = RestCall.postJson("http://127.0.0.1:10014/nipars/v1/search/contents", jsonText);
+
+//        String responseMessage = RestCall.postJson("http://sc.wigo.ai:10014/nipars/v1/search/contents", jsonText);
 
 //        System.out.println(YmdUtil.getTime("20200101"));
 //
