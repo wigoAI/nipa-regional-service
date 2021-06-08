@@ -3,7 +3,7 @@ plugins {
 }
 
 group 'com.wigoai.nipa.regional.service'
-version '1.0-SNAPSHOT'
+version '2.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
@@ -48,7 +48,7 @@ dependencies {
     implementation 'com.seomse.cypto:seomse-cypto:0.1.0'
 
 
-    testImplementation 'com.seomse.crawling:seomse-crawling:0.7.7'
+    testImplementation 'com.seomse.crawling:seomse-crawling:0.8.1'
 //    implementation group: 'org.elasticsearch.client', name: 'elasticsearch-rest-high-level-client', version: '7.7.1'
 
     implementation group: 'org.xerial', name: 'sqlite-jdbc', version: '3.30.1'

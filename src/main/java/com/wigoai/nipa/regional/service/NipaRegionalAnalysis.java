@@ -28,6 +28,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 /**
  * Nipa Regional Service Analysis
@@ -127,12 +129,9 @@ public class NipaRegionalAnalysis {
         return channelGroupManager.getGroups();
     }
 
-    /**
-     * DataSource 얻기
-     * @return DataSource
-     */
-    public DataSource getDataSource() {
-        return dataSource;
+
+    public Connection getConnection() throws SQLException {
+        return dataSource.getConnection();
     }
 
     /**

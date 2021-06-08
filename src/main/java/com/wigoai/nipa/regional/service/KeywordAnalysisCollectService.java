@@ -187,7 +187,7 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
         String emotionClassify = Config.getConfig(ServiceConfig.EMOTION_CLASSIFY.key());
 
         //500개씩 가져오기
-        try (Connection conn = NipaRegionalAnalysis.getInstance().getDataSource().getConnection()) {
+        try (Connection conn = NipaRegionalAnalysis.getInstance().getConnection()) {
 
             List<CrawlingChannel> channelList;
 

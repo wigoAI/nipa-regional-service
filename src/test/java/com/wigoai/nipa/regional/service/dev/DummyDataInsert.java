@@ -73,7 +73,7 @@ public class DummyDataInsert {
 
         List<NipaRsContents> contentsList = new ArrayList<>();
 
-        try(Connection conn  = NipaRegionalAnalysis.getInstance().getDataSource().getConnection()){
+        try(Connection conn  = NipaRegionalAnalysis.getInstance().getConnection()){
             for(File excel : excelList){
                 logger.info("excel name: " + excel.getAbsolutePath());
 
