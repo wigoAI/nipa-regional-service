@@ -43,7 +43,7 @@ public class NipaRegionalServiceInitializer implements MoaraInitializer {
         if(Config.getBoolean(ServiceConfig.SERVICE_FLAG.key(),(Boolean)ServiceConfig.SERVICE_FLAG.defaultValue())){
             //싱글톤 생성
             //noinspection ResultOfMethodCallIgnored
-            NipaRegionalAnalysis.getInstance();
+            NipaRegionalAnalysis nipaRegionalAnalysis = NipaRegionalAnalysis.getInstance();
             ServiceKeywordAnalysis serviceKeywordAnalysis = ServiceKeywordAnalysis.getInstance();
 
             Callback initCallback = new Callback() {

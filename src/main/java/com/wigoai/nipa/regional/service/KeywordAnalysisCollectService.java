@@ -35,9 +35,10 @@ import org.moara.keyword.index.*;
 import org.moara.keyword.search.ContentsGroup;
 import org.moara.keyword.search.ContentsIndexData;
 import org.moara.meta.MetaDataUtil;
-import org.moara.ner.NamedEntityRecognizer;
-import org.moara.ner.NamedEntityRecognizerManager;
-import org.moara.ner.entity.NamedEntity;
+
+import org.moara.yido.ner.NamedEntityRecognizer;
+import org.moara.yido.ner.NamedEntityRecognizerManager;
+import org.moara.yido.ner.entity.NamedEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

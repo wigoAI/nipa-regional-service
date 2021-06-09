@@ -16,6 +16,7 @@
 
 package com.wigoai.nipa.regional.service.dev;
 
+import com.wigoai.nipa.regional.service.NipaRegionalAnalysis;
 import org.moara.common.data.database.jdbc.JdbcObjects;
 
 /**
@@ -25,10 +26,10 @@ import org.moara.common.data.database.jdbc.JdbcObjects;
 public class JdbcObjMake {
 
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
 
-        String tableName = "T_CRAWLING_CHANNEL_GP_MAP";
-        System.out.println(JdbcObjects.makeObjectValue(tableName));
+        String tableName = "T_CRAWLING_CLIENT_CHANNEL";
+        System.out.println(JdbcObjects.makeObjectValue(NipaRegionalAnalysis.getInstance().getConnection(), tableName));
 
     }
 }

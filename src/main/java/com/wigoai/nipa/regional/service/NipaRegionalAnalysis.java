@@ -99,12 +99,20 @@ public class NipaRegionalAnalysis {
         classifyCodeManager.sync();
         SynchronizerManager.getInstance().add(classifyCodeManager);
 
+    }
+
+    /**
+     * 생성자 호출 이후에 필요한 이벤트
+     */
+    void init(){
+
         //채널 리뉴얼
         channelManager.sync();
         SynchronizerManager.getInstance().add(channelManager);
 
-        
+
     }
+
 
     /**
      * init error
