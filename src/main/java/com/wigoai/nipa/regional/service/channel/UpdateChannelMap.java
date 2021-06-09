@@ -18,8 +18,10 @@ package com.wigoai.nipa.regional.service.channel;
 
 import org.moara.common.data.database.Table;
 import org.moara.common.data.database.annotation.Column;
+import org.moara.common.data.database.annotation.DateTime;
+import org.moara.common.data.database.annotation.FlagBoolean;
 
-@Table(name="T_CRAWLING_CLIENT_CHANNEL_MAP")
+@Table(name="T_CRAWLING_CLIENT_CHANNEL_GP_MAP")
 public class UpdateChannelMap {
 
     @Column(name = "CHANNEL_GP_ID")
@@ -27,5 +29,14 @@ public class UpdateChannelMap {
 
     @Column(name = "API_CHANNEL_ID")
     String channelId;
+
+
+    @FlagBoolean
+    @Column(name = "DEL_FG")
+    boolean isDel;
+
+    @DateTime
+    @Column(name = "UPT_DT")
+    long time;
 
 }

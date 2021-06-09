@@ -25,14 +25,14 @@ import org.moara.common.data.database.annotation.FlagBoolean;
  * 채널그룹 업데이트용
  * @author macle
  */
-@Table(name="T_CRAWLING_CLIENT_CHANNEL")
+@Table(name="T_CRAWLING_CLIENT_CHANNEL_GP")
 public class UpdateChannelGroup {
 
 
-    @Column(name = "API_CHANNEL_ID")
+    @Column(name = "CHANNEL_GP_ID")
     String id;
 
-    @Column(name = "CHANNEL_NM")
+    @Column(name = "CHANNEL_GP_NM")
     String name;
 
     @FlagBoolean

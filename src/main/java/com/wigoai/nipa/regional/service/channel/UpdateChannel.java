@@ -16,6 +16,7 @@
 
 package com.wigoai.nipa.regional.service.channel;
 
+import org.moara.common.data.database.Table;
 import org.moara.common.data.database.annotation.Column;
 import org.moara.common.data.database.annotation.DateTime;
 import org.moara.common.data.database.annotation.FlagBoolean;
@@ -25,14 +26,15 @@ import org.moara.common.data.database.annotation.PrimaryKey;
  * 채널 업데이트 용
  * @author macle
  */
+@Table(name="T_CRAWLING_CLIENT_CHANNEL")
 public class UpdateChannel {
 
 
     @PrimaryKey(seq = 1)
-    @Column(name = "CHANNEL_GP_ID")
+    @Column(name = "API_CHANNEL_ID")
     String id;
 
-    @Column(name = "CHANNEL_GP_NM")
+    @Column(name = "CHANNEL_NM")
     String name;
 
     @FlagBoolean
