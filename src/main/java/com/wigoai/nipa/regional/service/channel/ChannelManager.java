@@ -58,6 +58,8 @@ public class ChannelManager implements Synchronizer {
         List<UpdateChannelGroup> groupList = getObjList(UpdateChannelGroup.class, groupTime);
         if(groupList.size() > 0){
 
+            logger.debug("new group: " + groupList.size());
+
             for(UpdateChannelGroup updateChannelGroup : groupList){
                 if(updateChannelGroup.isDel){
                     groupMap.remove(updateChannelGroup.id);
@@ -96,6 +98,8 @@ public class ChannelManager implements Synchronizer {
         List<UpdateChannel> channelList = getObjList(UpdateChannel.class, channelTime);
 
         if(channelList.size() > 0){
+            logger.debug("new channel: " + channelList.size());
+
 
             for(UpdateChannel updateChannel : channelList){
                 if(updateChannel.isDel){
@@ -127,6 +131,9 @@ public class ChannelManager implements Synchronizer {
         //매핑
         List<UpdateChannelMap> mapList = getObjList(UpdateChannelMap.class, mapTime);
         if(mapList.size() > 0){
+            logger.debug("new map: " + mapList.size());
+
+
             for(UpdateChannelMap map : mapList){
 
                 ChannelGroup channelGroup = groupMap.get(map.groupId);

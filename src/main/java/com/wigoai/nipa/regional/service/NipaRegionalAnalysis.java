@@ -17,6 +17,7 @@
 package com.wigoai.nipa.regional.service;
 
 import com.seomse.cypto.LoginCrypto;
+import com.wigoai.nipa.regional.service.channel.ChannelManager;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.moara.ara.datamining.textmining.TextMining;
@@ -55,8 +56,11 @@ public class NipaRegionalAnalysis {
 
     private final DataSource dataSource;
 
+    //채널 그룹 매니저 삭제 예정 관련기능 리뉴얼
     private final ChannelGroupManager channelGroupManager = new ChannelGroupManager();
+
     private final ClassifyManager classifyCodeManager = new ClassifyManager();
+    private final ChannelManager channelManager = new ChannelManager();
 
     /**
      * 생성자
@@ -87,10 +91,19 @@ public class NipaRegionalAnalysis {
         config.setAutoCommit(true);
         config.setMaximumPoolSize(3);
         dataSource =  new HikariDataSource(config);
+        
+        //삭제예정 그룹 리뉴얼
         channelGroupManager.sync();
         SynchronizerManager.getInstance().add(channelGroupManager);
+
         classifyCodeManager.sync();
         SynchronizerManager.getInstance().add(classifyCodeManager);
+
+        //채널 리뉴얼
+        channelManager.sync();
+        SynchronizerManager.getInstance().add(channelManager);
+
+        
     }
 
     /**
