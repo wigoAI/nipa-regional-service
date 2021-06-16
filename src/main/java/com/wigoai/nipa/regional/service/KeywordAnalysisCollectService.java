@@ -17,6 +17,7 @@
 package com.wigoai.nipa.regional.service;
 
 import com.seomse.commons.utils.FileUtil;
+import com.wigoai.nipa.regional.service.channel.ChannelManager;
 import org.json.JSONObject;
 import org.moara.ara.datamining.data.CodeName;
 import org.moara.ara.datamining.statistics.count.WordCount;
@@ -187,8 +188,13 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
 
         String emotionClassify = Config.getConfig(ServiceConfig.EMOTION_CLASSIFY.key());
 
+
+        NipaRegionalAnalysis nipaRegionalAnalysis = NipaRegionalAnalysis.getInstance();
+
+        ChannelManager channelManager = nipaRegionalAnalysis.getChannelManager();
+
         //500개씩 가져오기
-        try (Connection conn = NipaRegionalAnalysis.getInstance().getConnection()) {
+        try (Connection conn = nipaRegionalAnalysis.getConnection()) {
 
             List<CrawlingChannel> channelList;
 
@@ -241,9 +247,9 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
 
             int maxLength = Config.getInteger(ServiceConfig.CONTENTS_MAX_LENGTH.key(), (int) ServiceConfig.CONTENTS_MAX_LENGTH.defaultValue());
 
-            NipaRegionalAnalysis nipaRegionalAnalysis = NipaRegionalAnalysis.getInstance();
 
             List<NipaData> addDataList = new ArrayList<>();
+
 
             for (NipaRsContents nipaContents : nipaContentsList) {
 
@@ -254,6 +260,8 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
                 if (nipaContents.postTime == null) {
                     nipaContents.postTime = time;
                 }
+
+
 
                 Document document = NipaRegionalAnalysis.makeDocument(nipaContents);
 
@@ -267,6 +275,9 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
                 String[] keys = new String[2];
 
                 keys[0] = ymd;
+
+
+
                 ChannelGroup channelGroup = nipaRegionalAnalysis.getChannelGroup(nipaContents.channelId);
                 if (channelGroup == null) {
                     keys[1] = Config.getConfig(ServiceConfig.DEFAULT_CHANNEL_GROUP.key(), (String) ServiceConfig.DEFAULT_CHANNEL_GROUP.defaultValue());

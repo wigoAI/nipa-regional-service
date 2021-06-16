@@ -196,4 +196,12 @@ public class NipaRegionalAnalysis {
      */
     public String getFieldCode(String name){return classifyCodeManager.getFieldCode(name);}
 
+    /**
+     * 채널 매니저 얻기
+     * 채널과 그룹정보 관리
+     * @return 채널 매니저
+     */
+    public ChannelManager getChannelManager() {
+        return channelManager;
+    }
 }
