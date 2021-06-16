@@ -193,6 +193,8 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
 
         ChannelManager channelManager = nipaRegionalAnalysis.getChannelManager();
 
+        //이전 채널 그룹은 사용하지 않게 업데이트 해야함
+//        ChannelGroup mediaGroup = channelManager.getGroupFromId("media");
         //500개씩 가져오기
         try (Connection conn = nipaRegionalAnalysis.getConnection()) {
 
@@ -270,6 +272,9 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
                 if (wordCounts == null || wordCounts.length == 0) {
                     continue;
                 }
+
+
+
 
                 String ymd = new SimpleDateFormat("yyyyMMdd").format(new Date(nipaContents.postTime));
                 String[] keys = new String[2];

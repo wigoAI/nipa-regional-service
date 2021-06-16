@@ -66,6 +66,11 @@ public class ChannelGroup {
         isChange = false;
     }
 
+
+    public boolean hasChannel(String channelId){
+        return channelMap.containsKey(channelId);
+    }
+
     public Channel[] getChannels() {
         return channels;
     }
