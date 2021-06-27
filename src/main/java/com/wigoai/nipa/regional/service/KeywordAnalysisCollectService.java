@@ -188,7 +188,6 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
 
         String emotionClassify = Config.getConfig(ServiceConfig.EMOTION_CLASSIFY.key());
 
-
         NipaRegionalAnalysis nipaRegionalAnalysis = NipaRegionalAnalysis.getInstance();
 
         ChannelManager channelManager = nipaRegionalAnalysis.getChannelManager();
@@ -392,7 +391,7 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
 
                 jsonObj.put(IndexData.Keys.DETAIL.key(), detailObj);
 
-                indexFile.sb.append('\n').append(jsonObj.toString());
+                indexFile.sb.append('\n').append(jsonObj);
 
                 //라인 넘버 변경
                 indexFile.lineIndex++;

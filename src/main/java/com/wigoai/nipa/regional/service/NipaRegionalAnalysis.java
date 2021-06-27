@@ -56,8 +56,6 @@ public class NipaRegionalAnalysis {
 
     private final DataSource dataSource;
 
-    //채널 그룹 매니저 삭제 예정 관련기능 리뉴얼
-    private final ChannelGroupManager channelGroupManager = new ChannelGroupManager();
 
     private final ClassifyManager classifyCodeManager = new ClassifyManager();
     private final ChannelManager channelManager = new ChannelManager();
@@ -113,7 +111,6 @@ public class NipaRegionalAnalysis {
 
     }
 
-
     /**
      * init error
      * @param key String config key
@@ -123,31 +120,6 @@ public class NipaRegionalAnalysis {
         String errorMessage = "crawling database set error " + key + " check";
         logger.error(errorMessage);
         return errorMessage;
-    }
-
-    /**
-     *
-     * @param channelId String
-     * @return ChannelGroup
-     */
-    public ChannelGroup getChannelGroup(String channelId){
-        return channelGroupManager.getChannelGroup(channelId);
-    }
-    /**
-     *
-     * @param groupId String
-     * @return ChannelGroup
-     */
-    public ChannelGroup getGroup(String groupId){
-        return channelGroupManager.getGroup(groupId);
-    }
-
-    /**
-     *
-     * @return ChannelGroup[]
-     */
-    public ChannelGroup[] getGroups() {
-        return channelGroupManager.getGroups();
     }
 
 
