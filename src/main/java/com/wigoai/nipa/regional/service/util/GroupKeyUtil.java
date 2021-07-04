@@ -16,9 +16,13 @@
 
 package com.wigoai.nipa.regional.service.util;
 
-import com.wigoai.nipa.regional.service.ChannelGroup;
 
+import com.wigoai.nipa.regional.service.channel.Channel;
+import com.wigoai.nipa.regional.service.channel.ChannelGroup;
+
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * contents group key 생성 유틸
@@ -34,31 +38,35 @@ public class GroupKeyUtil {
      * @return String [] []
      */
     public static String [][] makeKeysArray(List<String> ymdList,  ChannelGroup[] groups){
-        String [] groupIds = new String[groups.length];
 
-        for (int i = 0; i < groups.length ; i++) {
-            groupIds[i] = groups[i].getId();
+        Set<String> overlapCheck = new HashSet<>();
+
+        for(ChannelGroup channelGroup : groups){
+            Channel[] channels = channelGroup.getChannels();
+            for(Channel channel : channels){
+                overlapCheck.add(channel.getId());
+            }
         }
 
-        return makeKeysArray(ymdList, groupIds);
+        return makeKeysArray(ymdList, overlapCheck.toArray(new String[0]));
     }
 
     /**
      * keys 생성
      * @param ymdList List
-     * @param groupIds String []
+     * @param channelIds 채널 아이디 배열
      * @return String [] []
      */
-    public static String [][] makeKeysArray(List<String> ymdList,  String [] groupIds){
-        int size = ymdList.size()*groupIds.length;
+    public static String [][] makeKeysArray(List<String> ymdList,  String [] channelIds){
+        int size = ymdList.size()*channelIds.length;
         String [][] keysArray = new String[size][2];
 
         int index = 0;
         for(String ymd : ymdList){
-            for (String groupId : groupIds) {
+            for (String channelId : channelIds) {
                 String[] key = new String[2];
                 key[0] = ymd;
-                key[1] = groupId;
+                key[1] = channelId;
                 keysArray[index++] = key;
             }
         }
@@ -66,22 +74,4 @@ public class GroupKeyUtil {
         return keysArray;
     }
 
-
-    /**
-     * keys 생성
-     * @param ymdList List
-     * @param groupId Sring
-     * @return  String [] []
-     */
-    public static String [][] makeKeysArray(List<String> ymdList,  String groupId){
-        String [][] keysArray = new String[ymdList.size()][1];
-        for (int i = 0; i <keysArray.length ; i++) {
-            String[] key = new String[2];
-            key[0] = ymdList.get(i);
-            key[1] = groupId;
-            keysArray[i] = key;
-        }
-
-        return keysArray;
-    }
 }

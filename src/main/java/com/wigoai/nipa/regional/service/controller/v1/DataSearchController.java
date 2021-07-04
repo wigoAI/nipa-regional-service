@@ -21,9 +21,10 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.seomse.commons.utils.FileUtil;
-import com.wigoai.nipa.regional.service.ChannelGroup;
 import com.wigoai.nipa.regional.service.NipaRegionalAnalysis;
 import com.wigoai.nipa.regional.service.ServiceConfig;
+import com.wigoai.nipa.regional.service.channel.ChannelGroup;
+import com.wigoai.nipa.regional.service.channel.ChannelManager;
 import com.wigoai.nipa.regional.service.util.GroupKeyUtil;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -77,6 +78,9 @@ public class DataSearchController {
         try {
 
             JSONObject request = new JSONObject(jsonValue);
+
+            JSONArray channelGroupArray = request.getJSONArray("");
+
             SearchData searchData = search(request);
             if(searchData == null|| searchData.getDataArray().length == 0){
                 return nullResult;
@@ -270,7 +274,22 @@ public class DataSearchController {
         obj.remove(DocumentStandardKey.LANG_CODE.key());
         obj.remove(DocumentStandardKey.DOC_TYPE.key());
 
-        String channelGroupId = data.getIndexKeys()[1];
+
+        ChannelManager channelManager = NipaRegionalAnalysis.getInstance().getChannelManager();
+        ChannelGroup channelGroup = channelManager.getGroupFromId("media");
+
+        String channelId = data.getIndexKeys()[1];
+
+        if(!channelGroup.hasChannel(channelId)){
+            channelGroup = channelManager.getGroupFromId("community");
+        }
+
+
+
+
+
+//        community
+
         obj.addProperty("channel_group_id", channelGroupId);
         obj.addProperty("channel_group_nm", NipaRegionalAnalysis.getInstance().getGroup(channelGroupId).getName());
         obj.addProperty("id", data.getId());

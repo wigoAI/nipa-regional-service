@@ -103,6 +103,7 @@ public class SubjectAnalysisController {
 
             Properties properties = new Properties();
 
+            //그룹 정보 변경
             ChannelGroup[] groups = nipaRegionalAnalysis.getGroups();
             StringBuilder channelIdBuilder = new StringBuilder();
             for(ChannelGroup channelGroup : groups){

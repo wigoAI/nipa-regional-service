@@ -289,6 +289,7 @@ public class IntegratedAnalysisController {
             }
         };
 
+        //그룹 정보 변경
         String [][] keysArray = GroupKeyUtil.makeKeysArray(ymdList,  groups[groupIndex].getId());
 
         KeywordAnalysis.Module [] modules;
