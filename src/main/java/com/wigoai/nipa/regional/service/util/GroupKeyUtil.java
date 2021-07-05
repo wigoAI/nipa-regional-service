@@ -48,7 +48,7 @@ public class GroupKeyUtil {
             }
         }
 
-        return makeKeysArray(ymdList, overlapCheck.toArray(new String[0]));
+        return makeChannelKeysArray(ymdList, overlapCheck.toArray(new String[0]));
     }
 
     /**
@@ -57,7 +57,7 @@ public class GroupKeyUtil {
      * @param channelIds 채널 아이디 배열
      * @return String [] []
      */
-    public static String [][] makeKeysArray(List<String> ymdList,  String [] channelIds){
+    public static String [][] makeChannelKeysArray(List<String> ymdList,  String [] channelIds){
         int size = ymdList.size()*channelIds.length;
         String [][] keysArray = new String[size][2];
 

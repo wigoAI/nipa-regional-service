@@ -262,8 +262,6 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
                     nipaContents.postTime = time;
                 }
 
-
-
                 Document document = NipaRegionalAnalysis.makeDocument(nipaContents);
 
                 IndexData indexData = IndexDataMake.getIndexDataDefault(document, Config.getInteger(KeywordConfig.MIN_SYLLABLE_LENGTH.key(), (int) KeywordConfig.MIN_SYLLABLE_LENGTH.defaultValue()));
@@ -272,15 +270,10 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
                     continue;
                 }
 
-
-
-
                 String ymd = new SimpleDateFormat("yyyyMMdd").format(new Date(nipaContents.postTime));
                 String[] keys = new String[2];
 
                 keys[0] = ymd;
-
-
 
                 ChannelGroup channelGroup = nipaRegionalAnalysis.getChannelGroup(nipaContents.channelId);
                 if (channelGroup == null) {

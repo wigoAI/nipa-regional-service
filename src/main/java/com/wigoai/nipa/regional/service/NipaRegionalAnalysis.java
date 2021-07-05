@@ -90,10 +90,6 @@ public class NipaRegionalAnalysis {
         config.setMaximumPoolSize(3);
         dataSource =  new HikariDataSource(config);
         
-        //삭제예정 그룹 리뉴얼
-        channelGroupManager.sync();
-        SynchronizerManager.getInstance().add(channelGroupManager);
-
         classifyCodeManager.sync();
         SynchronizerManager.getInstance().add(classifyCodeManager);
 
@@ -101,6 +97,7 @@ public class NipaRegionalAnalysis {
 
     /**
      * 생성자 호출 이후에 필요한 이벤트
+     * NipaRegionalServiceInitializer 에서 같이 실행 됨
      */
     void init(){
 

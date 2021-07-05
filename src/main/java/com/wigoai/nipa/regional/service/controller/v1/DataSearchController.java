@@ -79,7 +79,6 @@ public class DataSearchController {
 
             JSONObject request = new JSONObject(jsonValue);
 
-            JSONArray channelGroupArray = request.getJSONArray("");
 
             SearchData searchData = search(request);
             if(searchData == null|| searchData.getDataArray().length == 0){
@@ -221,7 +220,7 @@ public class DataSearchController {
                         for(String keyword : highlightKeywords){
                             sb.append(",").append(keyword);
                         }
-                        logger.error("highlight error id: " + data.getId() + " keywords: " + sb.toString() + " length: " + maxLength + ", pre: " + preTag + ", post: " + postTag);
+                        logger.error("highlight error id: " + data.getId() + " keywords: " + sb + " length: " + maxLength + ", pre: " + preTag + ", post: " + postTag);
 
                     }
                     dataArray.add(obj);
@@ -246,7 +245,7 @@ public class DataSearchController {
                         for(String keyword : highlightKeywords){
                             sb.append(",").append(keyword);
                         }
-                        logger.error("highlight error id: " + data.getId() + " keywords: " + sb.toString() + " length: " + maxLength + ", pre: " + preTag + ", post: " + postTag);
+                        logger.error("highlight error id: " + data.getId() + " keywords: " + sb + " length: " + maxLength + ", pre: " + preTag + ", post: " + postTag);
 
                     }
                     dataArray.add(obj);
@@ -284,14 +283,8 @@ public class DataSearchController {
             channelGroup = channelManager.getGroupFromId("community");
         }
 
-
-
-
-
-//        community
-
-        obj.addProperty("channel_group_id", channelGroupId);
-        obj.addProperty("channel_group_nm", NipaRegionalAnalysis.getInstance().getGroup(channelGroupId).getName());
+        obj.addProperty("channel_group_id", channelGroup.getId());
+        obj.addProperty("channel_group_nm", channelGroup.getName());
         obj.addProperty("id", data.getId());
         return obj;
     }
@@ -313,23 +306,23 @@ public class DataSearchController {
         String startYmd =  new SimpleDateFormat("yyyyMMdd").format(new Date(startTime));
         String endYmd =  new SimpleDateFormat("yyyyMMdd").format(new Date(endTime-1));
 
-        String [] groupIds;
+        ChannelGroup[] groups;
         if(request.has("channel_groups")){
+            ChannelManager channelManager = NipaRegionalAnalysis.getInstance().getChannelManager();
             JSONArray ids = request.getJSONArray("channel_groups");
-            groupIds = new String[ids.length()];
-            for (int i = 0; i <groupIds.length ; i++) {
-                groupIds[i] = ids.getString(i);
+            groups = new ChannelGroup[ids.length()];
+            for (int i = 0; i <groups.length ; i++) {
+                groups[i] = channelManager.getGroupFromId(ids.getString(i));
             }
         }else{
-            NipaRegionalAnalysis nipaRegionalAnalysis = NipaRegionalAnalysis.getInstance();
-            ChannelGroup[] groups = nipaRegionalAnalysis.getGroups();
-            groupIds = new String[groups.length];
-            for (int i = 0; i <groupIds.length ; i++) {
-                groupIds[i] = groups[i].getId();
-            }
+            ChannelManager channelManager = NipaRegionalAnalysis.getInstance().getChannelManager();
+            groups = new ChannelGroup[2];
+            groups[0] =  channelManager.getGroupFromId("media");
+            groups[1] =  channelManager.getGroupFromId("community");
+
         }
         List<String> ymdList = YmdUtil.getYmdList(startYmd,endYmd);
-        String [][] keysArray = GroupKeyUtil.makeKeysArray(ymdList, groupIds);
+        String [][] keysArray = GroupKeyUtil.makeKeysArray(ymdList, groups);
 
         return  keywordAnalysis.dataSearch(startTime, endTime, standardTime, request.getJSONArray("keywords").toString(), keysArray , analysisMaxTime);
 
