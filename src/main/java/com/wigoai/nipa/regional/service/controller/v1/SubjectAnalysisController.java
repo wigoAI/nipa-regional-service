@@ -22,6 +22,8 @@ import com.google.gson.JsonObject;
 import com.wigoai.nipa.regional.service.ChannelGroup;
 import com.wigoai.nipa.regional.service.NipaRegionalAnalysis;
 import com.wigoai.nipa.regional.service.ServiceConfig;
+import com.wigoai.nipa.regional.service.channel.ChannelGroup;
+import com.wigoai.nipa.regional.service.channel.ChannelManager;
 import com.wigoai.nipa.regional.service.util.GroupKeyUtil;
 import com.wigoai.nipa.regional.service.util.parameterUtil;
 import org.json.JSONArray;
@@ -103,9 +105,14 @@ public class SubjectAnalysisController {
 
             Properties properties = new Properties();
 
+
+            ChannelManager channelManager = NipaRegionalAnalysis.getInstance().getChannelManager();
+            ChannelGroup[] groups = new ChannelGroup[2];
+            groups[0] =  channelManager.getGroupFromId("media");
+            groups[1] =  channelManager.getGroupFromId("community");
+
             //그룹 정보 변경
-            ChannelGroup[] groups = nipaRegionalAnalysis.getGroups();
-            StringBuilder channelIdBuilder = new StringBuilder();
+//            StringBuilder channelIdBuilder = new StringBuilder();
             for(ChannelGroup channelGroup : groups){
                 channelIdBuilder.append(",").append(channelGroup.getId());
             }
@@ -305,7 +312,7 @@ public class SubjectAnalysisController {
             }
         };
 
-        String [][] keysArray = GroupKeyUtil.makeKeysArray(ymdList,  groups[groupIndex].getId());
+        String [][] keysArray = GroupKeyUtil.makeKeysArray(ymdList,  groups[groupIndex]);
 
         KeywordAnalysis.Module [] modules = new KeywordAnalysis.Module[2];
         modules[0] = KeywordAnalysis.Module.TF_WORD_CONTENTS;

@@ -17,6 +17,7 @@
 package com.wigoai.nipa.regional.service;
 
 import com.seomse.commons.utils.FileUtil;
+import com.wigoai.nipa.regional.service.channel.Channel;
 import com.wigoai.nipa.regional.service.channel.ChannelManager;
 import org.json.JSONObject;
 import org.moara.ara.datamining.data.CodeName;
@@ -25,7 +26,6 @@ import org.moara.ara.datamining.textmining.api.document.DocumentStandardKey;
 import org.moara.ara.datamining.textmining.document.Document;
 import org.moara.common.config.Config;
 import org.moara.common.data.database.jdbc.JdbcObjects;
-import org.moara.common.data.database.jdbc.PrepareStatementData;
 import org.moara.common.service.Service;
 import org.moara.common.util.ExceptionUtil;
 import org.moara.engine.MoaraEngine;
@@ -35,8 +35,6 @@ import org.moara.keyword.ServiceKeywordAnalysis;
 import org.moara.keyword.index.*;
 import org.moara.keyword.search.ContentsGroup;
 import org.moara.keyword.search.ContentsIndexData;
-import org.moara.meta.MetaDataUtil;
-
 import org.moara.yido.ner.NamedEntityRecognizer;
 import org.moara.yido.ner.NamedEntityRecognizerManager;
 import org.moara.yido.ner.entity.NamedEntity;
@@ -58,8 +56,6 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
     private static final Logger logger = LoggerFactory.getLogger(KeywordAnalysisCollectService.class);
 
     private final EngineConfig engineConfig;
-
-    private final Map<String, String> channelNameMap = new HashMap<>();
 
     ReIndexDetail reIndexDetail;
 
@@ -158,9 +154,6 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
 
     private long lastNum;
 
-    private long channelUpdateTime = 0L;
-
-
     private final Object collectLock = new Object();
 
     private boolean isCollect = false;
@@ -193,28 +186,8 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
         ChannelManager channelManager = nipaRegionalAnalysis.getChannelManager();
 
         //이전 채널 그룹은 사용하지 않게 업데이트 해야함
-//        ChannelGroup mediaGroup = channelManager.getGroupFromId("media");
         //500개씩 가져오기
         try (Connection conn = nipaRegionalAnalysis.getConnection()) {
-
-            List<CrawlingChannel> channelList;
-
-            if(channelUpdateTime == 0L){
-                channelList = JdbcObjects.getObjList(conn, CrawlingChannel.class, "DEL_FG = 'N'");
-            }else{
-                Map<Integer, PrepareStatementData> prepareStatementDataMap = MetaDataUtil.newTimeMap(channelUpdateTime);
-                channelList = JdbcObjects.getObjList(conn, CrawlingChannel.class, null,"UPT_DT > ? AND DEL_FG = 'N'", prepareStatementDataMap);
-            }
-
-            if(channelList.size() > 0){
-                for(CrawlingChannel crawlingChannel : channelList){
-                    channelNameMap.put(crawlingChannel.id, crawlingChannel.name);
-                    if(crawlingChannel.updateTime > channelUpdateTime){
-                        channelUpdateTime = crawlingChannel.updateTime;
-                    }
-                }
-                channelList.clear();
-            }
 
             List<NipaRsContents> nipaContentsList = JdbcObjects.getObjList(conn, NipaRsContents.class, "SEQ_NO > " + lastNum + " ORDER BY SEQ_NO ASC LIMIT 0, 500");
             if (nipaContentsList.size() == 0) {
@@ -274,24 +247,15 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
                 String[] keys = new String[2];
 
                 keys[0] = ymd;
-
-                ChannelGroup channelGroup = nipaRegionalAnalysis.getChannelGroup(nipaContents.channelId);
-                if (channelGroup == null) {
-                    keys[1] = Config.getConfig(ServiceConfig.DEFAULT_CHANNEL_GROUP.key(), (String) ServiceConfig.DEFAULT_CHANNEL_GROUP.defaultValue());
-                } else {
-                    keys[1] = channelGroup.id;
-                }
+                keys[1] = nipaContents.channelId;
                 indexData.setIndexKeys(keys);
 
-                Set<String> tagSet = null;
+                Channel channel = channelManager.getChannel(nipaContents.channelId);
+
+                Set<String> tagSet =  new HashSet<>();
+                tagSet.add(channel.getName());
 
 
-                String channelName = channelNameMap.get(nipaContents.channelId);
-
-                if(channelName != null){
-                    tagSet = new HashSet<>();
-                    tagSet.add(channelName.replace(" ",""));
-                }
 
                 if (keys[1].equals("media")) {
                     //해시 태그 정보 추가
@@ -299,9 +263,6 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
                     NamedEntity[] namedEntityArray = reportRecognizer.recognize(document.getContents());
 
                     if(namedEntityArray.length > 0){
-                        if(tagSet == null){
-                            tagSet = new HashSet<>();
-                        }
 
                         for(NamedEntity namedEntity : namedEntityArray){
                             tagSet.add(namedEntity.getText());
@@ -309,14 +270,12 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
                     }
 
                 }
-                if(tagSet != null && tagSet.size() > 0){
-                    indexData.setTagSet(tagSet);
-                }
+                indexData.setTagSet(tagSet);
                 NipaData nipaData = new NipaData();
                 nipaData.indexData = indexData;
                 nipaData.nipaContents = nipaContents;
                 nipaData.document = document;
-
+                nipaData.channel = channel;
                 addDataList.add(nipaData);
             }
 
@@ -361,7 +320,7 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
                 detailObj.put(DocumentStandardKey.DOC_TYPE.key(), nipaData.document.getDocType());
 
                 detailObj.put("channel_id", nipaData.nipaContents.channelId);
-                detailObj.put("channel_name", channelNameMap.get(nipaData.nipaContents.channelId));
+                detailObj.put("channel_name",  nipaData.channel.getName());
                 detailObj.put("post_time", nipaData.nipaContents.postTime);
                 detailObj.put("post_ymd_hm", new SimpleDateFormat("yyyyMMdd HH:mm").format(new Date(nipaData.nipaContents.postTime)));
                 detailObj.put("original_url", nipaData.nipaContents.originalUrl);
@@ -467,6 +426,8 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
         NipaRsContents nipaContents;
         IndexData indexData;
         Document document;
+        Channel channel;
+
     }
 
     private static class IndexFile {

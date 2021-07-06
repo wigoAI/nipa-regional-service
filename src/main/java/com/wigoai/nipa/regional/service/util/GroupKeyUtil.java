@@ -31,6 +31,23 @@ import java.util.Set;
 public class GroupKeyUtil {
 
 
+
+    public static String [][] makeKeysArray(List<String> ymdList,  ChannelGroup group){
+
+
+        Channel[] channels = group.getChannels();
+        String [] channelIds = new String[channels.length];
+
+        for (int i = 0; i <channels.length ; i++) {
+            channelIds[i] = channels[i].getId();
+        }
+
+
+
+        return makeChannelKeysArray(ymdList, channelIds);
+    }
+
+
     /**
      * keys 생성
      * @param ymdList List

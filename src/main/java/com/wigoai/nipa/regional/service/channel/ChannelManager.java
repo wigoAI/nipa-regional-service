@@ -175,6 +175,12 @@ public class ChannelManager implements Synchronizer {
         return groupNameMap.get(name);
     }
 
+
+    public Channel getChannel(String channelId){
+        return channelMap.get(channelId);
+    }
+
+
     private <T> List<T> getObjList(Class<T> objClass, long time){
         try(Connection conn = NipaRegionalAnalysis.getInstance().getConnection()){
             if(time == 0L){

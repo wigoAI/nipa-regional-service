@@ -325,9 +325,7 @@ public class DataSearchController {
         String [][] keysArray = GroupKeyUtil.makeKeysArray(ymdList, groups);
 
         return  keywordAnalysis.dataSearch(startTime, endTime, standardTime, request.getJSONArray("keywords").toString(), keysArray , analysisMaxTime);
-
     }
-
 
     @RequestMapping(value = "/nipars/v1/search/data" , method = RequestMethod.GET)
     public String search(@RequestParam final String id){
@@ -348,7 +346,6 @@ public class DataSearchController {
             classifyObj.addProperty("code", codeName.getCode());
             classifyObj.addProperty("name", codeName.getName());
             classifies.add(classifyObj);
-
         }
 
         obj.remove("analysis_contents");

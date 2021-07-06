@@ -22,6 +22,7 @@ import com.google.gson.JsonObject;
 import com.wigoai.nipa.regional.service.NipaRegionalAnalysis;
 import com.wigoai.nipa.regional.service.ServiceConfig;
 import com.wigoai.nipa.regional.service.channel.ChannelGroup;
+import com.wigoai.nipa.regional.service.channel.ChannelManager;
 import com.wigoai.nipa.regional.service.util.GroupKeyUtil;
 import com.wigoai.nipa.regional.service.util.parameterUtil;
 import org.json.JSONArray;
@@ -109,7 +110,11 @@ public class IntegratedAnalysisController {
             KeywordAnalysis keywordAnalysis = serviceKeywordAnalysis.getKeywordAnalysis();
 
             NipaRegionalAnalysis nipaRegionalAnalysis = NipaRegionalAnalysis.getInstance();
-            ChannelGroup[] groups = nipaRegionalAnalysis.getGroups();
+
+            ChannelManager channelManager = NipaRegionalAnalysis.getInstance().getChannelManager();
+            ChannelGroup[] groups = new ChannelGroup[2];
+            groups[0] =  channelManager.getGroupFromId("media");
+            groups[1] =  channelManager.getGroupFromId("community");
 
             String startYmd =  new SimpleDateFormat("yyyyMMdd").format(new Date(startTime));
             String endYmd =  new SimpleDateFormat("yyyyMMdd").format(new Date(endTime-1));
@@ -121,7 +126,8 @@ public class IntegratedAnalysisController {
 
             Map<KeywordAnalysis.Module,Properties> moduleProperties = new HashMap<>();
             Properties properties = new Properties();
-            StringBuilder channelIdBuilder = new StringBuilder();
+            //그룹 통게요청 결과 재구현 해야함
+//            StringBuilder channelIdBuilder = new StringBuilder();
             for(ChannelGroup channelGroup : groups){
                 channelIdBuilder.append(",").append(channelGroup.getId());
             }
@@ -290,7 +296,7 @@ public class IntegratedAnalysisController {
         };
 
         //그룹 정보 변경
-        String [][] keysArray = GroupKeyUtil.makeKeysArray(ymdList,  groups[groupIndex].getId());
+        String [][] keysArray = GroupKeyUtil.makeKeysArray(ymdList,  groups[groupIndex]);
 
         KeywordAnalysis.Module [] modules;
         modules = new KeywordAnalysis.Module[2];
