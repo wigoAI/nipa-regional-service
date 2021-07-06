@@ -34,6 +34,7 @@ import org.moara.common.util.ExceptionUtil;
 import org.moara.common.util.YmdUtil;
 import org.moara.keyword.KeywordAnalysis;
 import org.moara.keyword.ServiceKeywordAnalysis;
+import org.moara.keyword.tf.ChannelGroupHas;
 import org.moara.message.disposable.DisposableMessage;
 import org.moara.message.disposable.DisposableMessageManager;
 import org.slf4j.Logger;
@@ -123,15 +124,15 @@ public class IntegratedAnalysisController {
             List<String> ymdList = YmdUtil.getYmdList(startYmd,endYmd);
             String [][] keysArray = GroupKeyUtil.makeKeysArray(ymdList, groups);
 
-
             Map<KeywordAnalysis.Module,Properties> moduleProperties = new HashMap<>();
             Properties properties = new Properties();
-            //그룹 통게요청 결과 재구현 해야함
-//            StringBuilder channelIdBuilder = new StringBuilder();
-            for(ChannelGroup channelGroup : groups){
-                channelIdBuilder.append(",").append(channelGroup.getId());
-            }
-            properties.put("channels", channelIdBuilder.substring(1));
+
+            ChannelGroupHas[] channelGroups = new ChannelGroupHas[2];
+            channelGroups[0] = groups[0];
+            channelGroups[1] = groups[1];
+
+
+            properties.put("channel_group", channelGroups);
             moduleProperties.put(KeywordAnalysis.Module.TF_CONTENTS, properties);
 
 

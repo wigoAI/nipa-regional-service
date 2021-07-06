@@ -19,7 +19,6 @@ package com.wigoai.nipa.regional.service.controller.v1;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
-import com.wigoai.nipa.regional.service.ChannelGroup;
 import com.wigoai.nipa.regional.service.NipaRegionalAnalysis;
 import com.wigoai.nipa.regional.service.ServiceConfig;
 import com.wigoai.nipa.regional.service.channel.ChannelGroup;
@@ -35,6 +34,7 @@ import org.moara.common.util.ExceptionUtil;
 import org.moara.common.util.YmdUtil;
 import org.moara.keyword.KeywordAnalysis;
 import org.moara.keyword.ServiceKeywordAnalysis;
+import org.moara.keyword.tf.ChannelGroupHas;
 import org.moara.message.disposable.DisposableMessage;
 import org.moara.message.disposable.DisposableMessageManager;
 import org.slf4j.Logger;
@@ -111,12 +111,12 @@ public class SubjectAnalysisController {
             groups[0] =  channelManager.getGroupFromId("media");
             groups[1] =  channelManager.getGroupFromId("community");
 
-            //그룹 정보 변경
-//            StringBuilder channelIdBuilder = new StringBuilder();
-            for(ChannelGroup channelGroup : groups){
-                channelIdBuilder.append(",").append(channelGroup.getId());
-            }
-            properties.put("channels", channelIdBuilder.substring(1));
+            ChannelGroupHas[] channelGroups = new ChannelGroupHas[2];
+            channelGroups[0] = groups[0];
+            channelGroups[1] = groups[1];
+
+
+            properties.put("channel_group", channelGroups);
             moduleProperties.put(KeywordAnalysis.Module.TF_CONTENTS, properties);
 
             properties = new Properties();

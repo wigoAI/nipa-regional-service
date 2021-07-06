@@ -19,6 +19,7 @@ package com.wigoai.nipa.regional.service.channel;
 import org.moara.common.data.database.Table;
 import org.moara.common.data.database.annotation.Column;
 import org.moara.common.data.database.annotation.PrimaryKey;
+import org.moara.keyword.tf.ChannelGroupHas;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,7 +29,7 @@ import java.util.Map;
  * @author macle
  */
 @Table(name="T_CRAWLING_CLIENT_CHANNEL_GP")
-public class ChannelGroup {
+public class ChannelGroup implements ChannelGroupHas {
 
     @PrimaryKey(seq = 1)
     @Column(name = "CHANNEL_GP_ID")
