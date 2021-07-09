@@ -29,8 +29,8 @@ public enum ServiceConfig {
     , CONTENTS_LAST_NUM("nipa.rs.contents.last.num", null)
     , CONTENTS_MAX_LENGTH("nipa.rs.contents.max.length",7000)
 
-    , ELASTICSEARCH_CONTENTS_LAST_NUM("nipa.rs.elasticsearch.contents.last.num", 0L)
-    , ELASTICSEARCH_CONNECT_INFOS ("nipa.rs.elasticsearch.connect.infos", null)
+//    , ELASTICSEARCH_CONTENTS_LAST_NUM("nipa.rs.elasticsearch.contents.last.num", 0L)
+//    , ELASTICSEARCH_CONNECT_INFOS ("nipa.rs.elasticsearch.connect.infos", null)
 
     //
     //분야 분류
@@ -39,7 +39,6 @@ public enum ServiceConfig {
     //감성 분류
     , EMOTION_CLASSIFY("nipa.rs.emotion.classify", null)
 
-    , DEFAULT_CHANNEL_GROUP("nipa.rs.default.channel.group","community")
 
     //분석 최대시간
     , ANALYSIS_MAX_TIME("nipa.rs.analysis.max.time",600000L)

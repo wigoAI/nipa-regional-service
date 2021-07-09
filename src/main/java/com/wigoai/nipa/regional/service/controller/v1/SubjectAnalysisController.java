@@ -134,18 +134,16 @@ public class SubjectAnalysisController {
             JSONArray selectors = new JSONArray();
             JSONObject positiveSelector = new JSONObject();
             positiveSelector.put("id", "positive_keywords");
-            positiveSelector.put("type", "CATEGORY_WORD");
+            positiveSelector.put("type", "CATEGORY_ARRAY_WORD");
             positiveSelector.put("value", Config.getConfig(ServiceConfig.POSITIVE_CODE.key(),(String) ServiceConfig.POSITIVE_CODE.defaultValue()));
 
             JSONObject negativeSelector = new JSONObject();
             negativeSelector.put("id", "negative_keywords");
-            negativeSelector.put("type", "CATEGORY_WORD");
+            negativeSelector.put("type", "CATEGORY_ARRAY_WORD");
             negativeSelector.put("value", Config.getConfig(ServiceConfig.NEGATIVE_CODE.key(),(String) ServiceConfig.NEGATIVE_CODE.defaultValue()));
-
 
             selectors.put(positiveSelector);
             selectors.put(negativeSelector);
-
             properties.put("selectors", selectors.toString());
 
             if(request.has("emotion_keyword_count")){
@@ -157,14 +155,12 @@ public class SubjectAnalysisController {
             properties.put("is_trend", false);
             moduleProperties.put(KeywordAnalysis.Module.TF_WORD_CONTENTS, properties);
 
-
             String keywordJson = request.getJSONArray("keywords").toString();
 
             Map<String, Object> parameterMap = parameterUtil.makeParameterMap(request);
 
             ServiceKeywordAnalysis serviceKeywordAnalysis = ServiceKeywordAnalysis.getInstance();
             KeywordAnalysis keywordAnalysis = serviceKeywordAnalysis.getKeywordAnalysis();
-
 
             String startYmd =  new SimpleDateFormat("yyyyMMdd").format(new Date(startTime));
             String endYmd =  new SimpleDateFormat("yyyyMMdd").format(new Date(endTime-1));
