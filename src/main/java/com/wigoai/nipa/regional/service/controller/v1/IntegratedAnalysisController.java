@@ -34,7 +34,7 @@ import org.moara.common.util.ExceptionUtil;
 import org.moara.common.util.YmdUtil;
 import org.moara.keyword.KeywordAnalysis;
 import org.moara.keyword.ServiceKeywordAnalysis;
-import org.moara.keyword.tf.ChannelGroupHas;
+import org.moara.keyword.tf.contents.ChannelGroupHas;
 import org.moara.message.disposable.DisposableMessage;
 import org.moara.message.disposable.DisposableMessageManager;
 import org.slf4j.Logger;

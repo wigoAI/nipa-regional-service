@@ -19,7 +19,7 @@ package com.wigoai.nipa.regional.service.channel;
 import org.moara.common.data.database.Table;
 import org.moara.common.data.database.annotation.Column;
 import org.moara.common.data.database.annotation.PrimaryKey;
-import org.moara.keyword.tf.ChannelGroupHas;
+import org.moara.keyword.tf.contents.ChannelGroupHas;
 
 import java.util.HashMap;
 import java.util.Map;
