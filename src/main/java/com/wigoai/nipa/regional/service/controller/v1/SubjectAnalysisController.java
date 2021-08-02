@@ -35,6 +35,7 @@ import org.moara.common.util.YmdUtil;
 import org.moara.keyword.KeywordAnalysis;
 import org.moara.keyword.ServiceKeywordAnalysis;
 import org.moara.keyword.tf.contents.ChannelGroupHas;
+import org.moara.keyword.tf.contents.TermFrequencyContentsCreate;
 import org.moara.message.disposable.DisposableMessage;
 import org.moara.message.disposable.DisposableMessageManager;
 import org.slf4j.Logger;
@@ -116,8 +117,11 @@ public class SubjectAnalysisController {
             channelGroups[1] = groups[1];
 
 
-            properties.put("channel_group", channelGroups);
+            properties.put("channel_groups", channelGroups);
+            TermFrequencyContentsCreate.ChannelGroupExtract channelGroupExtract = TermFrequencyContentsCreate.ChannelGroupExtract.STATISTICS;
+            properties.put("channel_group_extract", channelGroupExtract);
             moduleProperties.put(KeywordAnalysis.Module.TF_CONTENTS, properties);
+
 
             properties = new Properties();
             String [] emotionCodes = nipaRegionalAnalysis.getEmotionCodes();

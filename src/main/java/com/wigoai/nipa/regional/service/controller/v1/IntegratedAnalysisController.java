@@ -35,6 +35,7 @@ import org.moara.common.util.YmdUtil;
 import org.moara.keyword.KeywordAnalysis;
 import org.moara.keyword.ServiceKeywordAnalysis;
 import org.moara.keyword.tf.contents.ChannelGroupHas;
+import org.moara.keyword.tf.contents.TermFrequencyContentsCreate;
 import org.moara.message.disposable.DisposableMessage;
 import org.moara.message.disposable.DisposableMessageManager;
 import org.slf4j.Logger;
@@ -101,7 +102,6 @@ public class IntegratedAnalysisController {
                 keywordCount = 30;
             }
 
-
             final KeywordAnalysis.Module [] modules = new KeywordAnalysis.Module[3];
             modules[0] = KeywordAnalysis.Module.TF_CONTENTS;
             modules[1] = KeywordAnalysis.Module.TF_CLASSIFY;
@@ -131,10 +131,10 @@ public class IntegratedAnalysisController {
             channelGroups[0] = groups[0];
             channelGroups[1] = groups[1];
 
-
-            properties.put("channel_group", channelGroups);
+            properties.put("channel_groups", channelGroups);
+            TermFrequencyContentsCreate.ChannelGroupExtract channelGroupExtract = TermFrequencyContentsCreate.ChannelGroupExtract.STATISTICS;
+            properties.put("channel_group_extract", channelGroupExtract);
             moduleProperties.put(KeywordAnalysis.Module.TF_CONTENTS, properties);
-
 
             String [] emotionCodes = nipaRegionalAnalysis.getEmotionCodes();
 
@@ -147,8 +147,6 @@ public class IntegratedAnalysisController {
             properties.put("in_codes", emotionBuilder.substring(1));
             properties.put("is_trend", false);
             moduleProperties.put(KeywordAnalysis.Module.TF_CLASSIFY, properties);
-
-
 
             StringBuilder sourceBuilder =new StringBuilder();
             if(request.has("classify_names") ){
@@ -169,12 +167,10 @@ public class IntegratedAnalysisController {
 
             }
 
-
             properties = new Properties();
             properties.put("source_codes", sourceBuilder.substring(1));
             properties.put("target_codes", emotionBuilder.substring(1));
             moduleProperties.put(KeywordAnalysis.Module.TF_CLASSIFY_TARGET, properties);
-
 
             String keywordJson = request.getJSONArray("keywords").toString();
 
@@ -217,7 +213,6 @@ public class IntegratedAnalysisController {
             isAnalysis.set(false);
 
             keyword(resultObj, endCallback, groups, 0, startTime, endTime, standardTime, keywordJson, parameterMap, keywordAnalysis, ymdList, sourceBuilder.substring(1), keywordCount);
-
 
             try {
                 long analysisTime = System.currentTimeMillis() - analysisStartTime;

@@ -29,7 +29,6 @@ import com.wigoai.nipa.regional.service.util.GroupKeyUtil;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.moara.ara.datamining.data.CodeName;
-import org.moara.ara.datamining.statistics.count.WordCount;
 import org.moara.ara.datamining.textmining.api.document.DocumentStandardKey;
 import org.moara.common.config.Config;
 import org.moara.common.util.ExceptionUtil;
@@ -38,6 +37,7 @@ import org.moara.keyword.KeywordAnalysis;
 import org.moara.keyword.ServiceKeywordAnalysis;
 import org.moara.keyword.index.IndexData;
 import org.moara.keyword.index.IndexUtil;
+import org.moara.keyword.index.IndexWord;
 import org.moara.keyword.search.data.LikeIndexData;
 import org.moara.keyword.search.data.LikeSearchData;
 import org.moara.keyword.search.data.SearchData;
@@ -351,11 +351,11 @@ public class DataSearchController {
         obj.remove("analysis_contents");
         obj.add("classifies", classifies);
         JsonArray tokens = new JsonArray();
-        WordCount [] wordCounts = data.getWordCounts();
-        Arrays.sort(wordCounts, WordCount.SORT_DESC);
+        IndexWord[] indexWords = data.getIndexWords();
+        Arrays.sort(indexWords, IndexWord.SORT_DESC);
 
-        for(WordCount wordCount : wordCounts){
-            tokens.add(gson.fromJson(wordCount.toJsonString(),JsonObject.class));
+        for(IndexWord indexWord : indexWords){
+            tokens.add(indexWord.toWordCountGson());
         }
         obj.add("tokens", tokens);
 
