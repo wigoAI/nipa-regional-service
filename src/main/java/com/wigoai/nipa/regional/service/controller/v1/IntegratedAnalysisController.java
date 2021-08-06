@@ -132,8 +132,6 @@ public class IntegratedAnalysisController {
             channelGroups[1] = groups[1];
 
             properties.put("channel_groups", channelGroups);
-            TermFrequencyContentsCreate.ChannelGroupExtract channelGroupExtract = TermFrequencyContentsCreate.ChannelGroupExtract.STATISTICS;
-            properties.put("channel_group_extract", channelGroupExtract);
             moduleProperties.put(KeywordAnalysis.Module.TF_CONTENTS, properties);
 
             String [] emotionCodes = nipaRegionalAnalysis.getEmotionCodes();

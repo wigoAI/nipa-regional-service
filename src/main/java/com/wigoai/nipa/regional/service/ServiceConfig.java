@@ -47,6 +47,9 @@ public enum ServiceConfig {
 
     , NEGATIVE_CODE("nipa.rs.negative.code" , "U087002")
 
+
+    , CHARACTER_CHANNEL_GROUPS("nipa.rs.character.channel.groups" , "84,85,86")
+
     ;
 
     private final String key;

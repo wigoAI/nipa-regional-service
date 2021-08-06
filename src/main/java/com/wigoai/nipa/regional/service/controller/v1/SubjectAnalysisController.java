@@ -118,8 +118,6 @@ public class SubjectAnalysisController {
 
 
             properties.put("channel_groups", channelGroups);
-            TermFrequencyContentsCreate.ChannelGroupExtract channelGroupExtract = TermFrequencyContentsCreate.ChannelGroupExtract.STATISTICS;
-            properties.put("channel_group_extract", channelGroupExtract);
             moduleProperties.put(KeywordAnalysis.Module.TF_CONTENTS, properties);
 
 
