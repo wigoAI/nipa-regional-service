@@ -18,10 +18,13 @@ package com.wigoai.nipa.regional.service.channel;
 
 import com.seomse.commons.exception.ReflectiveOperationRuntimeException;
 import com.wigoai.nipa.regional.service.NipaRegionalAnalysis;
+import com.wigoai.nipa.regional.service.ServiceConfig;
 import org.moara.common.annotation.Priority;
+import org.moara.common.config.Config;
 import org.moara.common.data.database.exception.SQLRuntimeException;
 import org.moara.common.data.database.jdbc.JdbcObjects;
 import org.moara.common.data.database.jdbc.PrepareStatementData;
+import org.moara.common.string.StringArray;
 import org.moara.meta.MetaDataUtil;
 import org.moara.sync.Synchronizer;
 import org.slf4j.Logger;
@@ -29,9 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 채널 관리자
@@ -50,6 +51,11 @@ public class ChannelManager implements Synchronizer {
     private long groupTime = 0L;
     private long channelTime = 0L;
     private long mapTime = 0L;
+
+    private ChannelGroup[] characterChannelGroups = null;
+    private String [] characterChannelIds = StringArray.EMPTY_STRING_ARRAY;
+
+    private String characterChannelGroupValue;
 
     @Override
     public void sync() {
@@ -128,11 +134,13 @@ public class ChannelManager implements Synchronizer {
             channelList.clear();
         }
 
+
+        boolean isMapChange = false;
         //매핑
         List<UpdateChannelMap> mapList = getObjList(UpdateChannelMap.class, mapTime);
         if(mapList.size() > 0){
             logger.debug("new map: " + mapList.size());
-
+            isMapChange = true;
 
             for(UpdateChannelMap map : mapList){
 
@@ -163,9 +171,60 @@ public class ChannelManager implements Synchronizer {
             group.setChannels();
         }
 
+        if(characterChannelGroups == null){
+            characterChannelGroupValue =  Config.getConfig(ServiceConfig.CHARACTER_CHANNEL_GROUPS.key(), (String) ServiceConfig.CHARACTER_CHANNEL_GROUPS.defaultValue()).trim();
+
+            String [] channelGroupIds = characterChannelGroupValue.split(",");
+            characterChannelGroups = new ChannelGroup[channelGroupIds.length];
+
+            for (int i = 0; i < channelGroupIds.length; i++) {
+                characterChannelGroups[i] = getGroupFromId(channelGroupIds[i]);
+            }
+        }else{
+
+            String channelGroupsValue = Config.getConfig(ServiceConfig.CHARACTER_CHANNEL_GROUPS.key(), (String) ServiceConfig.CHARACTER_CHANNEL_GROUPS.defaultValue()).trim();
+            if(!channelGroupsValue.equals(characterChannelGroupValue)){
+                characterChannelGroupValue = channelGroupsValue;
+
+                String [] channelGroupIds = characterChannelGroupValue.split(",");
+                ChannelGroup [] characterChannelGroups = new ChannelGroup[channelGroupIds.length];
+
+                for (int i = 0; i < channelGroupIds.length; i++) {
+                    characterChannelGroups[i] = getGroupFromId(channelGroupIds[i]);
+                }
+                //객체 변경
+                this.characterChannelGroups = characterChannelGroups;
+
+            }
+        }
+
+
+        if(isMapChange){
+            Set<String> characterChannelIdSet = new HashSet<>();
+            for(ChannelGroup channelGroup : characterChannelGroups){
+                Channel [] channels = channelGroup.getChannels();
+                for(Channel channel : channels){
+                    characterChannelIdSet.add(channel.getId());
+                }
+            }
+            characterChannelIds = characterChannelIdSet.toArray(new String [0]);
+            characterChannelIdSet.clear();
+
+        }
+
+
+
+
         logger.debug("channel update complete");
     }
 
+    public ChannelGroup[] getCharacterChannelGroups() {
+        return characterChannelGroups;
+    }
+
+    public String[] getCharacterChannelIds() {
+        return characterChannelIds;
+    }
 
     public ChannelGroup getGroupFromId(String id){
         return groupMap.get(id);

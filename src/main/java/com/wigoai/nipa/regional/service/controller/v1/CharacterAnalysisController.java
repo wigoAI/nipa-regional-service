@@ -1,12 +1,13 @@
 package com.wigoai.nipa.regional.service.controller.v1;
 
+import com.wigoai.nipa.regional.service.NipaRegionalAnalysis;
 import com.wigoai.nipa.regional.service.ServiceConfig;
+import com.wigoai.nipa.regional.service.channel.ChannelManager;
 import org.json.JSONObject;
 import org.moara.common.callback.ObjectCallback;
 import org.moara.common.config.Config;
 import org.moara.common.util.ExceptionUtil;
 import org.moara.keyword.KeywordAnalysis;
-import org.moara.keyword.search.data.SearchData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -50,6 +51,11 @@ public class CharacterAnalysisController {
                     logger.error(ExceptionUtil.getStackTrace(e));
                 }
             };
+
+            ChannelManager channelManager = NipaRegionalAnalysis.getInstance().getChannelManager();
+            channelManager.get
+
+
 
             final KeywordAnalysis.Module [] modules = new KeywordAnalysis.Module[1];
 
