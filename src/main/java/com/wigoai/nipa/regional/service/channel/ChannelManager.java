@@ -212,9 +212,6 @@ public class ChannelManager implements Synchronizer {
 
         }
 
-
-
-
         logger.debug("channel update complete");
     }
 

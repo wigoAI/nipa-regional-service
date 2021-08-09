@@ -179,7 +179,11 @@ public class IntegratedAnalysisController {
             try {
                 long analysisTime = System.currentTimeMillis() - analysisStartTime;
                 //최대 대기 시간
-                Thread.sleep(analysisMaxTime - analysisTime);
+
+                long sleepTime = analysisMaxTime - analysisTime;
+                if(sleepTime>0) {
+                    Thread.sleep(sleepTime);
+                }
             }catch (InterruptedException ignore){}
 
             if(!isAnalysis.get()){
@@ -215,7 +219,10 @@ public class IntegratedAnalysisController {
             try {
                 long analysisTime = System.currentTimeMillis() - analysisStartTime;
                 //최대 대기 시간
-                Thread.sleep(analysisMaxTime - analysisTime);
+                long sleepTime = analysisMaxTime - analysisTime;
+                if(sleepTime>0) {
+                    Thread.sleep(sleepTime);
+                }
             }catch (InterruptedException ignore){}
 
             if(!isAnalysis.get()){
@@ -225,7 +232,7 @@ public class IntegratedAnalysisController {
 
             //파싱 및 변환에 대한 속도차이는 없는것으로 보임
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            String result =  gson.toJson(gson.fromJson(resultObj.toString(), JsonObject.class));
+            String result = gson.toJson(gson.fromJson(resultObj.toString(), JsonObject.class));
             logger.debug("analysis second: " + jsonValue +":  "+ TimeUtil.getSecond(System.currentTimeMillis() - analysisStartTime));
             return result;
 
@@ -248,10 +255,6 @@ public class IntegratedAnalysisController {
 
                 if(obj == null){
                     //검색 결과가 없을때
-//                    resultObj.put(groups[groupIndex].getId() + "_classifies", "[]");
-//                    resultObj.put(groups[groupIndex].getId() + "_keywords", "[]");
-//                    logger.error("keyword analysis fail");
-
                     if(groupIndex >= groups.length-1){
                         callback.callback(null);
                         return;
