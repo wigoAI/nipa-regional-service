@@ -217,8 +217,6 @@ public class CharacterAnalysisController {
                 }
             }
 
-            
-
             String result = gson.toJson(resultObj);
             logger.debug("analysis second: " + jsonValue +":  "+ TimeUtil.getSecond(System.currentTimeMillis() - analysisStartTime));
             return result;

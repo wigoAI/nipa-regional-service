@@ -61,7 +61,7 @@ public class CharacterStatusCall {
         //단어 최대 건수설정 설정하지 않으면 30
 //        param.addProperty("keyword_count", 30);
 
-        param.addProperty("name","강원도");
+        param.addProperty("name","코로나");
 
 
         String request = gson.toJson(param);
