@@ -2,11 +2,13 @@ package com.wigoai.nipa.regional.service.controller.v1;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.wigoai.nipa.regional.service.NipaRegionalAnalysis;
 import com.wigoai.nipa.regional.service.ServiceConfig;
 import com.wigoai.nipa.regional.service.channel.ChannelGroup;
 import com.wigoai.nipa.regional.service.channel.ChannelManager;
+import com.wigoai.nipa.regional.service.data.ChannelGroupStatus;
 import com.wigoai.nipa.regional.service.data.ChannelStatus;
 import com.wigoai.nipa.regional.service.util.GroupKeyUtil;
 import com.wigoai.nipa.regional.service.util.parameterUtil;
@@ -21,6 +23,7 @@ import org.moara.common.util.ExceptionUtil;
 import org.moara.common.util.YmdUtil;
 import org.moara.keyword.KeywordAnalysis;
 import org.moara.keyword.ServiceKeywordAnalysis;
+import org.moara.keyword.tf.contents.ChannelGroupHas;
 import org.moara.message.disposable.DisposableMessageManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,27 +86,72 @@ public class CharacterAnalysisController {
             List<String> ymdList = YmdUtil.getYmdList(startYmd,endYmd);
             String [][] keysArray = GroupKeyUtil.makeChannelKeysArray(ymdList,  characterChannelIds);
 
-            final KeywordAnalysis.Module [] modules = new KeywordAnalysis.Module[1];
+            final KeywordAnalysis.Module [] modules = new KeywordAnalysis.Module[4];
             modules[0] =  KeywordAnalysis.Module.TF_CONTENTS;
-
-
+            modules[1] =  KeywordAnalysis.Module.TF_CONTENTS_GROUP;
+            modules[2] = KeywordAnalysis.Module.TF_CLASSIFY;
+            modules[3] = KeywordAnalysis.Module.TF_CLASSIFY_TARGET;
             WordDictionary wordDictionary = WordDictionary.getInstance();
             Word characterWord = wordDictionary.getSyllable(request.getString("name")).getDictionaryWord().getWord();
-
 
             NipaRegionalAnalysis nipaRegionalAnalysis = NipaRegionalAnalysis.getInstance();
 
             String [] emotionCodes = nipaRegionalAnalysis.getEmotionCodes();
 
-
+            ChannelGroup[] groups = channelManager.getCharacterChannelGroups();
             Map<KeywordAnalysis.Module, Properties> moduleProperties = new HashMap<>();
-
 
             Properties properties = new Properties();
             properties.put("title_word", characterWord);
             properties.put("classify_codes", emotionCodes);
 
             moduleProperties.put(KeywordAnalysis.Module.TF_CONTENTS, properties);
+
+            properties = new Properties();
+            ChannelGroupHas[] channelGroups = new ChannelGroupHas[groups.length];
+            //noinspection ManualArrayCopy
+            for (int i = 0; i <channelGroups.length ; i++) {
+                channelGroups[i] = groups[i];
+            }
+
+            properties.put("channel_groups", channelGroups);
+            properties.put("classify_codes", emotionCodes);
+            moduleProperties.put(KeywordAnalysis.Module.TF_CONTENTS_GROUP, properties);
+
+
+            StringBuilder emotionBuilder = new StringBuilder();
+            for(String emotionCode : emotionCodes){
+                emotionBuilder.append(",").append(emotionCode);
+            }
+
+            properties = new Properties();
+            properties.put("in_codes", emotionBuilder.substring(1));
+            properties.put("is_trend", true);
+            moduleProperties.put(KeywordAnalysis.Module.TF_CLASSIFY, properties);
+
+
+            StringBuilder sourceBuilder =new StringBuilder();
+            if(request.has("classify_names") ){
+                JSONArray array = request.getJSONArray("classify_names");
+                for (int i = 0; i <array.length() ; i++) {
+                    String code = nipaRegionalAnalysis.getFieldCode(array.getString(i));
+                    if(code == null){
+                        logger.error("field classify code search fail: " + array.getString(i));
+                        continue;
+                    }
+                    sourceBuilder.append(",").append(code);
+                }
+            }else{
+                String [] fieldCodes = nipaRegionalAnalysis.getFieldCodes();
+                for(String code : fieldCodes){
+                    sourceBuilder.append(",").append(code);
+                }
+
+            }
+            properties = new Properties();
+            properties.put("source_codes", sourceBuilder.substring(1));
+            properties.put("target_codes", emotionBuilder.substring(1));
+            moduleProperties.put(KeywordAnalysis.Module.TF_CLASSIFY_TARGET, properties);
 
             ServiceKeywordAnalysis serviceKeywordAnalysis = ServiceKeywordAnalysis.getInstance();
             KeywordAnalysis keywordAnalysis = serviceKeywordAnalysis.getKeywordAnalysis();
@@ -128,8 +176,6 @@ public class CharacterAnalysisController {
             }
 
 
-            ChannelGroup[] groups = channelManager.getCharacterChannelGroups();
-
             DisposableMessageManager disposableMessageManager = DisposableMessageManager.getInstance();
             String responseMessage =  disposableMessageManager.getMessages(messageId);
             //데이터 변환
@@ -146,12 +192,14 @@ public class CharacterAnalysisController {
                 KeywordAnalysis.Module module = KeywordAnalysis.Module.valueOf(messageObj.get("type").toString());
 
 
-                messageObj = messageObj.getJSONObject("message");
-                if (module == KeywordAnalysis.Module.TF_CONTENTS) {
 
+                if (module == KeywordAnalysis.Module.TF_CONTENTS) {
+                    messageObj = messageObj.getJSONObject("message");
+                    resultObj.addProperty("total", messageObj.getInt("total"));
                     Map<String, ChannelStatus> channelStatusMap = new HashMap<>();
 
                     JSONObject tfObj = messageObj.getJSONObject("tf_channel");
+
                     Set<String> keys = tfObj.keySet();
                     for(String key : keys){
                         ChannelStatus channelStatus = new ChannelStatus();
@@ -214,6 +262,57 @@ public class CharacterAnalysisController {
                     resultObj.add("channel_status_array", gson.toJsonTree(channelStatusArray));
 
                     channelStatusMap.clear();
+                }else if (module == KeywordAnalysis.Module.TF_CONTENTS_GROUP) {
+                    messageObj = messageObj.getJSONObject("message");
+                    JSONObject tfObj = messageObj.getJSONObject("tf_channel");
+
+                    Map<String, ChannelGroupStatus> statusMap = new HashMap<>();
+
+                    for(ChannelGroup channelGroup : groups){
+                        ChannelGroupStatus channelGroupStatus = new ChannelGroupStatus();
+                        channelGroupStatus.setGroup_id(channelGroup.getId());
+                        channelGroupStatus.setGroup_name(channelGroup.getName());
+                        if(!tfObj.isNull(channelGroup.getId())){
+                            channelGroupStatus.setCount(tfObj.getInt(channelGroup.getId()));
+                        }
+                        statusMap.put(channelGroup.getId(), channelGroupStatus);
+                    }
+
+                    JSONArray codes = messageObj.getJSONArray("classify_codes");
+                    int positiveIndex = 0;
+                    int negativeIndex = 0;
+                    int neutralIndex = 0;
+
+                    for (int j = 0; j <codes.length() ; j++) {
+                        String code = codes.getString(j);
+                        if(code.equals(emotionCodes[0])){
+                            positiveIndex = j;
+                        }else if(code.equals(emotionCodes[1])){
+                            negativeIndex = j;
+                        }else if(code.equals(emotionCodes[2])){
+                            neutralIndex = j;
+                        }
+                    }
+                    tfObj = messageObj.getJSONObject("classify_tf");
+                    for(ChannelGroup channelGroup : groups){
+                        if(tfObj.isNull(channelGroup.getId())){
+                            continue;
+                        }
+
+                        JSONArray counts = tfObj.getJSONArray(channelGroup.getId());
+                        ChannelGroupStatus status = statusMap.get(channelGroup.getId());
+                        status.setPositive_count(counts.getInt(positiveIndex));
+                        status.setNegative_count(counts.getInt(negativeIndex));
+                        status.setNeutral_count(counts.getInt(neutralIndex));
+                    }
+                    ChannelGroupStatus [] statusArray = statusMap.values().toArray(new ChannelGroupStatus[0]);
+                    Arrays.sort(statusArray, ChannelGroupStatus.SORT_DESC);
+                    resultObj.add("channel_group_status_array", gson.toJsonTree(statusArray));
+                }else if (module == KeywordAnalysis.Module.TF_CLASSIFY) {
+                    messageObj = messageObj.getJSONObject("message");
+                    resultObj.add("emotion_classifies", gson.fromJson(messageObj.toString(), JsonObject.class));
+                }else if (module == KeywordAnalysis.Module.TF_CLASSIFY_TARGET) {
+                    resultObj.add("field_emotion_classifies", gson.fromJson(messageObj.getJSONArray("message").toString(), JsonArray.class));
                 }
             }
 

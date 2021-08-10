@@ -34,10 +34,8 @@ public class CharacterStatusCall {
     public static void main(String[] args) throws Exception {
         long analysisStartTime = System.currentTimeMillis();
 
-        //7월 20일부터
         long startTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20210801 00:00:00").getTime();
 
-        //7월 25일 전까지 (7월24일까지)
 
         System.out.println(Times.DAY_1 -1);
 
@@ -61,7 +59,7 @@ public class CharacterStatusCall {
         //단어 최대 건수설정 설정하지 않으면 30
 //        param.addProperty("keyword_count", 30);
 
-        param.addProperty("name","코로나");
+        param.addProperty("name","강원도");
 
 
         String request = gson.toJson(param);
