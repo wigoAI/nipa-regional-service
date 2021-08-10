@@ -66,6 +66,7 @@ public class NipaRegionalAnalysis {
 
 
 
+
     /**
      * 생성자
      */
