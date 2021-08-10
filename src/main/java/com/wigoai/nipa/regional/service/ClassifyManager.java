@@ -16,6 +16,7 @@
 
 package com.wigoai.nipa.regional.service;
 
+import org.moara.category.CategoryDictionary;
 import org.moara.common.annotation.Priority;
 import org.moara.common.config.Config;
 import org.moara.common.data.database.jdbc.JDBCUtil;
@@ -56,7 +57,33 @@ public class ClassifyManager implements Synchronizer {
             throw new RuntimeException("emotion code set error: " + Config.getConfig(ServiceConfig.EMOTION_CLASSIFY.key()));
         }
 
-        String [] codes = emotionCodeList.toArray(new String[0]);
+        CategoryDictionary categoryDictionary = CategoryDictionary.getInstance();
+        String [] codes = emotionCodeList.toArray(new String[3]);
+
+        //긍정,부정,중립의 순서로저장
+        for (int i = 0; i <emotionCodeList.size() ; i++) {
+            String emotionCode = emotionCodeList.get(i);
+
+            if(categoryDictionary.getCategory(emotionCode).getName().equals("긍정")){
+                codes[0] = emotionCode;
+                emotionCodeList.remove(i);
+                break;
+            }
+        }
+
+        for (int i = 0; i <emotionCodeList.size() ; i++) {
+            String emotionCode = emotionCodeList.get(i);
+
+            if(categoryDictionary.getCategory(emotionCode).getName().equals("부정")){
+                codes[1] = emotionCode;
+                emotionCodeList.remove(i);
+                break;
+            }
+        }
+
+        codes[2] = emotionCodeList.get(0);
+
+
 
         if(!Arrays.equals(emotionCodes, codes)){
             emotionCodes = codes;

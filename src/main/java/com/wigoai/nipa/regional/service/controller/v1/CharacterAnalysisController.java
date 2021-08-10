@@ -5,7 +5,9 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.wigoai.nipa.regional.service.NipaRegionalAnalysis;
 import com.wigoai.nipa.regional.service.ServiceConfig;
+import com.wigoai.nipa.regional.service.channel.ChannelGroup;
 import com.wigoai.nipa.regional.service.channel.ChannelManager;
+import com.wigoai.nipa.regional.service.data.ChannelStatus;
 import com.wigoai.nipa.regional.service.util.GroupKeyUtil;
 import com.wigoai.nipa.regional.service.util.parameterUtil;
 import org.json.JSONArray;
@@ -39,6 +41,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @RestController
 public class CharacterAnalysisController {
     private static final Logger logger = LoggerFactory.getLogger(DataSearchController.class);
+
+
 
     @RequestMapping(value = "/nipars/v1/character/status" , method = RequestMethod.POST, produces= MediaType.APPLICATION_JSON_VALUE)
     public String status(@RequestBody final String jsonValue) {
@@ -124,13 +128,98 @@ public class CharacterAnalysisController {
             }
 
 
+            ChannelGroup[] groups = channelManager.getCharacterChannelGroups();
+
             DisposableMessageManager disposableMessageManager = DisposableMessageManager.getInstance();
             String responseMessage =  disposableMessageManager.getMessages(messageId);
             //데이터 변환
-            
-            
+
+            JSONObject responseObj = new JSONObject(responseMessage);
+            JSONArray messageArray =  responseObj.getJSONArray("messages");
+
+            JsonObject resultObj = new JsonObject();
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            String result = gson.toJson(gson.fromJson(responseMessage, JsonObject.class));
+
+            for (int i = 0; i <messageArray.length() ; i++) {
+
+                JSONObject messageObj = new JSONObject(messageArray.getString(i));
+                KeywordAnalysis.Module module = KeywordAnalysis.Module.valueOf(messageObj.get("type").toString());
+
+
+                messageObj = messageObj.getJSONObject("message");
+                if (module == KeywordAnalysis.Module.TF_CONTENTS) {
+
+                    Map<String, ChannelStatus> channelStatusMap = new HashMap<>();
+
+                    JSONObject tfObj = messageObj.getJSONObject("tf_channel");
+                    Set<String> keys = tfObj.keySet();
+                    for(String key : keys){
+                        ChannelStatus channelStatus = new ChannelStatus();
+                        channelStatusMap.put(key, channelStatus);
+
+                        channelStatus.setChannel_id(key);
+                        channelStatus.setChannel_name(channelManager.getChannel(key).getName());
+                        channelStatus.setCount(tfObj.getInt(key));
+
+
+                        for(ChannelGroup channelGroup : groups){
+                            if(channelGroup.hasChannel(key)){
+                                channelStatus.setGroup_id(channelGroup.getId());
+                                channelStatus.setGroup_name(channelGroup.getName());
+                                break;
+                            }
+                        }
+
+                    }
+                    tfObj = messageObj.getJSONObject("title_tf");
+                    for(String key : keys){
+                        if(tfObj.isNull(key)){
+                            continue;
+                        }
+                        channelStatusMap.get(key).setTitle_count(tfObj.getInt(key));
+                    }
+
+
+                    JSONArray codes = messageObj.getJSONArray("classify_codes");
+                    int positiveIndex = 0;
+                    int negativeIndex = 0;
+                    int neutralIndex = 0;
+
+                    for (int j = 0; j <codes.length() ; j++) {
+                        String code = codes.getString(j);
+                        if(code.equals(emotionCodes[0])){
+                            positiveIndex = j;
+                        }else if(code.equals(emotionCodes[1])){
+                            negativeIndex = j;
+                        }else if(code.equals(emotionCodes[2])){
+                            neutralIndex = j;
+                        }
+                    }
+
+                    tfObj = messageObj.getJSONObject("classify_tf");
+                    for(String key : keys){
+                        if(tfObj.isNull(key)){
+                            continue;
+                        }
+                        JSONArray counts = tfObj.getJSONArray(key);
+                        ChannelStatus channelStatus = channelStatusMap.get(key);
+                        channelStatus.setPositive_count(counts.getInt(positiveIndex));
+                        channelStatus.setNegative_count(counts.getInt(negativeIndex));
+                        channelStatus.setNeutral_count(counts.getInt(neutralIndex));
+                    }
+
+                    ChannelStatus [] channelStatusArray = channelStatusMap.values().toArray(new ChannelStatus[0]);
+
+                    Arrays.sort(channelStatusArray, ChannelStatus.SORT_DESC);
+                    resultObj.add("channel_status_array", gson.toJsonTree(channelStatusArray));
+
+                    channelStatusMap.clear();
+                }
+            }
+
+            
+
+            String result = gson.toJson(resultObj);
             logger.debug("analysis second: " + jsonValue +":  "+ TimeUtil.getSecond(System.currentTimeMillis() - analysisStartTime));
             return result;
 
