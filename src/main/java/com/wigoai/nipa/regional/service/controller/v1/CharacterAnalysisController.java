@@ -76,9 +76,9 @@ public class CharacterAnalysisController {
                     logger.error(ExceptionUtil.getStackTrace(e));
                 }
             };
+            NipaRegionalAnalysis nipaRegionalAnalysis = NipaRegionalAnalysis.getInstance();
 
-            ChannelManager channelManager = NipaRegionalAnalysis.getInstance().getChannelManager();
-
+            ChannelManager channelManager = nipaRegionalAnalysis.getChannelManager();
 
             String startYmd =  new SimpleDateFormat("yyyyMMdd").format(new Date(startTime));
             String endYmd =  new SimpleDateFormat("yyyyMMdd").format(new Date(endTime-1));
@@ -94,8 +94,6 @@ public class CharacterAnalysisController {
             modules[4] = KeywordAnalysis.Module.TF_WORD_CONTENTS;
             WordDictionary wordDictionary = WordDictionary.getInstance();
             Word characterWord = wordDictionary.getSyllable(request.getString("name")).getDictionaryWord().getWord();
-
-            NipaRegionalAnalysis nipaRegionalAnalysis = NipaRegionalAnalysis.getInstance();
 
             String [] emotionCodes = nipaRegionalAnalysis.getEmotionCodes();
 
@@ -380,10 +378,12 @@ public class CharacterAnalysisController {
     @RequestMapping(value = "/nipars/v1/character/trend" , method = RequestMethod.POST, produces= MediaType.APPLICATION_JSON_VALUE)
     public String trend(@RequestBody final String jsonValue) {
 
-
-        return "[]";
+        try {
+            return CharacterAnalysis.trend(new JSONObject(jsonValue));
+        }catch(Exception e){
+            logger.error(ExceptionUtil.getStackTrace(e));
+            return "[]";
+        }
     }
-
-
 
 }

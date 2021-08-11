@@ -1,9 +1,14 @@
 package com.wigoai.nipa.regional.service.controller.v1;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.wigoai.nipa.regional.service.NipaRegionalAnalysis;
 import com.wigoai.nipa.regional.service.ServiceConfig;
+import com.wigoai.nipa.regional.service.channel.ChannelGroup;
 import com.wigoai.nipa.regional.service.channel.ChannelManager;
+import com.wigoai.nipa.regional.service.data.CharacterTrendStatus;
 import com.wigoai.nipa.regional.service.util.GroupKeyUtil;
 import com.wigoai.nipa.regional.service.util.ParameterUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -11,12 +16,16 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.moara.ara.datamining.textmining.dictionary.word.WordDictionary;
 import org.moara.ara.datamining.textmining.dictionary.word.element.Word;
+import org.moara.category.CategoryDictionary;
+import org.moara.category.element.Category;
 import org.moara.common.callback.ObjectCallback;
 import org.moara.common.config.Config;
+import org.moara.common.time.TimeUtil;
 import org.moara.common.util.ExceptionUtil;
 import org.moara.common.util.YmdUtil;
 import org.moara.keyword.KeywordAnalysis;
 import org.moara.keyword.ServiceKeywordAnalysis;
+import org.moara.keyword.tf.contents.ChannelGroupHas;
 import org.moara.message.disposable.DisposableMessageManager;
 
 import java.text.SimpleDateFormat;
@@ -63,11 +72,14 @@ public class CharacterAnalysis {
         Map<KeywordAnalysis.Module, Properties> moduleProperties = new HashMap<>();
         Properties properties = new Properties();
 
+
+        String categoryCode = Config.getConfig(ServiceConfig.NER_CATEGORY_CODE.key(),(String) ServiceConfig.NER_CATEGORY_CODE.defaultValue());
+
         JSONArray selectors = new JSONArray();
         JSONObject keywordSelector = new JSONObject();
         keywordSelector.put("id", "ner_keywords");
         keywordSelector.put("type", "CATEGORY_WORD");
-        keywordSelector.put("value", Config.getConfig(ServiceConfig.POSITIVE_CODE.key(),(String) ServiceConfig.POSITIVE_CODE.defaultValue()));
+        keywordSelector.put("value", categoryCode);
 
         selectors.put(keywordSelector);
 
@@ -121,10 +133,9 @@ public class CharacterAnalysis {
         }catch (InterruptedException ignore){}
 
         if(!isAnalysis.get()){
-            log.error("time out: " + request.toString());
+            log.error("time out: " + request);
             return keywords;
         }
-
 
         DisposableMessageManager disposableMessageManager = DisposableMessageManager.getInstance();
         String responseMessage =  disposableMessageManager.getMessages(messageId);
@@ -132,9 +143,28 @@ public class CharacterAnalysis {
 
         JSONObject responseObj = new JSONObject(responseMessage);
         JSONArray messageArray =  responseObj.getJSONArray("messages");
+        JSONArray nerKeywords = new JSONObject(messageArray.getString(0)).getJSONObject("message").getJSONArray("ner_keywords");
+        Category category = CategoryDictionary.getInstance().getCategory(categoryCode);
+        Category [] nerCategories = category.getChildArray();
+        for (int i = 0; i <nerKeywords.length() ; i++) {
+            JSONObject nerKeyword =  nerKeywords.getJSONObject(i);
 
+            String code = nerKeyword.getString("code");
 
+            JsonObject keyword = new JsonObject();
+            keyword.addProperty("code", code);
+            keyword.addProperty("syllable", nerKeyword.getString("syllable"));
+            keyword.addProperty("count", nerKeyword.getInt("count"));
 
+            JsonArray ner = new JsonArray();
+            for(Category nerCategory: nerCategories){
+                if(nerCategory.isWordIn(code)){
+                    ner.add(nerCategory.getName());
+                }
+            }
+            keyword.add("ner", ner);
+            keywords.add(keyword);
+        }
 
         return keywords;
     }
@@ -164,4 +194,140 @@ public class CharacterAnalysis {
 
         return keywords;
     }
+
+
+    public static String trend(JSONObject request){
+
+        long analysisStartTime = System.currentTimeMillis();
+
+
+        long startTime = request.getLong("start_time");
+        long endTime = request.getLong("end_time");
+        long standardTime = request.getLong("standard_time");
+
+        long analysisMaxTime = Config.getLong(ServiceConfig.ANALYSIS_MAX_TIME.key(), (long)ServiceConfig.ANALYSIS_MAX_TIME.defaultValue());
+
+        final Thread currentThread = Thread.currentThread();
+
+        AtomicBoolean isAnalysis = new AtomicBoolean(false);
+
+        ObjectCallback endCallback = obj -> {
+
+            try {
+                isAnalysis.set(true);
+                currentThread.interrupt();
+            }catch(Exception e){
+                log.error(ExceptionUtil.getStackTrace(e));
+            }
+        };
+
+        final KeywordAnalysis.Module [] modules = new KeywordAnalysis.Module[2];
+        modules[0] =  KeywordAnalysis.Module.TF_CONTENTS_GROUP;
+        modules[1] =  KeywordAnalysis.Module.TF_CLASSIFY;
+
+        NipaRegionalAnalysis nipaRegionalAnalysis = NipaRegionalAnalysis.getInstance();
+
+        String [] emotionCodes = nipaRegionalAnalysis.getEmotionCodes();
+
+        Map<KeywordAnalysis.Module, Properties> moduleProperties = new HashMap<>();
+
+        Properties properties = new Properties();
+        StringBuilder emotionBuilder = new StringBuilder();
+        for(String emotionCode : emotionCodes){
+            emotionBuilder.append(",").append(emotionCode);
+        }
+        properties.put("in_codes", emotionBuilder.substring(1));
+        properties.put("is_trend", true);
+        moduleProperties.put(KeywordAnalysis.Module.TF_CLASSIFY, properties);
+
+
+        properties = new Properties();
+        ChannelManager channelManager = nipaRegionalAnalysis.getChannelManager();
+        ChannelGroup[] groups = channelManager.getCharacterChannelGroups();
+        ChannelGroupHas[] channelGroups = new ChannelGroupHas[groups.length];
+        //noinspection ManualArrayCopy
+        for (int i = 0; i <channelGroups.length ; i++) {
+            channelGroups[i] = groups[i];
+        }
+        WordDictionary wordDictionary = WordDictionary.getInstance();
+        Word characterWord = wordDictionary.getSyllable(request.getString("name")).getDictionaryWord().getWord();
+        properties.put("title_word", characterWord);
+        properties.put("channel_groups", channelGroups);
+        moduleProperties.put(KeywordAnalysis.Module.TF_CONTENTS_GROUP, properties);
+
+
+        String [] characterChannelIds = channelManager.getCharacterChannelIds();
+
+        String startYmd =  new SimpleDateFormat("yyyyMMdd").format(new Date(startTime));
+        String endYmd =  new SimpleDateFormat("yyyyMMdd").format(new Date(endTime-1));
+
+        List<String> ymdList = YmdUtil.getYmdList(startYmd,endYmd);
+        String [][] keysArray = GroupKeyUtil.makeChannelKeysArray(ymdList,  characterChannelIds);
+
+        Map<String, Object> parameterMap = ParameterUtil.makeParameterMap(request);
+
+        ServiceKeywordAnalysis serviceKeywordAnalysis = ServiceKeywordAnalysis.getInstance();
+        KeywordAnalysis keywordAnalysis = serviceKeywordAnalysis.getKeywordAnalysis();
+
+        String messageId = keywordAnalysis.analysis(startTime, endTime, standardTime, keywordAnalysis.makeSearchKeywords(CharacterAnalysis.getKeywordJson(request)), keysArray, modules, moduleProperties, parameterMap, endCallback);
+
+
+        try {
+            long analysisTime = System.currentTimeMillis() - analysisStartTime;
+            //최대 대기 시간
+            long sleepTime = analysisMaxTime - analysisTime;
+            if(sleepTime>0) {
+                Thread.sleep(sleepTime);
+            }
+        }catch (InterruptedException ignore){}
+
+        if(!isAnalysis.get()){
+            log.error("time out: " + request);
+            return "{}";
+        }
+
+        DisposableMessageManager disposableMessageManager = DisposableMessageManager.getInstance();
+        String responseMessage =  disposableMessageManager.getMessages(messageId);
+        //데이터 변환
+
+        JSONObject responseObj = new JSONObject(responseMessage);
+        JSONArray messageArray =  responseObj.getJSONArray("messages");
+
+        JsonObject resultObj = new JsonObject();
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+        CharacterTrendStatus characterTrendStatus = new CharacterTrendStatus();
+
+        for (int i = 0; i <messageArray.length() ; i++) {
+            JSONObject messageObj = new JSONObject(messageArray.getString(i));
+            KeywordAnalysis.Module module = KeywordAnalysis.Module.valueOf(messageObj.get("type").toString());
+
+            if (module == KeywordAnalysis.Module.TF_CONTENTS_GROUP) {
+                messageObj = messageObj.getJSONObject("message");
+                characterTrendStatus.setCount(messageObj.getInt("total"));
+                resultObj.add("times",gson.fromJson(messageObj.getJSONArray("times").toString(),JsonArray.class));
+
+                JSONObject titleMap = messageObj.getJSONObject("title_tf");
+
+            }else{
+                //감성분류
+            }
+
+
+        }
+
+
+        resultObj.add("status", gson.toJsonTree(characterTrendStatus));
+        String result = gson.toJson(resultObj);
+        log.debug("analysis second: " + request +":  "+ TimeUtil.getSecond(System.currentTimeMillis() - analysisStartTime));
+        return result;
+    }
+
+
+    private static int sum(JSONObject object){
+        int sum =0;
+
+        return sum;
+    }
+
 }

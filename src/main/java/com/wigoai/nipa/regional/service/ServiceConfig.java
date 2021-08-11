@@ -40,7 +40,7 @@ public enum ServiceConfig {
     , EMOTION_CLASSIFY("nipa.rs.emotion.classify", null)
 
     //객체명 사전
-    , NER_CATEGORY_CODE("nipa.rs.ner.category.code", null)
+    , NER_CATEGORY_CODE("nipa.rs.ner.category.code", "S601")
 
 
 

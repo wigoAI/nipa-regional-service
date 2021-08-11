@@ -17,6 +17,7 @@
 package com.wigoai.nipa.regional.service;
 
 import org.moara.category.CategoryDictionary;
+import org.moara.category.element.Category;
 import org.moara.common.annotation.Priority;
 import org.moara.common.config.Config;
 import org.moara.common.data.database.jdbc.JDBCUtil;
@@ -46,7 +47,6 @@ public class ClassifyManager implements Synchronizer {
 //    Map<String, String> fieldNameMap = new HashMap<>();
 
     Map<String, String> fieldNameCodeMap = new HashMap<>();
-
 
     @Override
     public void sync() {
@@ -112,6 +112,11 @@ public class ClassifyManager implements Synchronizer {
         }
 
         fieldList.clear();
+
+
+
+
+//        nerCategories
     }
 
 
