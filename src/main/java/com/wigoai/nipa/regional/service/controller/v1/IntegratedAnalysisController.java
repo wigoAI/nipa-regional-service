@@ -24,7 +24,7 @@ import com.wigoai.nipa.regional.service.ServiceConfig;
 import com.wigoai.nipa.regional.service.channel.ChannelGroup;
 import com.wigoai.nipa.regional.service.channel.ChannelManager;
 import com.wigoai.nipa.regional.service.util.GroupKeyUtil;
-import com.wigoai.nipa.regional.service.util.parameterUtil;
+import com.wigoai.nipa.regional.service.util.ParameterUtil;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.moara.common.callback.ObjectCallback;
@@ -35,7 +35,6 @@ import org.moara.common.util.YmdUtil;
 import org.moara.keyword.KeywordAnalysis;
 import org.moara.keyword.ServiceKeywordAnalysis;
 import org.moara.keyword.tf.contents.ChannelGroupHas;
-import org.moara.keyword.tf.contents.TermFrequencyContentsCreate;
 import org.moara.message.disposable.DisposableMessage;
 import org.moara.message.disposable.DisposableMessageManager;
 import org.slf4j.Logger;
@@ -172,7 +171,7 @@ public class IntegratedAnalysisController {
 
             String keywordJson = request.getJSONArray("keywords").toString();
 
-            Map<String, Object> parameterMap = parameterUtil.makeParameterMap(request);
+            Map<String, Object> parameterMap = ParameterUtil.makeParameterMap(request);
 
             String messageId = keywordAnalysis.keywordAnalysis(startTime, endTime, standardTime, keywordJson, keysArray, modules, moduleProperties, parameterMap, endCallback);
 

@@ -28,7 +28,7 @@ import java.util.Set;
  * 공통 parameter 관련 유틸
  * @author macle
  */
-public class parameterUtil {
+public class ParameterUtil {
 
     /**
      * parameterMap 생성

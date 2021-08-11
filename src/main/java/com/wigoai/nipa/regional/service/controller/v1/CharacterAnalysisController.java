@@ -11,7 +11,7 @@ import com.wigoai.nipa.regional.service.channel.ChannelManager;
 import com.wigoai.nipa.regional.service.data.ChannelGroupStatus;
 import com.wigoai.nipa.regional.service.data.ChannelStatus;
 import com.wigoai.nipa.regional.service.util.GroupKeyUtil;
-import com.wigoai.nipa.regional.service.util.parameterUtil;
+import com.wigoai.nipa.regional.service.util.ParameterUtil;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.moara.ara.datamining.textmining.dictionary.word.WordDictionary;
@@ -78,19 +78,20 @@ public class CharacterAnalysisController {
             };
 
             ChannelManager channelManager = NipaRegionalAnalysis.getInstance().getChannelManager();
-            String [] characterChannelIds = channelManager.getCharacterChannelIds();
+
 
             String startYmd =  new SimpleDateFormat("yyyyMMdd").format(new Date(startTime));
             String endYmd =  new SimpleDateFormat("yyyyMMdd").format(new Date(endTime-1));
-
+            String [] characterChannelIds = channelManager.getCharacterChannelIds();
             List<String> ymdList = YmdUtil.getYmdList(startYmd,endYmd);
             String [][] keysArray = GroupKeyUtil.makeChannelKeysArray(ymdList,  characterChannelIds);
 
-            final KeywordAnalysis.Module [] modules = new KeywordAnalysis.Module[4];
+            final KeywordAnalysis.Module [] modules = new KeywordAnalysis.Module[5];
             modules[0] =  KeywordAnalysis.Module.TF_CONTENTS;
             modules[1] =  KeywordAnalysis.Module.TF_CONTENTS_GROUP;
             modules[2] = KeywordAnalysis.Module.TF_CLASSIFY;
             modules[3] = KeywordAnalysis.Module.TF_CLASSIFY_TARGET;
+            modules[4] = KeywordAnalysis.Module.TF_WORD_CONTENTS;
             WordDictionary wordDictionary = WordDictionary.getInstance();
             Word characterWord = wordDictionary.getSyllable(request.getString("name")).getDictionaryWord().getWord();
 
@@ -153,13 +154,41 @@ public class CharacterAnalysisController {
             properties.put("target_codes", emotionBuilder.substring(1));
             moduleProperties.put(KeywordAnalysis.Module.TF_CLASSIFY_TARGET, properties);
 
+
+            properties = new Properties();
+
+            JSONArray selectors = new JSONArray();
+            JSONObject positiveSelector = new JSONObject();
+            positiveSelector.put("id", "positive_keywords");
+            positiveSelector.put("type", "CATEGORY_ARRAY_WORD");
+            positiveSelector.put("value", Config.getConfig(ServiceConfig.POSITIVE_CODE.key(),(String) ServiceConfig.POSITIVE_CODE.defaultValue()));
+
+            JSONObject negativeSelector = new JSONObject();
+            negativeSelector.put("id", "negative_keywords");
+            negativeSelector.put("type", "CATEGORY_ARRAY_WORD");
+            negativeSelector.put("value", Config.getConfig(ServiceConfig.NEGATIVE_CODE.key(),(String) ServiceConfig.NEGATIVE_CODE.defaultValue()));
+
+            selectors.put(positiveSelector);
+            selectors.put(negativeSelector);
+            properties.put("selectors", selectors.toString());
+
+            if(request.has("emotion_keyword_count")){
+                properties.put("count", request.getInt("emotion_keyword_count"));
+            }else{
+                properties.put("count", 50);
+            }
+
+            properties.put("is_trend", false);
+            moduleProperties.put(KeywordAnalysis.Module.TF_WORD_CONTENTS, properties);
+
+
             ServiceKeywordAnalysis serviceKeywordAnalysis = ServiceKeywordAnalysis.getInstance();
             KeywordAnalysis keywordAnalysis = serviceKeywordAnalysis.getKeywordAnalysis();
 
 
-            Map<String, Object> parameterMap = parameterUtil.makeParameterMap(request);
+            Map<String, Object> parameterMap = ParameterUtil.makeParameterMap(request);
 
-            String messageId = keywordAnalysis.analysis(startTime, endTime, standardTime, keywordAnalysis.makeSearchKeywords(getKeywordJson(request)), keysArray, modules, moduleProperties, parameterMap, endCallback);
+            String messageId = keywordAnalysis.analysis(startTime, endTime, standardTime, keywordAnalysis.makeSearchKeywords(CharacterAnalysis.getKeywordJson(request)), keysArray, modules, moduleProperties, parameterMap, endCallback);
 
             try {
                 long analysisTime = System.currentTimeMillis() - analysisStartTime;
@@ -192,7 +221,6 @@ public class CharacterAnalysisController {
                 KeywordAnalysis.Module module = KeywordAnalysis.Module.valueOf(messageObj.get("type").toString());
 
 
-
                 if (module == KeywordAnalysis.Module.TF_CONTENTS) {
                     messageObj = messageObj.getJSONObject("message");
                     resultObj.addProperty("total", messageObj.getInt("total"));
@@ -219,6 +247,7 @@ public class CharacterAnalysisController {
                         }
 
                     }
+
                     tfObj = messageObj.getJSONObject("title_tf");
                     for(String key : keys){
                         if(tfObj.isNull(key)){
@@ -226,7 +255,6 @@ public class CharacterAnalysisController {
                         }
                         channelStatusMap.get(key).setTitle_count(tfObj.getInt(key));
                     }
-
 
                     JSONArray codes = messageObj.getJSONArray("classify_codes");
                     int positiveIndex = 0;
@@ -313,8 +341,15 @@ public class CharacterAnalysisController {
                     resultObj.add("emotion_classifies", gson.fromJson(messageObj.toString(), JsonObject.class));
                 }else if (module == KeywordAnalysis.Module.TF_CLASSIFY_TARGET) {
                     resultObj.add("field_emotion_classifies", gson.fromJson(messageObj.getJSONArray("message").toString(), JsonArray.class));
+                }else if (module == KeywordAnalysis.Module.TF_WORD_CONTENTS) {
+                    JSONObject emotionObj = messageObj.getJSONObject("message");
+                    resultObj.add("negative_keywords",gson.fromJson(emotionObj.getJSONArray("negative_keywords").toString(), JsonArray.class));
+                    resultObj.add("positive_keywords",gson.fromJson(emotionObj.getJSONArray("positive_keywords").toString(), JsonArray.class));
                 }
             }
+            
+            //개체명 인식 분석 결과
+            resultObj.add("ner_keywords",CharacterAnalysis.ner(request));
 
             String result = gson.toJson(resultObj);
             logger.debug("analysis second: " + jsonValue +":  "+ TimeUtil.getSecond(System.currentTimeMillis() - analysisStartTime));
@@ -328,30 +363,27 @@ public class CharacterAnalysisController {
 
     }
 
+    @RequestMapping(value = "/nipars/v1/character/ner" , method = RequestMethod.POST, produces= MediaType.APPLICATION_JSON_VALUE)
+    public String ner(@RequestBody final String jsonValue) {
+        try{
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-    private JSONArray getKeywordJson(JSONObject request){
-
-        JSONArray keywords =new JSONArray();
-
-        if(!request.isNull("infos")){
-            String name = request.getString("name");
-
-            JSONArray infos = request.getJSONArray("infos");
-            for (int i = 0; i <infos.length() ; i++) {
-                JSONObject keyword = new JSONObject();
-                keyword.put("keyword", name);
-                JSONArray inFilters = new JSONArray();
-                inFilters.put(infos.getString(i));
-                keyword.put("in_filters", inFilters);
-                keywords.put(keyword);
-            }
-
-
-        }else{
-            keywords.put(request.getString("name"));
+            return gson.toJson(CharacterAnalysis.ner(new JSONObject(jsonValue)));
+        }catch(Exception e){
+            logger.error(ExceptionUtil.getStackTrace(e));
+            return "[]";
         }
 
-        return keywords;
     }
+
+
+    @RequestMapping(value = "/nipars/v1/character/trend" , method = RequestMethod.POST, produces= MediaType.APPLICATION_JSON_VALUE)
+    public String trend(@RequestBody final String jsonValue) {
+
+
+        return "[]";
+    }
+
+
 
 }

@@ -36,9 +36,6 @@ public class CharacterStatusCall {
 
         long startTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20210801 00:00:00").getTime();
 
-
-        System.out.println(Times.DAY_1 -1);
-
         //전일자
         long endTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20210810 00:00:00").getTime() + (Times.DAY_1 -1);
 
@@ -59,8 +56,12 @@ public class CharacterStatusCall {
         //단어 최대 건수설정 설정하지 않으면 30
 //        param.addProperty("keyword_count", 30);
 
-        param.addProperty("name","강원도");
+        param.addProperty("name","문재인");
 
+        JsonArray infos = new JsonArray();
+        infos.add("코로나");
+
+        param.add("infos", infos);
 
         String request = gson.toJson(param);
 //        String responseMessage = RestCall.postJson("http://127.0.0.1:33377/nipars/v1/integrated/analysis",request);
