@@ -31,11 +31,12 @@ public class CharacterTrendCall {
     public static void main(String[] args) throws Exception {
         long analysisStartTime = System.currentTimeMillis();
 
-        long startTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20210801 00:00:00").getTime();
+        long startTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20210802 00:00:00").getTime();
+        long endTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20210812 00:00:00").getTime() + (Times.DAY_1 -1);
 
-        //전일자
-        long endTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20210810 00:00:00").getTime() + (Times.DAY_1 -1);
 
+        long previousStartTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20210722 00:00:00").getTime();
+        long previousEndTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20210801 00:00:00").getTime() + (Times.DAY_1 -1);
 
 
         //오늘포함
@@ -49,6 +50,10 @@ public class CharacterTrendCall {
         param.addProperty("start_time", startTime);
         param.addProperty("end_time", endTime);
         param.addProperty("standard_time", standardTime);
+
+        param.addProperty("previous_start_time", previousStartTime);
+        param.addProperty("previous_end_time", previousEndTime);
+
 
         param.addProperty("name","문재인");
 
