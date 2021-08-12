@@ -39,6 +39,7 @@ import org.moara.common.util.ExceptionUtil;
 import org.moara.common.util.YmdUtil;
 import org.moara.keyword.KeywordAnalysis;
 import org.moara.keyword.ServiceKeywordAnalysis;
+import org.moara.keyword.search.SearchKeyword;
 import org.moara.keyword.tf.contents.ChannelGroupHas;
 import org.moara.message.disposable.DisposableMessageManager;
 import org.slf4j.Logger;
@@ -202,7 +203,9 @@ public class CharacterAnalysisController {
 
             Map<String, Object> parameterMap = ParameterUtil.makeParameterMap(request);
 
-            String messageId = keywordAnalysis.analysis(startTime, endTime, standardTime, keywordAnalysis.makeSearchKeywords(CharacterAnalysis.getKeywordJson(request)), keysArray, modules, moduleProperties, parameterMap, endCallback);
+            SearchKeyword[] searchKeywords = keywordAnalysis.makeSearchKeywords(CharacterAnalysis.getKeywordJson(request));
+
+            String messageId = keywordAnalysis.analysis(startTime, endTime, standardTime, searchKeywords, keysArray, modules, moduleProperties, parameterMap, endCallback);
 
             try {
                 long analysisTime = System.currentTimeMillis() - analysisStartTime;
@@ -364,6 +367,7 @@ public class CharacterAnalysisController {
             
             //개체명 인식 분석 결과
             resultObj.add("ner_keywords",CharacterAnalysis.ner(request));
+            resultObj.add("media_analysis", MediaAnalysis.analysis(startTime, endTime, standardTime, searchKeywords, ymdList, parameterMap));
 
             String result = gson.toJson(resultObj);
             logger.debug("analysis second: " + jsonValue +":  "+ TimeUtil.getSecond(System.currentTimeMillis() - analysisStartTime));

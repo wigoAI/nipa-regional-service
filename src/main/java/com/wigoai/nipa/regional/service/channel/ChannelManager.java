@@ -52,10 +52,16 @@ public class ChannelManager implements Synchronizer {
     private long channelTime = 0L;
     private long mapTime = 0L;
 
+    private String characterChannelGroupValue;
     private ChannelGroup[] characterChannelGroups = null;
     private String [] characterChannelIds = StringArray.EMPTY_STRING_ARRAY;
 
-    private String characterChannelGroupValue;
+
+    private String mediaChannelGroupValue;
+    private ChannelGroup[] mediaChannelGroups = null;
+    private String [] mediaChannelIds = StringArray.EMPTY_STRING_ARRAY;
+
+
 
     @Override
     public void sync() {
@@ -198,6 +204,32 @@ public class ChannelManager implements Synchronizer {
             }
         }
 
+        if(mediaChannelGroups == null){
+            mediaChannelGroupValue =  Config.getConfig(ServiceConfig.MEDIA_CHANNEL_GROUPS.key(), (String) ServiceConfig.MEDIA_CHANNEL_GROUPS.defaultValue()).trim();
+
+            String [] channelGroupIds = mediaChannelGroupValue.split(",");
+            mediaChannelGroups = new ChannelGroup[channelGroupIds.length];
+
+            for (int i = 0; i < channelGroupIds.length; i++) {
+                mediaChannelGroups[i] = getGroupFromId(channelGroupIds[i]);
+            }
+        }else{
+
+            String channelGroupsValue = Config.getConfig(ServiceConfig.MEDIA_CHANNEL_GROUPS.key(), (String) ServiceConfig.MEDIA_CHANNEL_GROUPS.defaultValue()).trim();
+            if(!channelGroupsValue.equals(mediaChannelGroupValue)){
+                mediaChannelGroupValue = channelGroupsValue;
+
+                String [] channelGroupIds = mediaChannelGroupValue.split(",");
+                ChannelGroup [] characterChannelGroups = new ChannelGroup[channelGroupIds.length];
+
+                for (int i = 0; i < channelGroupIds.length; i++) {
+                    characterChannelGroups[i] = getGroupFromId(channelGroupIds[i]);
+                }
+                //객체 변경
+                this.mediaChannelGroups = characterChannelGroups;
+
+            }
+        }
 
         if(isMapChange){
             Set<String> characterChannelIdSet = new HashSet<>();
@@ -209,6 +241,18 @@ public class ChannelManager implements Synchronizer {
             }
             characterChannelIds = characterChannelIdSet.toArray(new String [0]);
             characterChannelIdSet.clear();
+
+
+            Set<String> mediaChannelIdSet = new HashSet<>();
+            for(ChannelGroup channelGroup : mediaChannelGroups){
+                Channel [] channels = channelGroup.getChannels();
+                for(Channel channel : channels){
+                    mediaChannelIdSet.add(channel.getId());
+                }
+            }
+            mediaChannelIds = mediaChannelIdSet.toArray(new String [0]);
+            mediaChannelIdSet.clear();
+
 
         }
 
@@ -236,6 +280,13 @@ public class ChannelManager implements Synchronizer {
         return channelMap.get(channelId);
     }
 
+    public ChannelGroup[] getMediaChannelGroups() {
+        return mediaChannelGroups;
+    }
+
+    public String[] getMediaChannelIds() {
+        return mediaChannelIds;
+    }
 
     private <T> List<T> getObjList(Class<T> objClass, long time){
         try(Connection conn = NipaRegionalAnalysis.getInstance().getConnection()){

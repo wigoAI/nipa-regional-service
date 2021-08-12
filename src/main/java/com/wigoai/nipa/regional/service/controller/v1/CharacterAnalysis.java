@@ -43,6 +43,7 @@ import org.moara.common.util.YmdUtil;
 import org.moara.keyword.KeywordAnalysis;
 import org.moara.keyword.ServiceKeywordAnalysis;
 import org.moara.keyword.StatusScope;
+import org.moara.keyword.search.SearchKeyword;
 import org.moara.keyword.tf.contents.ChannelGroupHas;
 import org.moara.message.disposable.DisposableMessageManager;
 
@@ -306,7 +307,9 @@ public class CharacterAnalysis {
         ServiceKeywordAnalysis serviceKeywordAnalysis = ServiceKeywordAnalysis.getInstance();
         KeywordAnalysis keywordAnalysis = serviceKeywordAnalysis.getKeywordAnalysis();
 
-        String messageId = keywordAnalysis.analysis(startTime, endTime, standardTime, keywordAnalysis.makeSearchKeywords(CharacterAnalysis.getKeywordJson(request)), keysArray, modules, moduleProperties, parameterMap, endCallback);
+        SearchKeyword[] searchKeywords = keywordAnalysis.makeSearchKeywords(CharacterAnalysis.getKeywordJson(request));
+
+        String messageId = keywordAnalysis.analysis(startTime, endTime, standardTime, searchKeywords, keysArray, modules, moduleProperties, parameterMap, endCallback);
 
 
         try {
@@ -470,6 +473,7 @@ public class CharacterAnalysis {
         characterTrendStatus.setTitle_change(characterTrendStatus.getTitle() - characterTrendStatus.getTitle_previous());
         characterTrendStatus.setNegative_change(characterTrendStatus.getNegative() - characterTrendStatus.getNegative_previous());
         resultObj.add("status", gson.toJsonTree(characterTrendStatus));
+        resultObj.add("media_analysis", MediaAnalysis.analysis(startTime, endTime, standardTime, searchKeywords, ymdList, parameterMap));
         String result = gson.toJson(resultObj);
         log.debug("analysis second: " + request +":  "+ TimeUtil.getSecond(System.currentTimeMillis() - analysisStartTime));
         return result;
