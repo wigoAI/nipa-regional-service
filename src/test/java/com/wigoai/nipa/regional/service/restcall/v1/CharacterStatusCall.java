@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Wigo Inc.
+ * Copyright (C) 2021 Wigo Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import com.wigoai.rest.RestCall;
 import java.text.SimpleDateFormat;
 
 /**
- * 통합분석
+ * 인물분석 현황 호출 예제
  * @author macle
  */
 public class CharacterStatusCall {
@@ -40,10 +40,6 @@ public class CharacterStatusCall {
         long endTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20210810 00:00:00").getTime() + (Times.DAY_1 -1);
 
 
-
-        //오늘포함
-        // endTime = System.currentTimeMillis();
-
         long standardTime = System.currentTimeMillis();
 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -53,8 +49,6 @@ public class CharacterStatusCall {
         param.addProperty("end_time", endTime);
         param.addProperty("standard_time", standardTime);
 
-        //단어 최대 건수설정 설정하지 않으면 30
-//        param.addProperty("keyword_count", 30);
 
         param.addProperty("name","문재인");
 
@@ -64,7 +58,6 @@ public class CharacterStatusCall {
         param.add("infos", infos);
 
         String request = gson.toJson(param);
-//        String responseMessage = RestCall.postJson("http://127.0.0.1:33377/nipars/v1/integrated/analysis",request);
         String responseMessage = RestCall.postJson("http://sc.wigo.ai:10015/nipars/v1/character/status",request);
 
         System.out.println("mills second: " + (System.currentTimeMillis() - analysisStartTime));

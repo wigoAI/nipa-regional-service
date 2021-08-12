@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2021 Wigo Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.wigoai.nipa.regional.service.controller.v1;
 
 import com.google.gson.Gson;
@@ -9,6 +25,7 @@ import com.wigoai.nipa.regional.service.ServiceConfig;
 import com.wigoai.nipa.regional.service.channel.ChannelGroup;
 import com.wigoai.nipa.regional.service.channel.ChannelManager;
 import com.wigoai.nipa.regional.service.data.CharacterTrendStatus;
+import com.wigoai.nipa.regional.service.data.CountTitle;
 import com.wigoai.nipa.regional.service.util.GroupKeyUtil;
 import com.wigoai.nipa.regional.service.util.ParameterUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -122,7 +139,6 @@ public class CharacterAnalysis {
 
         String messageId = keywordAnalysis.analysis(startTime, endTime, standardTime, keywordAnalysis.makeSearchKeywords(CharacterAnalysis.getKeywordJson(request)), keysArray, modules, moduleProperties, parameterMap, endCallback);
 
-
         try {
             long analysisTime = System.currentTimeMillis() - analysisStartTime;
             //최대 대기 시간
@@ -136,6 +152,8 @@ public class CharacterAnalysis {
             log.error("time out: " + request);
             return keywords;
         }
+
+
 
         DisposableMessageManager disposableMessageManager = DisposableMessageManager.getInstance();
         String responseMessage =  disposableMessageManager.getMessages(messageId);
@@ -244,6 +262,7 @@ public class CharacterAnalysis {
         properties = new Properties();
         ChannelManager channelManager = nipaRegionalAnalysis.getChannelManager();
         ChannelGroup[] groups = channelManager.getCharacterChannelGroups();
+
         ChannelGroupHas[] channelGroups = new ChannelGroupHas[groups.length];
         //noinspection ManualArrayCopy
         for (int i = 0; i <channelGroups.length ; i++) {
@@ -308,15 +327,55 @@ public class CharacterAnalysis {
                 resultObj.add("times",gson.fromJson(messageObj.getJSONArray("times").toString(),JsonArray.class));
 
                 JSONObject titleMap = messageObj.getJSONObject("title_tf");
+                characterTrendStatus.setTitle(sum(titleMap));
+
+                JSONArray timeTfMaps = messageObj.getJSONArray("time_tf_arrays");
+                JSONArray titleTimeMaps = messageObj.getJSONArray("title_time_arrays");
+
+                int length = timeTfMaps.length();
+
+                CountTitle[] titles = new CountTitle[length];
+
+                for (int j = 0; j <length ; j++) {
+                    titles[j] = new CountTitle();
+                    titles[j].setCount(sum(timeTfMaps.getJSONObject(j).getJSONObject("tf_channel")));
+                    titles[j].setTitle(sum(titleTimeMaps.getJSONObject(j)));
+                }
+
+                resultObj.add("count_title_trend", gson.toJsonTree(titles));
+
+                JsonArray channelGroupArray = new JsonArray();
+
+                for (int j = 0; j <length ; j++) {
+                    JSONObject map = timeTfMaps.getJSONObject(j).getJSONObject("tf_channel");
+                    JsonArray groupArray = new JsonArray();
+                    for(ChannelGroup group :groups){
+                        JsonObject channelGroup = new JsonObject();
+                        channelGroup.addProperty("id", group.getId());
+                        channelGroup.addProperty("name", group.getName());
+                        if(map.isNull(group.getId())){
+                            channelGroup.addProperty("count", 0);
+                        }else{
+                            channelGroup.addProperty("count", map.getInt(group.getId()));
+                        }
+
+                        groupArray.add(channelGroup);
+                    }
+
+                    channelGroupArray.add(groupArray);
+
+                }
+                resultObj.add("channel_group_trend",channelGroupArray);
 
             }else{
                 //감성분류
+                messageObj = messageObj.getJSONObject("message");
+                resultObj.add("emotion_classify_trend", gson.fromJson(messageObj.getJSONArray("classifies").toString(), JsonArray.class));
             }
-
-
         }
 
 
+        //직전 건수 추출
         resultObj.add("status", gson.toJsonTree(characterTrendStatus));
         String result = gson.toJson(resultObj);
         log.debug("analysis second: " + request +":  "+ TimeUtil.getSecond(System.currentTimeMillis() - analysisStartTime));
@@ -325,7 +384,14 @@ public class CharacterAnalysis {
 
 
     private static int sum(JSONObject object){
+
         int sum =0;
+
+        Set<String> keys = object.keySet();
+
+        for(String key: keys){
+            sum+= object.getInt(key);
+        }
 
         return sum;
     }

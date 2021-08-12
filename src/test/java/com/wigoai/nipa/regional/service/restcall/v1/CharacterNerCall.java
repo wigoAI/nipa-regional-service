@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2021 Wigo Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.wigoai.nipa.regional.service.restcall.v1;
 
 import com.google.gson.Gson;
@@ -8,7 +23,10 @@ import com.seomse.commons.utils.time.Times;
 import com.wigoai.rest.RestCall;
 
 import java.text.SimpleDateFormat;
-
+/**
+ * 인물분석 개체명 분분석 호출 예제
+ * @author macle
+ */
 public class CharacterNerCall {
 
     public static void main(String[] args) throws Exception {
@@ -16,13 +34,7 @@ public class CharacterNerCall {
 
         long startTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20210801 00:00:00").getTime();
 
-        //전일자
         long endTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20210810 00:00:00").getTime() + (Times.DAY_1 -1);
-
-
-
-        //오늘포함
-        // endTime = System.currentTimeMillis();
 
         long standardTime = System.currentTimeMillis();
 
@@ -33,8 +45,7 @@ public class CharacterNerCall {
         param.addProperty("end_time", endTime);
         param.addProperty("standard_time", standardTime);
         param.addProperty("ner_count", 10);
-        //단어 최대 건수설정 설정하지 않으면 30
-//        param.addProperty("keyword_count", 30);
+
 
         param.addProperty("name","문재인");
 
@@ -44,7 +55,6 @@ public class CharacterNerCall {
         param.add("infos", infos);
 
         String request = gson.toJson(param);
-//        String responseMessage = RestCall.postJson("http://127.0.0.1:33377/nipars/v1/integrated/analysis",request);
         String responseMessage = RestCall.postJson("http://sc.wigo.ai:10015/nipars/v1/character/ner",request);
 
         System.out.println("mills second: " + (System.currentTimeMillis() - analysisStartTime));
