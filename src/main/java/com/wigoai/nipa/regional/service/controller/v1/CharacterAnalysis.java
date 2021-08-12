@@ -42,6 +42,7 @@ import org.moara.common.util.ExceptionUtil;
 import org.moara.common.util.YmdUtil;
 import org.moara.keyword.KeywordAnalysis;
 import org.moara.keyword.ServiceKeywordAnalysis;
+import org.moara.keyword.StatusScope;
 import org.moara.keyword.tf.contents.ChannelGroupHas;
 import org.moara.message.disposable.DisposableMessageManager;
 
@@ -144,17 +145,24 @@ public class CharacterAnalysis {
         }else{
             properties.put("count", 50);
         }
+        WordDictionary wordDictionary = WordDictionary.getInstance();
+        Word characterWord = wordDictionary.getSyllable(request.getString("name")).getDictionaryWord().getWord();
 
         if(!request.isNull("ner_scope")){
-            properties.put("scope", request.getString("ner_scope"));
+            StatusScope scope = StatusScope.valueOf(request.getString("ner_scope"));
+            properties.put("scope", scope);
+
+            if(scope != StatusScope.FULL){
+                Word [] words = new Word[1];
+                words[0] = characterWord;
+                properties.put("scope_words", words);
+            }
+
         }else{
-            properties.put("scope", "FULL");
+            properties.put("scope", StatusScope.FULL);
         }
 
         properties.put("is_trend", false);
-
-        WordDictionary wordDictionary = WordDictionary.getInstance();
-        Word characterWord = wordDictionary.getSyllable(request.getString("name")).getDictionaryWord().getWord();
 
         properties.put("scope_word", characterWord);
         moduleProperties.put(KeywordAnalysis.Module.TF_WORD_CONTENTS, properties);
@@ -189,8 +197,6 @@ public class CharacterAnalysis {
             log.error("time out: " + request);
             return keywords;
         }
-
-
 
         DisposableMessageManager disposableMessageManager = DisposableMessageManager.getInstance();
         String responseMessage =  disposableMessageManager.getMessages(messageId);

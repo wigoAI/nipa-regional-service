@@ -45,7 +45,7 @@ public class CharacterNerCall {
         param.addProperty("end_time", endTime);
         param.addProperty("standard_time", standardTime);
         param.addProperty("ner_count", 10);
-        param.addProperty("ner_score", "FULL");
+        param.addProperty("ner_scope", "FULL");
         param.addProperty("search_type", "FILTER");
 
         param.addProperty("name","문재인");
@@ -53,7 +53,7 @@ public class CharacterNerCall {
         JsonArray infos = new JsonArray();
         infos.add("코로나");
 
-        param.add("infos", infos);
+//        param.add("infos", infos);
 
         String request = gson.toJson(param);
         String responseMessage = RestCall.postJson("http://sc.wigo.ai:10015/nipars/v1/character/ner",request);
