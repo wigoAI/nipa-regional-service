@@ -31,16 +31,13 @@ public class CharacterTrendCall {
     public static void main(String[] args) throws Exception {
         long analysisStartTime = System.currentTimeMillis();
 
-        long startTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20210802 00:00:00").getTime();
+        long startTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20210810 00:00:00").getTime();
         long endTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20210812 00:00:00").getTime() + (Times.DAY_1 -1);
 
 
-        long previousStartTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20210722 00:00:00").getTime();
-        long previousEndTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20210801 00:00:00").getTime() + (Times.DAY_1 -1);
+        long previousStartTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20210807 00:00:00").getTime();
+        long previousEndTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20210809 00:00:00").getTime() + (Times.DAY_1 -1);
 
-
-        //오늘포함
-        // endTime = System.currentTimeMillis();
 
         long standardTime = System.currentTimeMillis();
 
