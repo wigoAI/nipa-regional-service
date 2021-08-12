@@ -34,6 +34,7 @@ import org.moara.common.util.ExceptionUtil;
 import org.moara.common.util.YmdUtil;
 import org.moara.keyword.KeywordAnalysis;
 import org.moara.keyword.ServiceKeywordAnalysis;
+import org.moara.keyword.search.SearchKeyword;
 import org.moara.keyword.tf.contents.ChannelGroupHas;
 import org.moara.message.disposable.DisposableMessage;
 import org.moara.message.disposable.DisposableMessageManager;
@@ -173,7 +174,8 @@ public class IntegratedAnalysisController {
 
             Map<String, Object> parameterMap = ParameterUtil.makeParameterMap(request);
 
-            String messageId = keywordAnalysis.keywordAnalysis(startTime, endTime, standardTime, keywordJson, keysArray, modules, moduleProperties, parameterMap, endCallback);
+            SearchKeyword[] searchKeywords = keywordAnalysis.makeSearchKeywords(new JSONArray(keywordJson));
+            String messageId = keywordAnalysis.analysis(startTime, endTime, standardTime, searchKeywords, keysArray, modules, moduleProperties, parameterMap, endCallback);
 
             try {
                 long analysisTime = System.currentTimeMillis() - analysisStartTime;
@@ -213,7 +215,7 @@ public class IntegratedAnalysisController {
             //2번째 결과 호출
             isAnalysis.set(false);
 
-            keyword(resultObj, endCallback, groups, 0, startTime, endTime, standardTime, keywordJson, parameterMap, keywordAnalysis, ymdList, sourceBuilder.substring(1), keywordCount);
+            keyword(resultObj, endCallback, groups, 0, startTime, endTime, standardTime, searchKeywords, parameterMap, keywordAnalysis, ymdList, sourceBuilder.substring(1), keywordCount);
 
             try {
                 long analysisTime = System.currentTimeMillis() - analysisStartTime;
@@ -231,7 +233,11 @@ public class IntegratedAnalysisController {
 
             //파싱 및 변환에 대한 속도차이는 없는것으로 보임
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            String result = gson.toJson(gson.fromJson(resultObj.toString(), JsonObject.class));
+
+            JsonObject jsonObj = gson.fromJson(resultObj.toString(), JsonObject.class);
+            jsonObj.add("media_analysis", MediaAnalysis.analysis(startTime, endTime, standardTime, searchKeywords, ymdList, parameterMap));
+
+            String result = gson.toJson(jsonObj);
             logger.debug("analysis second: " + jsonValue +":  "+ TimeUtil.getSecond(System.currentTimeMillis() - analysisStartTime));
             return result;
 
@@ -243,7 +249,7 @@ public class IntegratedAnalysisController {
     }
 
     private void keyword(final JSONObject resultObj, final ObjectCallback callback, final ChannelGroup[] groups, final int groupIndex
-            , final long startTime, final long endTime, final long standardTime, final String keywordJson,  Map<String, Object> parameterMap, final KeywordAnalysis keywordAnalysis, final List<String> ymdList
+            , final long startTime, final long endTime, final long standardTime, final SearchKeyword[] searchKeywords,  Map<String, Object> parameterMap, final KeywordAnalysis keywordAnalysis, final List<String> ymdList
             , final String inCodesValue
             , final int keywordCount
     ){
@@ -258,7 +264,7 @@ public class IntegratedAnalysisController {
                         callback.callback(null);
                         return;
                     }
-                    keyword(resultObj, callback, groups, groupIndex +1, startTime, endTime, standardTime, keywordJson, parameterMap, keywordAnalysis, ymdList, inCodesValue, keywordCount);
+                    keyword(resultObj, callback, groups, groupIndex +1, startTime, endTime, standardTime, searchKeywords, parameterMap, keywordAnalysis, ymdList, inCodesValue, keywordCount);
                     return ;
                 }
 
@@ -279,7 +285,7 @@ public class IntegratedAnalysisController {
                     return;
                 }
 
-                keyword(resultObj, callback, groups, groupIndex +1, startTime, endTime, standardTime, keywordJson, parameterMap, keywordAnalysis, ymdList, inCodesValue, keywordCount);
+                keyword(resultObj, callback, groups, groupIndex +1, startTime, endTime, standardTime, searchKeywords, parameterMap, keywordAnalysis, ymdList, inCodesValue, keywordCount);
             }catch(Exception e){
 
                 if(obj == null){
@@ -312,7 +318,7 @@ public class IntegratedAnalysisController {
 
         moduleProperties.put(KeywordAnalysis.Module.TF_WORD_CONTENTS, properties);
 
-        keywordAnalysis.keywordAnalysis(startTime, endTime, standardTime, keywordJson, keysArray, modules, moduleProperties, parameterMap, endCallback);
+        keywordAnalysis.analysis(startTime, endTime, standardTime, searchKeywords, keysArray, modules, moduleProperties, parameterMap, endCallback);
 
     }
 

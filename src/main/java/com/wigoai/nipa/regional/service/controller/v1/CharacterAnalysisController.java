@@ -60,7 +60,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 @RestController
 public class CharacterAnalysisController {
-    private static final Logger logger = LoggerFactory.getLogger(DataSearchController.class);
+    private static final Logger logger = LoggerFactory.getLogger(CharacterAnalysisController.class);
 
 
 
