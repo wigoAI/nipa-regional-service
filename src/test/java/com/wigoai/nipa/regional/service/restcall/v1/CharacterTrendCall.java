@@ -50,7 +50,7 @@ public class CharacterTrendCall {
 
         param.addProperty("previous_start_time", previousStartTime);
         param.addProperty("previous_end_time", previousEndTime);
-
+        param.addProperty("search_type", "FILTER");
 
         param.addProperty("name","문재인");
 

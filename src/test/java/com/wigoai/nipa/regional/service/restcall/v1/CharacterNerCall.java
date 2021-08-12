@@ -45,7 +45,8 @@ public class CharacterNerCall {
         param.addProperty("end_time", endTime);
         param.addProperty("standard_time", standardTime);
         param.addProperty("ner_count", 10);
-
+        param.addProperty("ner_score", "FULL");
+        param.addProperty("search_type", "FILTER");
 
         param.addProperty("name","문재인");
 

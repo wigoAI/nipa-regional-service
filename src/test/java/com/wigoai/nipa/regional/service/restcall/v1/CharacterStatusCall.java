@@ -48,10 +48,10 @@ public class CharacterStatusCall {
         param.addProperty("start_time", startTime);
         param.addProperty("end_time", endTime);
         param.addProperty("standard_time", standardTime);
+        param.addProperty("search_type", "FILTER");
 
 
         param.addProperty("name","문재인");
-
         JsonArray infos = new JsonArray();
         infos.add("코로나");
 

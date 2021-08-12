@@ -57,6 +57,43 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Slf4j
 public class CharacterAnalysis {
 
+
+    public static JSONArray getKeywordJson(JSONObject request){
+
+        JSONArray keywords =new JSONArray();
+
+        if(!request.isNull("infos")){
+            String name = request.getString("name");
+
+            boolean isFilter = false;
+            //noinspection RedundantIfStatement
+            if(!request.isNull("search_type") && request.getString("search_type").equals("FILTER")){
+                isFilter = true;
+            }
+
+            JSONArray infos = request.getJSONArray("infos");
+            for (int i = 0; i <infos.length() ; i++) {
+                if(isFilter){
+                    JSONObject keyword = new JSONObject();
+                    keyword.put("keyword", name);
+                    JSONArray inFilters = new JSONArray();
+                    inFilters.put(infos.getString(i));
+                    keyword.put("in_filters", inFilters);
+                    keywords.put(keyword);
+                }else{
+                    keywords.put(name +" " + infos.getString(i));
+                }
+
+            }
+
+
+        }else{
+            keywords.put(request.getString("name"));
+        }
+
+        return keywords;
+    }
+
     public static JsonArray ner(JSONObject request) {
         JsonArray keywords = new JsonArray();
 
@@ -187,31 +224,6 @@ public class CharacterAnalysis {
         return keywords;
     }
 
-
-    public static JSONArray getKeywordJson(JSONObject request){
-
-        JSONArray keywords =new JSONArray();
-
-        if(!request.isNull("infos")){
-            String name = request.getString("name");
-
-            JSONArray infos = request.getJSONArray("infos");
-            for (int i = 0; i <infos.length() ; i++) {
-                JSONObject keyword = new JSONObject();
-                keyword.put("keyword", name);
-                JSONArray inFilters = new JSONArray();
-                inFilters.put(infos.getString(i));
-                keyword.put("in_filters", inFilters);
-                keywords.put(keyword);
-            }
-
-
-        }else{
-            keywords.put(request.getString("name"));
-        }
-
-        return keywords;
-    }
 
 
     public static String trend(JSONObject request){
@@ -370,16 +382,107 @@ public class CharacterAnalysis {
             }else{
                 //감성분류
                 messageObj = messageObj.getJSONObject("message");
-                resultObj.add("emotion_classify_trend", gson.fromJson(messageObj.getJSONArray("classifies").toString(), JsonArray.class));
+                JSONArray classifyArray = messageObj.getJSONArray("classifies");
+                characterTrendStatus.setNegative(negativeRate(classifyArray));
+                resultObj.add("emotion_classify_trend", gson.fromJson(classifyArray.toString(), JsonArray.class));
             }
         }
 
 
+
         //직전 건수 추출
+        final AtomicBoolean isAnalysisPrevious = new AtomicBoolean(false);
+        final Thread currentThreadPrevious = Thread.currentThread();
+
+        startTime = request.getLong("previous_start_time");
+        endTime = request.getLong("previous_end_time");
+
+        startYmd =  new SimpleDateFormat("yyyyMMdd").format(new Date(startTime));
+        endYmd =  new SimpleDateFormat("yyyyMMdd").format(new Date(endTime-1));
+        endCallback = obj -> {
+
+            try {
+                isAnalysisPrevious.set(true);
+                currentThreadPrevious.interrupt();
+            }catch(Exception e){
+                log.error(ExceptionUtil.getStackTrace(e));
+            }
+        };
+
+        ymdList = YmdUtil.getYmdList(startYmd,endYmd);
+        keysArray = GroupKeyUtil.makeChannelKeysArray(ymdList,  characterChannelIds);
+
+
+        moduleProperties = new HashMap<>();
+        properties = new Properties();
+
+        properties.put("in_codes", emotionBuilder.substring(1));
+        properties.put("is_trend", false);
+        moduleProperties.put(KeywordAnalysis.Module.TF_CLASSIFY, properties);
+
+        properties.put("title_word", characterWord);
+        properties.put("channel_groups", channelGroups);
+        moduleProperties.put(KeywordAnalysis.Module.TF_CONTENTS_GROUP, properties);
+        messageId = keywordAnalysis.analysis(startTime, endTime, standardTime, keywordAnalysis.makeSearchKeywords(CharacterAnalysis.getKeywordJson(request)), keysArray, modules, moduleProperties, parameterMap, endCallback);
+
+        try {
+            long analysisTime = System.currentTimeMillis() - analysisStartTime;
+            //최대 대기 시간
+            long sleepTime = analysisMaxTime - analysisTime;
+            if(sleepTime>0) {
+                Thread.sleep(sleepTime);
+            }
+        }catch (InterruptedException ignore){}
+        if(!isAnalysisPrevious.get()){
+            log.error("time out: " + request);
+            return "{}";
+        }
+
+        responseMessage =  disposableMessageManager.getMessages(messageId);
+        //데이터 변환
+
+        responseObj = new JSONObject(responseMessage);
+        messageArray =  responseObj.getJSONArray("messages");
+
+        for (int i = 0; i <messageArray.length() ; i++) {
+            JSONObject messageObj = new JSONObject(messageArray.getString(i));
+            KeywordAnalysis.Module module = KeywordAnalysis.Module.valueOf(messageObj.get("type").toString());
+            if (module == KeywordAnalysis.Module.TF_CONTENTS_GROUP) {
+                messageObj = messageObj.getJSONObject("message");
+                characterTrendStatus.setCount_previous(messageObj.getInt("total"));
+                JSONObject titleMap = messageObj.getJSONObject("title_tf");
+                characterTrendStatus.setTitle_previous(sum(titleMap));
+
+            }else{
+                messageObj = messageObj.getJSONObject("message");
+                JSONArray classifyArray = messageObj.getJSONArray("classifies");
+                characterTrendStatus.setNegative_previous(negativeRate(classifyArray));
+            }
+        }
+
+        characterTrendStatus.setCount_change(characterTrendStatus.getCount() - characterTrendStatus.getCount_previous());
+        characterTrendStatus.setTitle_change(characterTrendStatus.getTitle() - characterTrendStatus.getTitle_previous());
+        characterTrendStatus.setNegative_change(characterTrendStatus.getNegative() - characterTrendStatus.getNegative_previous());
         resultObj.add("status", gson.toJsonTree(characterTrendStatus));
         String result = gson.toJson(resultObj);
         log.debug("analysis second: " + request +":  "+ TimeUtil.getSecond(System.currentTimeMillis() - analysisStartTime));
         return result;
+    }
+
+    private static int negativeRate( JSONArray classifyArray){
+        int negative = 0;
+        int total = 0;
+        for (int j = 0; j <classifyArray.length() ; j++) {
+            JSONObject emotion =  classifyArray.getJSONObject(j);
+
+            if(emotion.getString("name").equals("부정")){
+                negative = emotion.getInt("count");
+            }
+
+            total += emotion.getInt("count");
+
+        }
+        return (int)Math.round((double)negative/(double)total * 100.0);
     }
 
 
