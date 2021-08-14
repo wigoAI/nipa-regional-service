@@ -25,7 +25,6 @@ import com.wigoai.nipa.regional.service.channel.ChannelGroup;
 import com.wigoai.nipa.regional.service.channel.ChannelManager;
 import com.wigoai.nipa.regional.service.data.ChannelEmotion;
 import com.wigoai.nipa.regional.service.data.ChannelGroupStatus;
-import com.wigoai.nipa.regional.service.data.ChannelStatus;
 import com.wigoai.nipa.regional.service.util.GroupKeyUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
@@ -73,8 +72,8 @@ public class MediaAnalysis {
 
 
         final KeywordAnalysis.Module [] modules = new KeywordAnalysis.Module[2];
-        modules[0] =  KeywordAnalysis.Module.TF_CONTENTS;
-        modules[1] =  KeywordAnalysis.Module.TF_CONTENTS_GROUP;
+        modules[0] =  KeywordAnalysis.Module.TF_CONTENTS_GROUP;
+        modules[1] =  KeywordAnalysis.Module.TF_CONTENTS;
 
         Map<KeywordAnalysis.Module, Properties> moduleProperties = new HashMap<>();
         String [] emotionCodes = nipaRegionalAnalysis.getEmotionCodes();
@@ -131,8 +130,8 @@ public class MediaAnalysis {
                 //매체그룹별 트랜드
                 //매체그룹별 긍부정
                 messageObj = messageObj.getJSONObject("message");
-
                 resultObj.add("times",gson.fromJson(messageObj.getJSONArray("times").toString(), JsonArray.class));
+
                 JSONArray timeTfMaps = messageObj.getJSONArray("time_tf_arrays");
 
                 JsonArray channelGroupArray = new JsonArray();
@@ -258,7 +257,8 @@ public class MediaAnalysis {
             }
         }
 
-
         return resultObj;
     }
+
+
 }

@@ -34,6 +34,7 @@ import org.moara.common.util.ExceptionUtil;
 import org.moara.common.util.YmdUtil;
 import org.moara.keyword.KeywordAnalysis;
 import org.moara.keyword.ServiceKeywordAnalysis;
+import org.moara.keyword.search.SearchKeyword;
 import org.moara.keyword.tf.contents.ChannelGroupHas;
 import org.moara.message.disposable.DisposableMessage;
 import org.moara.message.disposable.DisposableMessageManager;
@@ -169,7 +170,8 @@ public class SubjectAnalysisController {
             List<String> ymdList = YmdUtil.getYmdList(startYmd,endYmd);
             String [][] keysArray = GroupKeyUtil.makeKeysArray(ymdList, groups);
 
-            final String messageId = keywordAnalysis.keywordAnalysis(startTime, endTime, standardTime, keywordJson, keysArray, modules, moduleProperties, parameterMap, endCallback);
+            SearchKeyword[] searchKeywords = keywordAnalysis.makeSearchKeywords(new JSONArray(keywordJson));
+            final String messageId = keywordAnalysis.analysis(startTime, endTime, standardTime, searchKeywords, keysArray, modules, moduleProperties, parameterMap, endCallback);
 
             try {
                 long analysisTime = System.currentTimeMillis() - analysisStartTime;
@@ -233,7 +235,7 @@ public class SubjectAnalysisController {
             }
 
             isAnalysis.set(false);
-            keyword(resultObj, endCallback, groups, 0, startTime, endTime, standardTime, keywordJson, parameterMap, keywordAnalysis, ymdList, cloudKeywordCount, snaProperties);
+            keyword(resultObj, endCallback, groups, 0, startTime, endTime, standardTime, searchKeywords, parameterMap, keywordAnalysis, ymdList, cloudKeywordCount, snaProperties);
             try {
                 long analysisTime = System.currentTimeMillis() - analysisStartTime;
                 //최대 대기 시간
@@ -247,7 +249,11 @@ public class SubjectAnalysisController {
 
 
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            String result =  gson.toJson(gson.fromJson(resultObj.toString(), JsonObject.class));
+
+            JsonObject jsonObj = gson.fromJson(resultObj.toString(), JsonObject.class);
+            jsonObj.add("media_analysis", MediaAnalysis.analysis(startTime, endTime, standardTime, searchKeywords, ymdList, parameterMap));
+
+            String result =  gson.toJson(jsonObj);
             logger.debug("analysis second: " + jsonValue +":  "+ TimeUtil.getSecond(System.currentTimeMillis() - analysisStartTime));
             return result;
 
@@ -260,7 +266,7 @@ public class SubjectAnalysisController {
 
 
     private void keyword(final JSONObject resultObj, final ObjectCallback callback, final ChannelGroup[] groups, final int groupIndex
-            , final long startTime, final long endTime, final long standardTime, final String keywordJson,  Map<String, Object> parameterMap, final KeywordAnalysis keywordAnalysis, final List<String> ymdList
+            , final long startTime, final long endTime, final long standardTime, final SearchKeyword[] searchKeywords,  Map<String, Object> parameterMap, final KeywordAnalysis keywordAnalysis, final List<String> ymdList
             , final int cloudKeywordCount ,  Properties snaProperties
     ){
 
@@ -274,7 +280,7 @@ public class SubjectAnalysisController {
                         callback.callback(null);
                         return;
                     }
-                    keyword(resultObj, callback, groups, groupIndex +1, startTime, endTime, standardTime, keywordJson, parameterMap, keywordAnalysis, ymdList, cloudKeywordCount, snaProperties);
+                    keyword(resultObj, callback, groups, groupIndex +1, startTime, endTime, standardTime, searchKeywords, parameterMap, keywordAnalysis, ymdList, cloudKeywordCount, snaProperties);
                     return ;
                 }
 
@@ -296,7 +302,7 @@ public class SubjectAnalysisController {
                     return;
                 }
 
-                keyword(resultObj, callback, groups, groupIndex +1, startTime, endTime, standardTime, keywordJson, parameterMap, keywordAnalysis, ymdList, cloudKeywordCount, snaProperties);
+                keyword(resultObj, callback, groups, groupIndex +1, startTime, endTime, standardTime, searchKeywords, parameterMap, keywordAnalysis, ymdList, cloudKeywordCount, snaProperties);
             }catch(Exception e){
 
                 if(obj == null){
@@ -329,7 +335,7 @@ public class SubjectAnalysisController {
         }
 
 
-        keywordAnalysis.keywordAnalysis(startTime, endTime, standardTime, keywordJson, keysArray, modules, moduleProperties, parameterMap, endCallback);
+        keywordAnalysis.analysis(startTime, endTime, standardTime, searchKeywords, keysArray, modules, moduleProperties, parameterMap, endCallback);
 
     }
 

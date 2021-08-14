@@ -11,6 +11,7 @@ import java.util.Comparator;
  */
 @Data
 public class ChannelEmotion {
+
     public static final Comparator<ChannelEmotion> SORT_DESC = (c1, c2) -> Integer.compare(c2.count, c1.count);
 
     private String group_id;

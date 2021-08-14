@@ -19,6 +19,7 @@ package com.wigoai.nipa.regional.service;
 import com.seomse.commons.utils.FileUtil;
 import com.wigoai.nipa.regional.service.channel.Channel;
 import com.wigoai.nipa.regional.service.channel.ChannelManager;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.moara.ara.datamining.data.CodeName;
 import org.moara.ara.datamining.statistics.count.WordCount;
@@ -98,10 +99,12 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
                     if(tagSet == null){
                         tagSet = new HashSet<>();
                     }
-
+                    JSONArray reporterArray = new JSONArray();
                     for(NamedEntity namedEntity : namedEntityArray){
                         tagSet.add(namedEntity.getText());
+                        reporterArray.put(namedEntity.getText());
                     }
+                    indexData.addData("PS_REPORTER", reporterArray);
                 }
             }
 
@@ -263,10 +266,12 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
                     NamedEntity[] namedEntityArray = reportRecognizer.recognize(document.getContents());
 
                     if(namedEntityArray.length > 0){
-
+                        JSONArray reporterArray = new JSONArray();
                         for(NamedEntity namedEntity : namedEntityArray){
                             tagSet.add(namedEntity.getText());
+                            reporterArray.put(namedEntity.getText());
                         }
+                        indexData.addData("PS_REPORTER", reporterArray);
                     }
 
                 }
