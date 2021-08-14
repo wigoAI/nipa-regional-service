@@ -32,11 +32,9 @@ public class SubjectAnalysisCall {
     public static void main(String[] args) throws Exception {
         long analysisStartTime = System.currentTimeMillis();
 
-        //7월 20일부터
-        long startTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20200101 00:00:00").getTime();
+        long startTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20210802 00:00:00").getTime();
 
-        //7월 25일 전까지 (7월24일까지)
-        long endTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20210118 00:00:00").getTime();
+        long endTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20210812 00:00:00").getTime();
 
         long standardTime = System.currentTimeMillis();
 
@@ -70,7 +68,7 @@ public class SubjectAnalysisCall {
 
 
         JsonArray keywords = new JsonArray();
-        keywords.add("#조승현");
+        keywords.add("춘천");
 //        JsonObject keyword1 = new JsonObject();
 //        keyword1.addProperty("keyword", "#조승현");
 //        keyword1.add("in_filters",inFilters);
@@ -80,8 +78,7 @@ public class SubjectAnalysisCall {
 
 
         String request = gson.toJson(param);
-        String responseMessage = RestCall.postJson("http://127.0.0.1:33377/nipars/v1/subject/analysis",request);
-//        String responseMessage = RestCall.postJson("http://sc.wigo.ai:10014/nipars/v1/subject/analysis",request);
+        String responseMessage = RestCall.postJson("http://sc.wigo.ai:10015/nipars/v1/subject/analysis",request);
 
         System.out.println("mills second: " + (System.currentTimeMillis() - analysisStartTime));
 
