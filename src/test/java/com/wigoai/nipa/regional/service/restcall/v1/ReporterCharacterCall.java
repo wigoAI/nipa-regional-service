@@ -34,6 +34,8 @@ public class ReporterCharacterCall {
         param.addProperty("end_time", endTime);
         param.addProperty("standard_time", standardTime);
         param.addProperty("search_type", "FILTER");
+
+        //채널조건 필수
         param.addProperty("channel_id", "bfly_es_news_063");
 
 

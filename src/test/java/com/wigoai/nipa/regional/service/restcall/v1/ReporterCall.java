@@ -33,9 +33,10 @@ public class ReporterCall {
         param.addProperty("start_time", startTime);
         param.addProperty("end_time", endTime);
         param.addProperty("standard_time", standardTime);
+
+        //채널조건 필수
         param.addProperty("channel_id", "bfly_es_news_063");
-        //단어 최대 건수설정 설정하지 않으면 30
-//        param.addProperty("keyword_count", 30);
+
         JsonArray keywords = new JsonArray();
         keywords.add("코로나");
         keywords.add("강원도");
