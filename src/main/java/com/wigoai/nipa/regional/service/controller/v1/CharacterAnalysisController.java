@@ -405,4 +405,34 @@ public class CharacterAnalysisController {
         }
     }
 
+    @RequestMapping(value = "/nipars/v1/character/reporter" , method = RequestMethod.POST, produces= MediaType.APPLICATION_JSON_VALUE)
+    public String reporter(@RequestBody final String jsonValue) {
+        try{
+
+            JSONObject request = new JSONObject(jsonValue);
+
+            long startTime = request.getLong("start_time");
+            long endTime = request.getLong("end_time");
+            long standardTime = request.getLong("standard_time");
+            String startYmd =  new SimpleDateFormat("yyyyMMdd").format(new Date(startTime));
+            String endYmd =  new SimpleDateFormat("yyyyMMdd").format(new Date(endTime-1));
+
+            //날짜정보
+            List<String> ymdList = YmdUtil.getYmdList(startYmd,endYmd);
+
+            Map<String, Object> parameterMap = ParameterUtil.makeParameterMap(request);
+            ServiceKeywordAnalysis serviceKeywordAnalysis = ServiceKeywordAnalysis.getInstance();
+            KeywordAnalysis keywordAnalysis = serviceKeywordAnalysis.getKeywordAnalysis();
+
+            SearchKeyword[] searchKeywords = keywordAnalysis.makeSearchKeywords(CharacterAnalysis.getKeywordJson(request));
+
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+            return gson.toJson(MediaAnalysis.reporter(startTime,endTime,standardTime,searchKeywords,ymdList,parameterMap, request.getString("channel_id")));
+        }catch(Exception e){
+            logger.error(ExceptionUtil.getStackTrace(e));
+            return "[]";
+        }
+    }
+
 }
