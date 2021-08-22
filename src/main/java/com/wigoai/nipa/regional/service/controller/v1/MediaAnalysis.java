@@ -115,13 +115,14 @@ public class MediaAnalysis {
 
         JsonObject resultObj = new JsonObject();
 
-
         DisposableMessageManager disposableMessageManager = DisposableMessageManager.getInstance();
         String responseMessage =  disposableMessageManager.getMessages(messageId);
         //데이터 변환
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         JSONObject responseObj = new JSONObject(responseMessage);
         JSONArray messageArray =  responseObj.getJSONArray("messages");
+
+        ChannelEmotion [] channelEmotionArray = null;
         for (int i = 0; i <messageArray.length() ; i++) {
             JSONObject messageObj = new JSONObject(messageArray.getString(i));
             KeywordAnalysis.Module module = KeywordAnalysis.Module.valueOf(messageObj.get("type").toString());
@@ -251,14 +252,98 @@ public class MediaAnalysis {
                     channelEmotion.setNeutral_count(counts.getInt(neutralIndex));
                 }
 
-                ChannelEmotion [] channelEmotionArray = channelEmotionMap.values().toArray(new ChannelEmotion[0]);
+                channelEmotionArray = channelEmotionMap.values().toArray(new ChannelEmotion[0]);
                 Arrays.sort(channelEmotionArray, ChannelEmotion.SORT_DESC);
                 resultObj.add("channel_status_array", gson.toJsonTree(channelEmotionArray));
             }
         }
-
+        resultObj.add("reporter_status_array",reporter(startTime,endTime,standardTime,searchKeywords,ymdList,parameterMap, channelEmotionArray[0].getChannel_id()));
         return resultObj;
     }
 
+    public static JsonArray reporter(long startTime, long endTime, long standardTime, SearchKeyword[] searchKeywords,  List<String> ymdList, Map<String, Object> parameterMap, String channelId ) {
+        long analysisStartTime = System.currentTimeMillis();
+        long analysisMaxTime = Config.getLong(ServiceConfig.ANALYSIS_MAX_TIME.key(), (long)ServiceConfig.ANALYSIS_MAX_TIME.defaultValue());
 
+        final Thread currentThread = Thread.currentThread();
+
+        AtomicBoolean isAnalysis = new AtomicBoolean(false);
+
+        ObjectCallback endCallback = obj -> {
+
+            try {
+                isAnalysis.set(true);
+                currentThread.interrupt();
+            }catch(Exception e){
+                log.error(ExceptionUtil.getStackTrace(e));
+            }
+        };
+
+        final KeywordAnalysis.Module [] modules = new KeywordAnalysis.Module[1];
+        modules[0] =  KeywordAnalysis.Module.TF_DATA_ARRAY;
+
+        Map<KeywordAnalysis.Module, Properties> moduleProperties = new HashMap<>();
+
+        NipaRegionalAnalysis nipaRegionalAnalysis = NipaRegionalAnalysis.getInstance();
+        String [] emotionCodes = nipaRegionalAnalysis.getEmotionCodes();
+
+        Properties properties = new Properties();
+        properties.setProperty("data_key" , "PS_REPORTER");
+        properties.put("classify_codes", emotionCodes);
+        moduleProperties.put(KeywordAnalysis.Module.TF_DATA_ARRAY, properties);
+
+        ServiceKeywordAnalysis serviceKeywordAnalysis = ServiceKeywordAnalysis.getInstance();
+        KeywordAnalysis keywordAnalysis = serviceKeywordAnalysis.getKeywordAnalysis();
+
+
+        int size = ymdList.size();
+        String [][] keysArray = new String[size][2];
+        int index = 0;
+        for(String ymd : ymdList){
+            String[] key = new String[2];
+            key[0] = ymd;
+            key[1] = channelId;
+            keysArray[index++] = key;
+        }
+
+        String messageId = keywordAnalysis.analysis(startTime, endTime, standardTime, searchKeywords, keysArray, modules, moduleProperties, parameterMap, endCallback);
+
+        try {
+            long analysisTime = System.currentTimeMillis() - analysisStartTime;
+            //최대 대기 시간
+            long sleepTime = analysisMaxTime - analysisTime;
+            if(sleepTime>0) {
+                Thread.sleep(sleepTime);
+            }
+        }catch (InterruptedException ignore){}
+
+        if(!isAnalysis.get()){
+            log.error("time out");
+            return new JsonArray();
+        }
+        JsonArray resultArray = new JsonArray();
+
+        DisposableMessageManager disposableMessageManager = DisposableMessageManager.getInstance();
+        String responseMessage =  disposableMessageManager.getMessages(messageId);
+
+        JSONObject responseObj = new JSONObject(responseMessage);
+        JSONArray messageArray =  responseObj.getJSONArray("messages");
+
+        JSONArray array = new JSONObject(messageArray.getString(0)).getJSONArray("message");
+
+        for (int i = 0; i <array.length() ; i++) {
+            JSONObject data = array.getJSONObject(i);
+
+            JsonObject obj = new JsonObject();
+            obj.addProperty("name", data.getString("text"));
+            obj.addProperty("count", data.getInt("count"));
+
+            JSONArray classifyCounts  = data.getJSONArray("classify_counts");
+            obj.addProperty("positive_count", classifyCounts.getInt(0));
+            obj.addProperty("negative_count", classifyCounts.getInt(1));
+            obj.addProperty("neutral_count", classifyCounts.getInt(2));
+            resultArray.add(obj);
+        }
+        return resultArray;
+    }
 }
