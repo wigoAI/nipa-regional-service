@@ -18,6 +18,7 @@ package com.wigoai.nipa.regional.service;
 
 import com.seomse.commons.utils.FileUtil;
 import com.wigoai.nipa.regional.service.channel.Channel;
+import com.wigoai.nipa.regional.service.channel.ChannelGroup;
 import com.wigoai.nipa.regional.service.channel.ChannelManager;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -62,6 +63,8 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
 
     private final NamedEntityRecognizer reportRecognizer;
 
+
+
     /**
      * 생성자
      */
@@ -79,6 +82,8 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
 
         String emotionClassify = Config.getConfig(ServiceConfig.EMOTION_CLASSIFY.key());
 
+        final ChannelGroup mediaGroup = NipaRegionalAnalysis.getInstance().getChannelManager().getGroupFromId("media");
+
         reIndexDetail = (detailObj, document, indexData) -> {
 
             String [] keys = indexData.getIndexKeys();
@@ -90,7 +95,7 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
                 tagSet.add(detailObj.getString("channel_name").replace(" ",""));
             }
 
-            if (keys[1].equals("media")) {
+            if (mediaGroup.hasChannel(keys[1])) {
                 //해시 태그 정보 추가
                 //            //index data에 데이터 추가
                 NamedEntity[] namedEntityArray = reportRecognizer.recognize(document.getContents());
@@ -187,7 +192,7 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
         NipaRegionalAnalysis nipaRegionalAnalysis = NipaRegionalAnalysis.getInstance();
 
         ChannelManager channelManager = nipaRegionalAnalysis.getChannelManager();
-
+        final ChannelGroup mediaGroup = channelManager.getGroupFromId("media");
         //이전 채널 그룹은 사용하지 않게 업데이트 해야함
         //500개씩 가져오기
         try (Connection conn = nipaRegionalAnalysis.getConnection()) {
@@ -258,14 +263,13 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
                 Set<String> tagSet =  new HashSet<>();
                 tagSet.add(channel.getName());
 
-
-
-                if (keys[1].equals("media")) {
+                if (mediaGroup.hasChannel(nipaContents.channelId)) {
                     //해시 태그 정보 추가
-                    //index data에 데이터 추가
+                    //            //index data에 데이터 추가
                     NamedEntity[] namedEntityArray = reportRecognizer.recognize(document.getContents());
 
                     if(namedEntityArray.length > 0){
+
                         JSONArray reporterArray = new JSONArray();
                         for(NamedEntity namedEntity : namedEntityArray){
                             tagSet.add(namedEntity.getText());
@@ -273,8 +277,8 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
                         }
                         indexData.addData("PS_REPORTER", reporterArray);
                     }
-
                 }
+
                 indexData.setTagSet(tagSet);
                 NipaData nipaData = new NipaData();
                 nipaData.indexData = indexData;
