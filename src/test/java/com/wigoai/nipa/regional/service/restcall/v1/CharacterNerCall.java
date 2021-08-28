@@ -32,7 +32,7 @@ public class CharacterNerCall {
     public static void main(String[] args) throws Exception {
         long analysisStartTime = System.currentTimeMillis();
 
-        long startTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20210801 00:00:00").getTime();
+        long startTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20210501 00:00:00").getTime();
 
         long endTime = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse("20210810 00:00:00").getTime() + (Times.DAY_1 -1);
 
