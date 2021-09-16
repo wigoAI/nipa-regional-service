@@ -88,12 +88,8 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
 
             String [] keys = indexData.getIndexKeys();
 
-            Set<String> tagSet = null;
-
-            if(detailObj.has("channel_name")){
-                tagSet = new HashSet<>();
-                tagSet.add(detailObj.getString("channel_name").replace(" ",""));
-            }
+            Set<String> tagSet = new HashSet<>();
+            tagSet.add(detailObj.getString("channel_name").replace(" ",""));
 
             if (mediaGroup.hasChannel(keys[1])) {
                 //해시 태그 정보 추가
@@ -101,9 +97,7 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
                 NamedEntity[] namedEntityArray = reportRecognizer.recognize(document.getContents());
 
                 if(namedEntityArray.length > 0){
-                    if(tagSet == null){
-                        tagSet = new HashSet<>();
-                    }
+
                     JSONArray reporterArray = new JSONArray();
                     for(NamedEntity namedEntity : namedEntityArray){
                         tagSet.add(namedEntity.getText());
@@ -113,9 +107,9 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
                 }
             }
 
-            if(tagSet != null && tagSet.size() > 0){
-                indexData.setTagSet(tagSet);
-            }
+
+            indexData.setTagSet(tagSet);
+
             CodeName[] emotionClassifies = indexData.getClassifies();
             CodeName emotionCodeName = null;
             for(CodeName codeName : emotionClassifies){
@@ -261,7 +255,7 @@ public class KeywordAnalysisCollectService extends Service implements ReIndexWai
                 Channel channel = channelManager.getChannel(nipaContents.channelId);
 
                 Set<String> tagSet =  new HashSet<>();
-                tagSet.add(channel.getName());
+                tagSet.add(channel.getName().replace(" ",""));
 
                 if (mediaGroup.hasChannel(nipaContents.channelId)) {
                     //해시 태그 정보 추가
