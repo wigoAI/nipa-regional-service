@@ -257,7 +257,11 @@ public class MediaAnalysis {
                 resultObj.add("channel_status_array", gson.toJsonTree(channelEmotionArray));
             }
         }
-        resultObj.add("reporter_status_array",reporter(startTime,endTime,standardTime,searchKeywords,ymdList,parameterMap, channelEmotionArray[0].getChannel_id()));
+
+        if(channelEmotionArray != null){
+            resultObj.add("reporter_status_array",reporter(startTime,endTime,standardTime,searchKeywords,ymdList,parameterMap, channelEmotionArray[0].getChannel_id()));
+        }
+
         return resultObj;
     }
 
