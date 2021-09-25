@@ -17,7 +17,6 @@
 package com.wigoai.nipa.regional.service;
 
 import com.seomse.cypto.LoginCrypto;
-import com.wigoai.nipa.regional.service.channel.ChannelGroup;
 import com.wigoai.nipa.regional.service.channel.ChannelManager;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -61,12 +60,6 @@ public class NipaRegionalAnalysis {
     private final ClassifyManager classifyCodeManager = new ClassifyManager();
     private final ChannelManager channelManager = new ChannelManager();
 
-
-
-
-
-
-
     /**
      * 생성자
      */
@@ -100,12 +93,6 @@ public class NipaRegionalAnalysis {
         classifyCodeManager.sync();
         SynchronizerManager.getInstance().add(classifyCodeManager);
 
-
-
-
-
-//        private ChannelGroup[] channelGroups;
-
     }
 
     /**
@@ -113,15 +100,11 @@ public class NipaRegionalAnalysis {
      * NipaRegionalServiceInitializer 에서 같이 실행 됨
      */
     void init(){
-
         //채널 리뉴얼
         channelManager.sync();
         SynchronizerManager.getInstance().add(channelManager);
 
-
     }
-
-
 
     /**
      * init error
