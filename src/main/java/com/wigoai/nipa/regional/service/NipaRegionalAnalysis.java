@@ -129,7 +129,7 @@ public class NipaRegionalAnalysis {
      */
     public static Document makeDocument(NipaRsContents nipaContents){
         Document document = new Document();
-        document.setId(Long.toString(nipaContents.contentsNum));
+        document.setId(nipaContents.contentsId);
         document.setTitle(nipaContents.title);
         document.setContents(nipaContents.contents);
         document.setLangCode(LangCode.KO);
@@ -170,5 +170,11 @@ public class NipaRegionalAnalysis {
      */
     public ChannelManager getChannelManager() {
         return channelManager;
+    }
+
+    public static void main(String[] args) {
+        String [] loginInfos = LoginCrypto.decryption("EHNdN3qHKveMUvHAZJXnpA==", "WnpLft2HTQTR+YVfkDPufw==");
+        System.out.println(loginInfos[0]);
+        System.out.println(loginInfos[1]);
     }
 }

@@ -31,7 +31,7 @@ public class NipaRsContents {
 
     @PrimaryKey(seq = 1)
     @Column(name = "CONTENTS_NO")
-    long contentsNum;
+    String contentsId;
 
     @Column(name = "API_CHANNEL_ID")
     String channelId;
@@ -52,13 +52,8 @@ public class NipaRsContents {
     @Column(name = "SEQ_NO")
     long seqNum;
 
-    /**
-     * 컨텐츠 번호 설정
-     * 외부 insert 용
-     * @param contentsNum long
-     */
-    public void setContentsNum(long contentsNum) {
-        this.contentsNum = contentsNum;
+    public void setContentsId(String contentsId) {
+        this.contentsId = contentsId;
     }
 
     /**

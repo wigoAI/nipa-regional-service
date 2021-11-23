@@ -248,7 +248,7 @@ public class IntegratedAnalysisController {
 
     }
 
-    private void keyword(final JSONObject resultObj, final ObjectCallback callback, final ChannelGroup[] groups, final int groupIndex
+    public static void keyword(final JSONObject resultObj, final ObjectCallback callback, final ChannelGroup[] groups, final int groupIndex
             , final long startTime, final long endTime, final long standardTime, final SearchKeyword[] searchKeywords,  Map<String, Object> parameterMap, final KeywordAnalysis keywordAnalysis, final List<String> ymdList
             , final String inCodesValue
             , final int keywordCount

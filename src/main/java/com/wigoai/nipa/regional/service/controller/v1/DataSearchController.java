@@ -61,7 +61,7 @@ public class DataSearchController {
 
     private static final Logger logger = LoggerFactory.getLogger(DataSearchController.class);
 
-    private final String nullResult = "{\n" +
+    public static final String nullResult = "{\n" +
             "  \"total\": 0,\n" +
             "  \"data_array\": []\n" +
             "}";
