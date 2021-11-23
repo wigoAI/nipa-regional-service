@@ -295,9 +295,9 @@ public class ChannelAnalysisController {
         negativeSelector.put("value", Config.getConfig(ServiceConfig.NEGATIVE_CODE.key(),(String) ServiceConfig.NEGATIVE_CODE.defaultValue()));
 
         JSONObject nounSelector = new JSONObject();
-        negativeSelector.put("id", "noun_keywords");
-        negativeSelector.put("type", "WORD_CLASS");
-        negativeSelector.put("value","NOUN");
+        nounSelector.put("id", "noun_keywords");
+        nounSelector.put("type", "WORD_CLASS");
+        nounSelector.put("value","NOUN");
 
 
         selectors.put(positiveSelector);
@@ -395,7 +395,6 @@ public class ChannelAnalysisController {
     @RequestMapping(value = "/nipars/v1/channel/timeline" , method = RequestMethod.POST, produces= MediaType.APPLICATION_JSON_VALUE)
     public String timeLine(@RequestBody final String jsonValue){
         try {
-
             JSONObject request = new JSONObject(jsonValue);
 
             SearchData searchData = search(request);
