@@ -108,7 +108,7 @@ public class DummyDataInsert {
 //                    time = time/1000;
 
                     NipaRsContents nipaRsContents = new NipaRsContents();
-                    nipaRsContents.setContentsNum(rowNumber++);
+                    nipaRsContents.setContentsId(Long.toString(rowNumber++));
                     nipaRsContents.setChannelId(channelIds[random.nextInt(channelIds.length)]);
                     nipaRsContents.setTitle(title);
                     nipaRsContents.setContents(contents);
