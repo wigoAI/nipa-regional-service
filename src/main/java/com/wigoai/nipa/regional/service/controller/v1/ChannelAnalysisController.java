@@ -7,8 +7,6 @@ import com.google.gson.JsonObject;
 import com.seomse.commons.utils.FileUtil;
 import com.wigoai.nipa.regional.service.NipaRegionalAnalysis;
 import com.wigoai.nipa.regional.service.ServiceConfig;
-import com.wigoai.nipa.regional.service.channel.ChannelGroup;
-import com.wigoai.nipa.regional.service.channel.ChannelManager;
 import com.wigoai.nipa.regional.service.util.GroupKeyUtil;
 import com.wigoai.nipa.regional.service.util.ParameterUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -87,11 +85,11 @@ public class ChannelAnalysisController {
                 keywordCount = 30;
             }
 
-            final KeywordAnalysis.Module [] modules = new KeywordAnalysis.Module[3];
+            final KeywordAnalysis.Module [] modules = new KeywordAnalysis.Module[4];
             modules[0] = KeywordAnalysis.Module.TF_CONTENTS;
             modules[1] = KeywordAnalysis.Module.TF_WORD_CONTENTS;
             modules[2] = KeywordAnalysis.Module.TF_CLASSIFY;
-
+            modules[3] = KeywordAnalysis.Module.TF_CLASSIFY_TARGET;
             ServiceKeywordAnalysis serviceKeywordAnalysis = ServiceKeywordAnalysis.getInstance();
             KeywordAnalysis keywordAnalysis = serviceKeywordAnalysis.getKeywordAnalysis();
 
@@ -155,6 +153,11 @@ public class ChannelAnalysisController {
             properties.put("is_trend", false);
             moduleProperties.put(KeywordAnalysis.Module.TF_CLASSIFY, properties);
 
+            properties = new Properties();
+            properties.put("source_codes", sourceBuilder.substring(1));
+            properties.put("target_codes", emotionBuilder.substring(1));
+            moduleProperties.put(KeywordAnalysis.Module.TF_CLASSIFY_TARGET, properties);
+
             Map<String, Object> parameterMap = ParameterUtil.makeParameterMap(request);
 
             String messageId = keywordAnalysis.analysis(startTime, endTime, standardTime, null, keysArray, modules, moduleProperties, parameterMap, endCallback);
@@ -187,7 +190,9 @@ public class ChannelAnalysisController {
                 KeywordAnalysis.Module module = KeywordAnalysis.Module.valueOf(messageObj.get("type").toString());
                 if (module == KeywordAnalysis.Module.TF_CONTENTS) {
                     resultObj.put("channel_count", messageObj.getJSONObject("message"));
-                }else if(module == KeywordAnalysis.Module.TF_WORD_CONTENTS){
+                }else if(module == KeywordAnalysis.Module.TF_CLASSIFY_TARGET){
+                    resultObj.put("field_emotion_classifies", messageObj.getJSONArray("message"));
+                } else if(module == KeywordAnalysis.Module.TF_WORD_CONTENTS){
                     resultObj.put("keywords", messageObj.getJSONObject("message"));
                 } else {
                     resultObj.put("classifies", messageObj.getJSONObject("message").getJSONArray("classifies"));
